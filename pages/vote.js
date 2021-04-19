@@ -137,6 +137,38 @@ function Vote({ query }) {
     setSubmitLoading(false);
   };
 
+  /**
+   * Toggle show/hide description
+   * @param {number} key identifying the option the user clicked on
+   */
+  const toggleDescription = (key) => {
+    const description = document.getElementById("description-container-" + key);
+    const link = document.getElementById("link-container-" + key);
+    const toggleButton = document.getElementById("toggle-button-" + key);
+    console.log(toggleButton)
+    if (toggleButton.alt === "down arrow") {
+      toggleButton.src = "/vectors/up_arrow.svg";
+      toggleButton.alt = "up arrow";
+    } else {
+      toggleButton.src = "/vectors/down_arrow.svg";
+      toggleButton.alt = "down arrow";
+    }
+    if (description) {
+      if (description.style.display === "none") {
+        description.style.display = "block";
+      } else {
+        description.style.display = "none";
+      }
+    }
+    if (link) {
+      if (link.style.display === "none") {
+        link.style.display = "block";
+      } else {
+        link.style.display = "none";
+      }
+    }
+  };
+
   return (
     <Layout>
       {/* Navigation header */}
@@ -244,20 +276,21 @@ function Vote({ query }) {
                       return (
                         <div key={i} className="event__option_item">
                           <div>
-                            <div>
+                            <button className="title-container" onClick={() => toggleDescription(i)}>
                               <label>Title</label>
                               <h3>{option.title}</h3>
-                            </div>
+                                <img id={`toggle-button-${i}`} src="/vectors/down_arrow.svg" alt="down arrow" />
+                            </button>
                             {option.description !== "" ? (
                               // If description exists, show description
-                              <div>
+                              <div id={`description-container-${i}`}>
                                 <label>Description</label>
                                 <p className="event__option_item_desc">{option.description}</p>
                               </div>
                             ) : null}
                             {option.url !== "" ? (
                               // If URL exists, show URL
-                              <div>
+                              <div id={`link-container-${i}`}>
                                 <label>Link</label>
                                 <a
                                   href={option.url}
@@ -479,13 +512,39 @@ function Vote({ query }) {
         .event__option_item label {
           display: block;
           color: #000;
-          font-weight: bold;
           font-size: 18px;
           text-transform: uppercase;
         }
 
         .event__option_item > div > div {
           margin: 25px 0px;
+        }
+
+        .title-container {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          font-family: suisse_intlbook;
+          padding: 0px;
+          outline: none;
+          width: 100%;
+          border-radius: 5px;
+          background-color: #fff;
+          transition: 100ms ease-in-out;
+          border: none;
+          cursor: pointer;
+        }
+
+        .title-container > label,
+        .title-container > h3 {
+          grid-column-start: 1;
+          text-align: left;
+          display: block;
+          color: #000;
+          font-size: 18px;
+        }
+
+        .title-container > label {
+          text-transform: uppercase;
         }
 
         .event__option_item > div > div:nth-child(1) {
