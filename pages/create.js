@@ -172,8 +172,8 @@ export default function Create() {
           <h2>Global Settings</h2>
           <p>
             These settings are used to setup your event. You can add an event
-            title and description, select the number of voters, how many vote
-            credits they'll each receive, and a start and end date for voting.
+            title and description, select the number of participants, how many voice
+            credits they'll each receive, and a start and end date for participation.
           </p>
 
           {/* Event title selection */}
@@ -207,8 +207,8 @@ export default function Create() {
 
           {/* Number of voters selection */}
           <div className="create__settings_section">
-            <label htmlFor="num_voters">Number of voters</label>
-            <p>How many voting links would you like to generate? (Max: 250)</p>
+            <label htmlFor="num_voters">Number of participants</label>
+            <p>How many unique links would you like to generate? (Max: 250)</p>
             <input
               type="number"
               id="num_voters"
@@ -219,8 +219,8 @@ export default function Create() {
 
           {/* Number of credits per voter selection */}
           <div className="create__settings_section">
-            <label htmlFor="credits_per_voter">Vote credits per voter</label>
-            <p>How many votes will each voter receive?</p>
+            <label htmlFor="credits_per_voter">Voice credits per participant</label>
+            <p>How many voice credits will each participant receive?</p>
             <input
               type="number"
               max="100"
@@ -260,8 +260,8 @@ export default function Create() {
           {/* Subject settings heading */}
           <h2>Options</h2>
           <p>
-            These settings enable you to add options that voters can delegate
-            their voting credits to. You can choose to add an option title,
+            These settings enable you to add options that participants can delegate
+            their voice credits to. You can choose to add an option title,
             description, and link.
           </p>
 

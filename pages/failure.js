@@ -11,17 +11,17 @@ function Failure({ query }) {
           title: "Voting",
           link: `/vote?user=${query.user}`,
         }}
-        title="Vote Failure"
+        title="Submission Failure"
       />
 
       {/* Failure dialog */}
       <div className="failure">
-        <h1>Oops! Your vote failed.</h1>
+        <h1>Oops! Your submission failed.</h1>
         <p>This shouldn't happen—please try again later!</p>
 
         {/* Return to voting */}
         <Link href={`/vote?user=${query.user}`}>
-          <a>Try voting again</a>
+          <a>Try submitting again</a>
         </Link>
 
         {/* Redirect to event dashboard */}

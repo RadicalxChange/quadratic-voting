@@ -165,8 +165,8 @@ function Event({ query }) {
         !loading &&
         data ? (
           <div className="event__section">
-            <label className="private__label">Individual voting links</label>
-            <p>For private sharing with voters</p>
+            <label className="private__label">Individual participant links</label>
+            <p>For private sharing with participants</p>
             <textarea
               className="event__section_textarea"
               // Collect voter urls as one text element
@@ -188,10 +188,10 @@ function Event({ query }) {
         !loading &&
         data ? (
           <div className="event__section">
-            <label>Event Votes</label>
+            <label>Event Results</label>
             {data.chart ? (
             <>
-              <p>Quadratic Voting-weighted voting results</p>
+              <p>Quadratic Voting-weighted results</p>
               {!loading && data ? (
                 <>
                 <div className="chart">
@@ -214,7 +214,7 @@ function Event({ query }) {
               )}
             </>
             ) : (
-              <p>Voting results will appear here when the event has concluded</p>
+              <p>Results will appear here when the event has concluded</p>
             )}
           </div>
         ) : null}
@@ -229,7 +229,7 @@ function Event({ query }) {
               {data.statistics ? (
               <>
                 <div className="event__sub_section">
-                  <label>Voting Participants</label>
+                  <label>Participants</label>
                   <h3>
                     {!loading && data
                       ? `${data.statistics.numberVoters.toLocaleString()} / ${data.statistics.numberVotersTotal.toLocaleString()}`

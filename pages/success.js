@@ -8,26 +8,27 @@ function Success({ query }) {
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Voting",
+          title: "Poll",
           link: `/vote?user=${query.user}`,
         }}
-        title="Vote Success"
+        title="Submission Success"
       />
 
       {/* Success dialog */}
       <div className="success">
-        <h1>Your vote is in!</h1>
-        <p>You have successfully placed your votes.</p>
+        <h1>Your submission is in!</h1>
+        <p>You have successfully submitted your preferences.</p>
 
         {/* Go back to voting */}
         <Link href={`/vote?user=${query.user}`}>
-          <a>Change your votes</a>
+          <a>Change your submission</a>
         </Link>
 
-        {/* Redirect to event dashboard */}
+        {/*
         <Link href={`/event?id=${query.event}`}>
           <a>See event dashboard</a>
         </Link>
+        */}
       </div>
 
       {/* Scoped styling */}
@@ -69,12 +70,12 @@ function Success({ query }) {
           opacity: 0.8;
         }
 
-        .success > a:nth-of-type(1) {
+        .success > a:nth-of-type(2) {
           background-color: #edff38;
           color: #000;
         }
 
-        .success > a:nth-of-type(2) {
+        .success > a:nth-of-type(1) {
           background-color: #000;
           color: #edff38;
         }

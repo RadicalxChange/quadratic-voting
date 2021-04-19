@@ -86,7 +86,7 @@ function Place({ query }) {
           title: "Home",
           link: "/",
         }}
-        title="Place Votes"
+        title="Participate"
       />
 
       {/* Place vote block */}
@@ -94,7 +94,7 @@ function Place({ query }) {
         {!error ? (
           // If no error, show enter code block
           <div className="place__votes">
-            <h2>Enter your voting code</h2>
+            <h2>Enter your code</h2>
             <p>
               This should be a long code with multiple characters and dashes.
             </p>
@@ -114,8 +114,8 @@ function Place({ query }) {
         ) : (
           // If there is an error, show invalid voting code block
           <div className="place__votes">
-            <h2>Invalid voting code</h2>
-            <p>Oops! It doesn't look like that voting code exists.</p>
+            <h2>Invalid code</h2>
+            <p>Oops! It doesn't look like that code exists.</p>
             <button className="retry__button" onClick={tryAgain}>
               Try Again
             </button>

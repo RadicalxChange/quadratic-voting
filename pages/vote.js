@@ -145,7 +145,7 @@ function Vote({ query }) {
           title: "Home",
           link: "/",
         }}
-        title="Place Votes"
+        title="Participate"
       />
 
       <div className="vote">
@@ -154,11 +154,11 @@ function Vote({ query }) {
           <div className="vote__info">
             {/* General voting header */}
             <div className="vote__info_heading">
-              <h1>Place your votes</h1>
+              <h1>Participate</h1>
               <p>
                 You can use up to{" "}
                 <strong>{data.event_data.credits_per_voter} credits</strong> to
-                vote during this event.
+                express your preferences during this event.
               </p>
             </div>
 
@@ -199,7 +199,7 @@ function Vote({ query }) {
                 <></>
               ) : (
                 <>
-                {/* General information */}
+                {/*
                 <div className="event__options">
                   <h2>General Information</h2>
                   <div className="divider" />
@@ -232,10 +232,11 @@ function Vote({ query }) {
                     </div>
                   </div>
                 </div>
+                */}
 
                 {/* Voteable options */}
                 <div className="event__options">
-                  <h2>Voteable Options</h2>
+                  <h2>Options</h2>
                   <div className="divider" />
                   <div className="event__options_list">
                     {data.vote_data.map((option, i) => {
@@ -269,7 +270,7 @@ function Vote({ query }) {
                             ) : null}
                           </div>
                           <div className="event__option_item_vote">
-                            <label>Votes</label>
+                            <label>Clicks</label>
                             {data ? (
                               <>
                               {(moment() > moment(data.event_data.end_event_date)) ? (
@@ -334,10 +335,11 @@ function Vote({ query }) {
                     <></>
                   ) : (
                     <>
-                      {/* Submission button states */}
+                      {/*
                       {name !== "" ? (
                         // Check for name being filled
-                        submitLoading ? (
+                        */}
+                        {submitLoading ? (
                           // Check for existing button loading state
                           <button className="submit__button" disabled>
                             <Loader />
@@ -345,15 +347,17 @@ function Vote({ query }) {
                         ) : (
                           // Else, enable submission
                           <button name="input-element" onClick={submitVotes} className="submit__button">
-                            Submit Votes
+                            Submit
                           </button>
-                        )
+                        )}
+                        {/*
                       ) : (
                         // If name isn't filled, request fulfillment
                         <button className="submit__button button__disabled" disabled>
-                          Enter your name to vote
+                          Enter your name to submit
                         </button>
                       )}
+                      */}
                     </>
                   )}
                   </>
