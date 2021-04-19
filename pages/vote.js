@@ -202,13 +202,7 @@ function Vote({ query }) {
                 {data ? (
                   <>
                   {(moment() > moment(data.event_data.end_event_date)) ? (
-                    <>
-                    <h3>This event has concluded. Click below to to see the results!</h3>
-                    {/* Redirect to event dashboard */}
-                    <Link href={`/event?id=${data.event_id}`}>
-                      <a>See event dashboard</a>
-                    </Link>
-                    </>
+                    <h3>This event has concluded.</h3>
                   ) : (
                     <>
                     {(moment() < moment(data.event_data.start_event_date)) ? (
