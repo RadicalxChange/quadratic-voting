@@ -56,10 +56,10 @@ export default async (req, res) => {
       res.status(200).send("Successful update");
     } else {
       // If voting is closed, respond with 400
-      res.status(400).send("Voting is closed for this event")
+      res.status(400).send("Voting is closed for this event");
     }
   } else {
     // If user does not exist, respond with 400
-    res.status(400).send("Invalid voter link")
+    res.status(400).send("Invalid voter link");
   }
 };
