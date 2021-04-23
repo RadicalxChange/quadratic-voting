@@ -8,11 +8,18 @@ import { HorizontalBar } from "react-chartjs-2"; // Horizontal bar graph
 import HashLoader from "react-spinners/HashLoader"; // Loader
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
+import Datetime from "react-datetime"; // Datetime component
+import { useState, useEffect } from "react"; // State handling
+import axios from "axios"; // Axios for requests
 
 // Setup fetcher for SWR
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
 function Event({ query }) {
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [editMode, setEditMode] = useState(false);
+
   // Collect data from endpoint
   const { data, loading } = useSWR(
     // Use query ID in URL
@@ -26,9 +33,6 @@ function Event({ query }) {
       refreshInterval: 500,
     }
   );
-  if (data) {
-    console.log(data);
-  }
 
   /**
    * Admin view: download voter URLs as text file
@@ -84,6 +88,28 @@ function Event({ query }) {
     FileSaver.saveAs(fileData, 'qv-results' + fileExtension);
   };
 
+  const toggleEditMode = async (start) => {
+    if (start) {
+      if (data) {
+        setStartDate(moment(data.event.start_event_date));
+        setEndDate(moment(data.event.end_event_date));
+        setEditMode(true);
+      }
+    } else {
+      // POST data and collect status
+      const { status } = await axios.post("/api/events/update", {
+        id: data.event.id,
+        start_event_date: startDate,
+        end_event_date: endDate,
+      });
+      // If POST is a success
+      if (status === 200) {
+        // Close edit mode
+        setEditMode(false);
+      }
+    }
+  };
+
   return (
     <Layout event>
       {/* Custom meta images */}
@@ -134,6 +160,76 @@ function Event({ query }) {
             </>
           ) : null}
         </div>
+
+        {/* Event start date selection */}
+        {!loading && data ? (
+          editMode ? (
+            <div className="event__section">
+              <label>Event start date</label>
+              <div className="event__dates">
+                <Datetime
+                  className="create__settings_datetime"
+                  value={startDate}
+                  onChange={(value) => setStartDate(value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleEditMode(false)}
+                >save
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="event__section">
+              <label>Event start date</label>
+              <div className="event__dates">
+                <p>
+                  {moment(data.event.start_event_date).format('MMMM Do YYYY, h:mm a')}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => toggleEditMode(true)}
+                >edit
+                </button>
+              </div>
+            </div>
+          )
+        ) : null}
+
+        {/* Event end date selection */}
+        {!loading && data ? (
+          editMode ? (
+            <div className="event__section">
+              <label>Event end date</label>
+              <div className="event__dates">
+                <Datetime
+                  className="create__settings_datetime"
+                  value={endDate}
+                  onChange={(value) => setEndDate(value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleEditMode(false)}
+                >save
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="event__section">
+              <label>Event end date</label>
+              <div className="event__dates">
+                <p>
+                  {moment(data.event.end_event_date).format('MMMM Do YYYY, h:mm a')}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => toggleEditMode(true)}
+                >edit
+                </button>
+              </div>
+            </div>
+          )
+        ) : null}
 
         {/* Event public URL */}
         <div className="event__section">
@@ -255,6 +351,19 @@ function Event({ query }) {
         ) : null}
       </div>
 
+      {/* Global styling */}
+      <style jsx global>{`
+        .create__settings_section > input,
+        .create__settings_datetime > input {
+          width: calc(100% - 10px);
+          font-size: 26px !important;
+          border-radius: 5px;
+          border: 1px solid #f1f2e5;
+          margin-top: 15px;
+          padding: 5px 0px 5px 5px;
+        }]
+      `}</style>
+
       {/* Scoped styles */}
       <style jsx>{`
         .event {
@@ -349,6 +458,21 @@ function Event({ query }) {
 
         .event__sub_section > h3 {
           margin: 0px;
+        }
+
+        .event__dates {
+          display: grid;
+          grid-template-columns: 1fr auto;
+        }
+
+        .event__dates > button {
+          border: none;
+          background: none;
+          text-decoration: underline;
+          cursor: pointer;
+        }
+        .event__dates > button:hover {
+          text-decoration: none;
         }
 
         .chart {
