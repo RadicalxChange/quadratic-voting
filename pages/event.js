@@ -26,6 +26,9 @@ function Event({ query }) {
       refreshInterval: 500,
     }
   );
+  if (data) {
+    console.log(data);
+  }
 
   /**
    * Admin view: download voter URLs as text file
