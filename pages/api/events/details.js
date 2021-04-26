@@ -209,8 +209,12 @@ function generateChart(subjects, linearWeights, weights) {
     // Collect weight for series
     // data.push(weights[i]);
     // Package subject data for sorting;
+    var croppedTitle = subjects[i].title;
+    if (croppedTitle.length > 80) {
+      croppedTitle = croppedTitle.substring(0, 80) + "..."
+    }
     var subject = {
-      label: subjects[i].title,
+      label: croppedTitle,
       linearData: (linearWeights[i] * 100).toFixed(2),
       data: weights[i],
     }
