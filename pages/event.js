@@ -294,7 +294,7 @@ function Event({ query }) {
               {!loading && data ? (
                 <>
                 <div className="chart">
-                  <HorizontalBar data={data.chart} width={90} height={60} />
+                  <HorizontalBar data={data.chart} width={90} height={1500} options={{ maintainAspectRatio: false }}/>
                 </div>
                 <button onClick={downloadXLSX} className="download__button">
                   Download spreadsheet
@@ -367,7 +367,7 @@ function Event({ query }) {
       {/* Scoped styles */}
       <style jsx>{`
         .event {
-          max-width: 700px;
+          // max-width: 700px;
           padding: 40px 20px 75px 20px;
           margin: 0px auto;
         }
