@@ -83,10 +83,10 @@ function Place({ query }) {
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Home",
+          title: "Voltar ao início",
           link: "/",
         }}
-        title="Place Votes"
+        title="Distribua seus votos"
       />
 
       {/* Place vote block */}
