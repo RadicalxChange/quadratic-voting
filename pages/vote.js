@@ -174,10 +174,10 @@ function Vote({ query }) {
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Home",
+          title: "Início",
           link: "/",
         }}
-        title="Place Votes"
+        title="Distribua seus votos"
       />
 
       <div className="vote">
