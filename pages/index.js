@@ -8,7 +8,7 @@ export default function Home() {
       <div className="home">
         {/* Home heading */}
         <div className="home__content">
-          <h1>RxC QV</h1>
+          <h1>RxC Voto Quadrático</h1>
           <h2> Uma ferramenta fácil para hospedar uma votação quadrática. </h2>
           <p>
             A votação quadrática é a maneira matematicamente ideal de votar em uma comunidade democrática. 
