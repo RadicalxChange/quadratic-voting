@@ -133,27 +133,27 @@ function Event({ query }) {
           // If secret is present, return to create page
           link: query.secret && query.secret !== "" ? `/create` : "/",
         }}
-        title="Event Details"
+        title="Detalhes do evento"
       />
 
       {/* Event page summary */}
       <div className="event">
-        <h1>Event Details</h1>
+        <h1>Detalhes do evento </h1>
         <div className="event__information">
-          <h2>{!loading && data ? data.event.event_title : "Loading..."}</h2>
+          <h2>{!loading && data ? data.event.event_title : "Carregando..."}</h2>
           <p>
-            {!loading && data ? data.event.event_description : "Loading..."}
+            {!loading && data ? data.event.event_description : "Carregando..."}
           </p>
           {data ? (
             <>
             {(moment() > moment(data.event.end_event_date)) ? (
-              <h3>This event has concluded. See results below!</h3>
+              <h3> Este evento foi encerrado. Veja os resultados abaixo! </h3>
             ) : (
               <>
               {(moment() < moment(data.event.start_event_date)) ? (
-                <h3>This event begins {moment(data.event.start_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                <h3>Esse evento começa {moment(data.event.start_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
               ) : (
-                <h3>This event closes {moment(data.event.end_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                <h3>Esse evento encerra {moment(data.event.end_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
               )}
               </>
             )}
@@ -165,7 +165,7 @@ function Event({ query }) {
         {!loading && data ? (
           editMode ? (
             <div className="event__section">
-              <label>Event start date</label>
+              <label>Data de início do evento</label>
               <div className="event__dates">
                 <Datetime
                   className="create__settings_datetime"
@@ -181,7 +181,7 @@ function Event({ query }) {
             </div>
           ) : (
             <div className="event__section">
-              <label>Event start date</label>
+              <label>Data de início do evento</label>
               <div className="event__dates">
                 <p>
                   {moment(data.event.start_event_date).format('MMMM Do YYYY, h:mm a')}
@@ -200,7 +200,7 @@ function Event({ query }) {
         {!loading && data ? (
           editMode ? (
             <div className="event__section">
-              <label>Event end date</label>
+              <label>Data de término do evento</label>
               <div className="event__dates">
                 <Datetime
                   className="create__settings_datetime"
@@ -216,7 +216,7 @@ function Event({ query }) {
             </div>
           ) : (
             <div className="event__section">
-              <label>Event end date</label>
+              <label>Data de término do evento</label>
               <div className="event__dates">
                 <p>
                   {moment(data.event.end_event_date).format('MMMM Do YYYY, h:mm a')}
@@ -234,7 +234,7 @@ function Event({ query }) {
         {/* Event public URL */}
         <div className="event__section">
           <label>Event URL</label>
-          <p>Statistics dashboard URL</p>
+          <p>URL do painel de estatísticas</p>
           <input
             value={`https://quadraticvote.radicalxchange.org/event?id=${query.id}`}
             readOnly
@@ -248,8 +248,8 @@ function Event({ query }) {
         !loading &&
         data ? (
           <div className="event__section">
-            <label className="private__label">Private Admin URL</label>
-            <p>Save this URL to manage event and make changes</p>
+            <label className="private__label">URL de administrador privado</label>
+            <p>Salve este URL para gerenciar o evento e fazer alterações</p>
             <input
               value={`https://quadraticvote.radicalxchange.org/event?id=${query.id}&secret=${query.secret}`}
               readOnly
@@ -264,7 +264,7 @@ function Event({ query }) {
         !loading &&
         data ? (
           <div className="event__section">
-            <label className="private__label">Individual voting links</label>
+            <label className="private__label">Links de votação individual</label>
             <p>For private sharing with voters</p>
             <textarea
               className="event__section_textarea"
@@ -277,7 +277,7 @@ function Event({ query }) {
               readOnly
             />
             <button onClick={downloadTXT} className="download__button">
-              Download as TXT
+              Baixar como um arquivo de texto (.txt) 
             </button>
           </div>
         ) : null}
@@ -287,17 +287,17 @@ function Event({ query }) {
         !loading &&
         data ? (
           <div className="event__section">
-            <label>Event Votes</label>
+            <label> Votos de evento </label>
             {data.chart ? (
             <>
-              <p>Quadratic Voting-weighted voting results</p>
+              <p> Resultados da votação ponderada por votação quadrática </p>
               {!loading && data ? (
                 <>
                 <div className="chart">
                   <HorizontalBar data={data.chart} width={90} height={60} />
                 </div>
                 <button onClick={downloadXLSX} className="download__button">
-                  Download spreadsheet
+                  Baixar planilha
                 </button>
                 </>
               ) : (
@@ -307,13 +307,13 @@ function Event({ query }) {
                     color="#000"
                     css={{ display: "inline-block" }}
                   />
-                  <h3>Loading Chart...</h3>
-                  <span>Please give us a moment</span>
+                  <h3> Carregando gráfico ... </h3>
+                   <span> Dê-nos um momento </span>
                 </div>
               )}
             </>
             ) : (
-              <p>Voting results will appear here when the event has concluded</p>
+              <p> Os resultados da votação aparecerão aqui quando o evento for concluído </p>
             )}
           </div>
         ) : null}
@@ -324,11 +324,11 @@ function Event({ query }) {
         !loading &&
         data ? (
           <div className="event__section">
-              <label>Event Statistics</label>
+              <label> Estatísticas do evento </label>
               {data.statistics ? (
               <>
                 <div className="event__sub_section">
-                  <label>Voting Participants</label>
+                <label> Participantes votantes </label>
                   <h3>
                     {!loading && data
                       ? `${data.statistics.numberVoters.toLocaleString()} / ${data.statistics.numberVotersTotal.toLocaleString()}`
@@ -336,7 +336,7 @@ function Event({ query }) {
                   </h3>
                 </div>
                 <div className="event__sub_section">
-                  <label>Credits Used</label>
+                <label> Créditos usados </label>
                   <h3>
                     {!loading && data
                       ? `${data.statistics.numberVotes.toLocaleString()} / ${data.statistics.numberVotesTotal.toLocaleString()}`
@@ -345,7 +345,7 @@ function Event({ query }) {
                 </div>
               </>
               ) : (
-                <p>Event Statistics will appear here when the event has concluded</p>
+                <p> As estatísticas do evento aparecerão aqui quando o evento for concluído </p>
               )}
           </div>
         ) : null}
