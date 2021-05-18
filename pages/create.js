@@ -148,10 +148,10 @@ export default function Create() {
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Home",
+          title: "Início",
           link: "/",
         }}
-        title="Create Event"
+        title="Criar evento"
       />
 
       {/* Create page */}
