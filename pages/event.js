@@ -129,7 +129,7 @@ function Event({ query }) {
         history={{
           // If secret is not present, return to home
           title:
-            query.secret && query.secret !== "" ? "event creation" : "home",
+            query.secret && query.secret !== "" ? "criar evento" : "Início",
           // If secret is present, return to create page
           link: query.secret && query.secret !== "" ? `/create` : "/",
         }}
