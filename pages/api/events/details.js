@@ -30,47 +30,27 @@ export default async (req, res) => {
     event.voters = voters;
   }
 
-  var statistics = null;
-  var chart = null;
-
-  // If event is concluded or private_key enables administrator access
-  if (isAdmin || (moment() > moment(event.end_event_date))) {
-    // Pass voting statistics to endpoint
-    statistics = generateStatistics(
-      // Number of voteable subjects
-      JSON.parse(event.event_data).length,
-      // Number of max voters
-      event.num_voters,
-      // Number of credits per voter
-      event.credits_per_voter,
-      // Array of voter preferences
-      voters
-    );
-  }
+  // Pass voting statistics to endpoint
+  const statistics = generateStatistics(
+    // Number of voteable subjects
+    JSON.parse(event.event_data).length,
+    // Number of max voters
+    event.num_voters,
+    // Number of credits per voter
+    event.credits_per_voter,
+    // Array of voter preferences
+    voters
+  );
 
   // Parse event_data
   event.event_data = JSON.parse(event.event_data);
 
-  // If event is concluded or private_key enables administrator access
-  if (isAdmin || (moment() > moment(event.end_event_date))) {
-    // Generate chart data for chartJS
-    chart = generateChart(
-      event.event_data,
-      statistics.linear,
-      statistics.qv
-    );
-  }
-
-  // If private_key enables administrator access
-  if (isAdmin && event.voters) {
-    // remove voter name and vote data to keep anonymous from election admins
-    const voterIds = event.voters;
-    voterIds.forEach((voter, _) => {
-      delete voter.voter_name;
-      delete voter.vote_data;
-    });
-    event.voters = voterIds;
-  }
+  // Generate chart data for chartJS
+  const chart = generateChart(
+    event.event_data,
+    statistics.linear,
+    statistics.qv
+  );
 
   // Return event data, computed statistics, and chart
   res.send({

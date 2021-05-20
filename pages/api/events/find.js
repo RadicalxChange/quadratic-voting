@@ -11,48 +11,43 @@ export default async (req, res) => {
     const response = {
       exists: false,
       event_id: "",
-      voter_name: "",
-      vote_data: "",
+      event_title: "",
+      event_description: "",
+      start_event_date: "",
+      end_event_date: "",
+      credits_per_voter: "",
       event_data: {},
     }; // Setup response object
 
-    // Collect voter information
-    const user = await prisma.voters.findUnique({
+    // Collect event information
+    const event = await prisma.events.findUnique({
       // With ID from request body
       where: {
         id: id,
       },
+      // And selecting the appropriate fields
+      select: {
+        event_title: true,
+        event_description: true,
+        start_event_date: true,
+        end_event_date: true,
+        credits_per_voter: true,
+        event_data: true,
+      },
     });
 
-    // If voter exists in database
-    if (user) {
+    // If event exists in database
+    if (event) {
       // Toggle response object exist field
       response.exists = true;
-      // Set response event_id field to value retrived from DB
-      response.event_id = user.event_uuid;
-      // Set respons object voter_name field to value retrieved from DB
-      response.voter_name = user.voter_name;
-      // Set response object vote_data field to value retrieved from DB
-      response.vote_data = user.vote_data;
-
-      // Collect misc event data
-      const event_data = await prisma.events.findUnique({
-        // By searching for the Event ID from table of Events
-        where: {
-          id: user.event_uuid,
-        },
-        // And selecting the appropriate fields
-        select: {
-          event_title: true,
-          event_description: true,
-          start_event_date: true,
-          end_event_date: true,
-          credits_per_voter: true,
-        },
-      });
-
-      // Set response object field to values retrieved from DB
-      response.event_data = event_data;
+      // Set response event_id field to value from query
+      response.event_id = id;
+      response.event_title = event.event_title;
+      response.event_description = event.event_description;
+      response.start_event_date = event.start_event_date;
+      response.end_event_date = event.end_event_date;
+      response.credits_per_voter = event.credits_per_voter;
+      response.event_data = JSON.parse(event.event_data);
     }
 
     // Send edited/unedited response object

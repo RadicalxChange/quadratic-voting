@@ -17,11 +17,6 @@ export default async (req, res) => {
     });
   }
 
-  // Fill array with voter data based on num_voters in request body
-  const voters = new Array(event.num_voters).fill({
-    vote_data: vote_data, // Placeholder zeroed vote_data
-  });
-
   // Create new event
   const createdEvent = await prisma.events.create({
     data: {
@@ -34,7 +29,7 @@ export default async (req, res) => {
       // Stringify voteable subject data
       event_data: JSON.stringify(event.subjects),
       // Create voters from filled array
-      Voters: { create: voters },
+      Voters: [],
     },
     select: {
       id: true,

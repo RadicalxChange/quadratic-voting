@@ -17,26 +17,6 @@ function Vote({ query }) {
   const [submitLoading, setSubmitLoading] = useState(false); // Component (button) submission loading state
 
   /**
-   * Calculates culmulative number of votes and available credits on load
-   * @param {object} rData vote data object
-   */
-  const calculateVotes = (rData) => {
-    // Collect array of all user votes per option
-    const votesArr = rData.vote_data.map((item, _) => item.votes);
-    // Multiple user votes (Quadratic Voting)
-    const votesArrMultiple = votesArr.map((item, _) => item * item);
-    // Set votes variable to array
-    setVotes(votesArr);
-    // Set credits to:
-    setCredits(
-      // Maximum votes -
-      rData.event_data.credits_per_voter -
-        // Sum of all QV multiplied votes
-        votesArrMultiple.reduce((a, b) => a + b, 0)
-    );
-  };
-
-  /**
    * Update votes array with QV weighted vote increment/decrement
    * @param {number} index of option to update
    * @param {boolean} increment true === increment, else decrement
@@ -54,26 +34,25 @@ function Vote({ query }) {
       .map((num, _) => num * num)
       .reduce((a, b) => a + b, 0);
     // Set available credits to maximum credits - sumVotes
-    setCredits(data.event_data.credits_per_voter - sumVotes);
+    setCredits(data.credits_per_voter - sumVotes);
   };
 
   /**
    * componentDidMount
    */
   useEffect(() => {
-    // Collect voter information on load
+    // Collect event information on load
     axios
-      .get(`/api/events/find?id=${query.user}`)
+      .get(`/api/events/find?id=${query.id}`)
       // If voter exists
       .then((response) => {
         // Set response data
         setData(response.data);
-        // Set name if exists
-        setName(
-          response.data.voter_name !== null ? response.data.voter_name : ""
-        );
-        // Calculate QV votes with data
-        calculateVotes(response.data);
+        // Placeholder zeroed vote_data
+        const votesArr = new Array(response.data.event_data.length).fill(0);
+        setVotes(votesArr);
+        // Set credits to:
+        setCredits(response.data.credits_per_voter);
         // Toggle global loading state to false
         setLoading(false);
       })
@@ -106,7 +85,7 @@ function Vote({ query }) {
       return current <= 0 ? true : canOccur;
     } else {
       // Or check for inverse state when subtracting
-      return (current >= 0 ? true : canOccur) && (current !== 0);
+      return current >= 0 ? true : canOccur;
     }
   };
 
@@ -117,20 +96,28 @@ function Vote({ query }) {
     // Toggle button loading state to true
     setSubmitLoading(true);
 
+    var vote_data = []
+    for (var i = 0; i < votes.length; i++) {
+      vote_data.push({
+        ...data.event_data[i],
+        votes: votes[i],
+      });
+    }
+
     // POST data and collect status
     const { status } = await axios.post("/api/events/vote", {
-      id: query.user, // Voter ID
-      votes: votes, // Vote data
+      id: query.id, // Voter ID
+      votes: vote_data, // Vote data
       name: name, // Voter name
     });
 
     // If POST is a success
     if (status === 200) {
       // Redirect to success page
-      router.push(`success?event=${data.event_id}&user=${query.user}`);
+      router.push(`success?id=${query.id}`);
     } else {
       // Else, redirec to failure page
-      router.push(`failure?event=${data.event_id}&user=${query.user}`);
+      router.push(`failure?id=${query.id}`);
     }
 
     // Toggle button loading state to false
@@ -189,7 +176,7 @@ function Vote({ query }) {
               <h1>Place your votes</h1>
               <p>
                 You can use up to{" "}
-                <strong>{data.event_data.credits_per_voter} credits</strong> to
+                <strong>{data.credits_per_voter} credits</strong> to
                 vote during this event.
               </p>
             </div>
@@ -197,11 +184,11 @@ function Vote({ query }) {
             {/* Project name and description */}
             <div className="event__details">
               <div className="vote__loading event__summary">
-                <h2>{data.event_data.event_title}</h2>
-                <p>{data.event_data.event_description}</p>
+                <h2>{data.event_title}</h2>
+                <p>{data.event_description}</p>
                 {data ? (
                   <>
-                  {(moment() > moment(data.event_data.end_event_date)) ? (
+                  {(moment() > moment(data.end_event_date)) ? (
                     <>
                     <h3>This event has concluded. Click below to to see the results!</h3>
                     {/* Redirect to event dashboard */}
@@ -211,10 +198,10 @@ function Vote({ query }) {
                     </>
                   ) : (
                     <>
-                    {(moment() < moment(data.event_data.start_event_date)) ? (
-                      <h3>This event begins {moment(data.event_data.start_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                    {(moment() < moment(data.start_event_date)) ? (
+                      <h3>This event begins {moment(data.start_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
                     ) : (
-                      <h3>This event closes {moment(data.event_data.end_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                      <h3>This event closes {moment(data.end_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
                     )}
                     </>
                   )}
@@ -227,7 +214,7 @@ function Vote({ query }) {
             {data ? (
               <>
               {/* Hide ballot if event hasn't started yet */}
-              {(moment() < moment(data.event_data.start_event_date)) ? (
+              {(moment() < moment(data.start_event_date)) ? (
                 <></>
               ) : (
                 <>
@@ -240,7 +227,7 @@ function Vote({ query }) {
                       <label>Voter Name</label>
                       {data ? (
                         <>
-                        {(moment() > moment(data.event_data.end_event_date)) ? (
+                        {(moment() > moment(data.end_event_date)) ? (
                           <input
                             disabled
                             type="text"
@@ -250,7 +237,7 @@ function Vote({ query }) {
                           />
                         ) : (
                           <>
-                          <p>Please enter your full name:</p>
+                          <p>Please enter your name:</p>
                           <input
                             type="text"
                             placeholder="Jane Doe"
@@ -270,7 +257,7 @@ function Vote({ query }) {
                   <h2>Voteable Options</h2>
                   <div className="divider" />
                   <div className="event__options_list">
-                    {data.vote_data.map((option, i) => {
+                    {data.event_data.map((option, i) => {
                       // Loop through each voteable option
                       return (
                         <div key={i} className="event__option_item">
@@ -305,7 +292,7 @@ function Vote({ query }) {
                             <label>Votes</label>
                             {data ? (
                               <>
-                              {(moment() > moment(data.event_data.end_event_date)) ? (
+                              {(moment() > moment(data.end_event_date)) ? (
                                 <></>
                               ) : (
                                 <span className="item__vote_credits">
@@ -318,7 +305,7 @@ function Vote({ query }) {
                             <div className="item__vote_buttons">
                               {data ? (
                                 <>
-                                {(moment() > moment(data.event_data.end_event_date)) ? (
+                                {(moment() > moment(data.end_event_date)) ? (
                                   <></>
                                 ) : (
                                   <>
@@ -344,16 +331,6 @@ function Vote({ query }) {
                                 </>
                               ) : null}
                             </div>
-                            {data.voter_name !== "" && data.voter_name !== null ? (
-                              // If user has voted before, show historic votes
-                              <div className="existing__votes">
-                                <span>
-                                  You last allocated{" "}
-                                  <strong>{data.vote_data[i].votes} votes </strong>
-                                  to this option.
-                                </span>
-                              </div>
-                            ) : null}
                           </div>
                         </div>
                       );
@@ -363,7 +340,7 @@ function Vote({ query }) {
 
                 {data ? (
                   <>
-                  {(moment() > moment(data.event_data.end_event_date)) ? (
+                  {(moment() > moment(data.end_event_date)) ? (
                     <></>
                   ) : (
                     <>

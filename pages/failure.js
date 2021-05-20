@@ -9,7 +9,7 @@ function Failure({ query }) {
       <Navigation
         history={{
           title: "Voting",
-          link: `/vote?user=${query.user}`,
+          link: `/vote?id=${query.id}`,
         }}
         title="Vote Failure"
       />
@@ -20,12 +20,12 @@ function Failure({ query }) {
         <p>This shouldn't happen—please try again later!</p>
 
         {/* Return to voting */}
-        <Link href={`/vote?user=${query.user}`}>
+        <Link href={`/vote?id=${query.id}`}>
           <a>Try voting again</a>
         </Link>
 
         {/* Redirect to event dashboard */}
-        <Link href={`/event?id=${query.event}`}>
+        <Link href={`/event?id=${query.id}`}>
           <a>See event dashboard</a>
         </Link>
       </div>

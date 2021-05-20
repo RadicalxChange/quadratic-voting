@@ -22,18 +22,18 @@ function Place({ query }) {
   }, []);
 
   /**
-   * Gets /api/events/exists to check if voter exists
+   * Gets /api/events/exists to check if event exists
    */
-  const checkVoterExists = () => {
+  const checkEventExists = () => {
     setLoading(true); // Toggle loading to true
 
-    // Get endpoint passing code as voter ID param
+    // Get endpoint passing code as event ID param
     axios
       .get(`/api/events/exists?id=${code}`)
       // If status === 200
       .then(() => {
         // Redirect to voting page
-        router.push(`/vote?user=${code}`);
+        router.push(`/vote?id=${code}`);
         // Toggle loading to false
         setLoading(false);
       })
@@ -94,7 +94,7 @@ function Place({ query }) {
         {!error ? (
           // If no error, show enter code block
           <div className="place__votes">
-            <h2>Enter your voting code</h2>
+            <h2>Enter the event code</h2>
             <p>
               This should be a long code with multiple characters and dashes.
             </p>
@@ -104,7 +104,7 @@ function Place({ query }) {
               placeholder="0918cd22-a487-4cd0-8e29-8144b9580b80"
             />
             {!loading ? (
-              <button onClick={checkVoterExists}>Submit</button>
+              <button onClick={checkEventExists}>Submit</button>
             ) : (
               <button disabled>
                 <Loader />
@@ -115,7 +115,7 @@ function Place({ query }) {
           // If there is an error, show invalid voting code block
           <div className="place__votes">
             <h2>Invalid voting code</h2>
-            <p>Oops! It doesn't look like that voting code exists.</p>
+            <p>Oops! It doesn't look like that event code exists.</p>
             <button className="retry__button" onClick={tryAgain}>
               Try Again
             </button>
