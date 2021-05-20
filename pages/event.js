@@ -33,36 +33,6 @@ function Event({ query }) {
       refreshInterval: 500,
     }
   );
-  console.log(data);
-
-  /**
-   * Admin view: download voter URLs as text file
-   */
-  const downloadTXT = () => {
-    // Collect voter URLs in single text string
-    const text = data.event.voters
-      .map((voter, _) => `https://quadraticvote.radicalxchange.org/vote?user=${voter.id}`)
-      .join("\n");
-
-    // Create link component
-    const element = document.createElement("a");
-    // Create blob from text
-    const file = new Blob([text], { type: "text/plain" });
-
-    // Setup link component to be downloadable and hidden
-    element.href = URL.createObjectURL(file);
-    element.download = "voter_links.txt";
-    element.style.display = "none";
-
-    // Append link component to body
-    document.body.appendChild(element);
-
-    // Click link component to download file
-    element.click();
-
-    // Remove link component from body
-    document.body.removeChild(element);
-  };
 
   const downloadXLSX = () => {
     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';

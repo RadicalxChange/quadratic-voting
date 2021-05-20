@@ -17,27 +17,32 @@ export default async (req, res) => {
       end_event_date: true,
     },
   });
-  if ((moment() > moment(event_data.start_event_date)) &&
-    (moment() < moment(event_data.end_event_date))) {
-    // Create new voter
-    const createdVoter = await prisma.voters.create({
-      data: {
-        voter_name: vote.name,
-        vote_data: vote.votes,
-        Events: {
-          connect: {
-            id: vote.id,
+  if (event_data) {
+    if ((moment() > moment(event_data.start_event_date)) &&
+      (moment() < moment(event_data.end_event_date))) {
+      // Create new voter
+      const createdVoter = await prisma.voters.create({
+        data: {
+          voter_name: vote.name,
+          vote_data: vote.votes,
+          Events: {
+            connect: {
+              id: vote.id,
+            }
           }
-        }
-      },
-      select: {
-        id: true,
-      },
-    });
-    // Upon success, respond with 200
-    res.status(200).send("Successful update");
+        },
+        select: {
+          id: true,
+        },
+      });
+      // Upon success, respond with 200
+      res.status(200).send("Successful update");
+    } else {
+      // If voting is closed, respond with 400
+      res.status(400).send("Voting is closed for this event");
+    }
   } else {
     // If voting is closed, respond with 400
-    res.status(400).send("Voting is closed for this event");
+    res.status(400).send("Invalid voting link");
   }
 };
