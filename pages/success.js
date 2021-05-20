@@ -9,7 +9,7 @@ function Success({ query }) {
       <Navigation
         history={{
           title: "Voting",
-          link: `/vote?user=${query.user}`,
+          link: `/vote?id=${query.id}`,
         }}
         title="Vote Success"
       />
@@ -19,13 +19,8 @@ function Success({ query }) {
         <h1>Your vote is in!</h1>
         <p>You have successfully placed your votes.</p>
 
-        {/* Go back to voting */}
-        <Link href={`/vote?user=${query.user}`}>
-          <a>Change your votes</a>
-        </Link>
-
         {/* Redirect to event dashboard */}
-        <Link href={`/event?id=${query.event}`}>
+        <Link href={`/event?id=${query.id}`}>
           <a>See event dashboard</a>
         </Link>
       </div>
@@ -70,11 +65,6 @@ function Success({ query }) {
         }
 
         .success > a:nth-of-type(1) {
-          background-color: #edff38;
-          color: #000;
-        }
-
-        .success > a:nth-of-type(2) {
           background-color: #000;
           color: #edff38;
         }

@@ -33,6 +33,7 @@ function Event({ query }) {
       refreshInterval: 500,
     }
   );
+  console.log(data);
 
   /**
    * Admin view: download voter URLs as text file
@@ -99,6 +100,7 @@ function Event({ query }) {
       // POST data and collect status
       const { status } = await axios.post("/api/events/update", {
         id: data.event.id,
+        secret: query.secret,
         start_event_date: startDate,
         end_event_date: endDate,
       });
@@ -162,7 +164,11 @@ function Event({ query }) {
         </div>
 
         {/* Event start date selection */}
-        {!loading && data ? (
+        {query.id !== "" &&
+        query.secret !== "" &&
+        query.secret !== undefined &&
+        !loading &&
+        data ? (
           editMode ? (
             <div className="event__section">
               <label>Event start date</label>
@@ -197,7 +203,11 @@ function Event({ query }) {
         ) : null}
 
         {/* Event end date selection */}
-        {!loading && data ? (
+        {query.id !== "" &&
+        query.secret !== "" &&
+        query.secret !== undefined &&
+        !loading &&
+        data ? (
           editMode ? (
             <div className="event__section">
               <label>Event end date</label>
@@ -259,26 +269,15 @@ function Event({ query }) {
 
         {/* Event copyable links */}
         {query.id !== "" &&
-        query.secret !== "" &&
-        query.secret !== undefined &&
         !loading &&
         data ? (
           <div className="event__section">
-            <label className="private__label">Individual voting links</label>
-            <p>For private sharing with voters</p>
-            <textarea
-              className="event__section_textarea"
-              // Collect voter urls as one text element
-              value={data.event.voters
-                .map(
-                  (voter, _) => `https://quadraticvote.radicalxchange.org/vote?user=${voter.id}`
-                )
-                .join("\n")}
+            <label className="private__label">Public Voting Link</label>
+            <p>For sharing with voters</p>
+            <input
+              value={`https://quadraticvote.radicalxchange.org/vote?id=${query.id}`}
               readOnly
             />
-            <button onClick={downloadTXT} className="download__button">
-              Download as TXT
-            </button>
           </div>
         ) : null}
 
