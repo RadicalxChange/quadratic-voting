@@ -300,7 +300,7 @@ function Event({ query }) {
                   <label>Voting Participants</label>
                   <h3>
                     {!loading && data
-                      ? `${data.statistics.numberVoters.toLocaleString()} / ${data.statistics.numberVotersTotal.toLocaleString()}`
+                      ? `${data.statistics.numberVoters.toLocaleString()}`
                       : "Loading..."}
                   </h3>
                 </div>
@@ -308,7 +308,7 @@ function Event({ query }) {
                   <label>Credits Used</label>
                   <h3>
                     {!loading && data
-                      ? `${data.statistics.numberVotes.toLocaleString()} / ${data.statistics.numberVotesTotal.toLocaleString()}`
+                      ? `${data.statistics.numberVotes.toLocaleString()}`
                       : "Loading..."}
                   </h3>
                 </div>
