@@ -11,10 +11,10 @@ function Vote({ query }) {
   const router = useRouter(); // Hook into router
   const [data, setData] = useState(null); // Data retrieved from DB
   const [loading, setLoading] = useState(true); // Global loading state
-  const [name, setName] = useState(""); // Voter name
   const [votes, setVotes] = useState(null); // Option votes array
   const [credits, setCredits] = useState(0); // Total available credits
   const [submitLoading, setSubmitLoading] = useState(false); // Component (button) submission loading state
+  const [alreadyVoted, setAlreadyVoted] = useState(false); // has user voted already?
 
   /**
    * Update votes array with QV weighted vote increment/decrement
@@ -108,7 +108,7 @@ function Vote({ query }) {
     const { status } = await axios.post("/api/events/vote", {
       id: query.id, // Voter ID
       votes: vote_data, // Vote data
-      name: name, // Voter name
+      name: "", // Voter name
     });
 
     // If POST is a success
@@ -199,9 +199,9 @@ function Vote({ query }) {
                   ) : (
                     <>
                     {(moment() < moment(data.start_event_date)) ? (
-                      <h3>This event begins {moment(data.start_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                      <h3>This event begins {moment(data.event_data.start_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
                     ) : (
-                      <h3>This event closes {moment(data.end_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                      <h3>This event begins {moment(data.event_data.end_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
                     )}
                     </>
                   )}
@@ -218,38 +218,11 @@ function Vote({ query }) {
                 <></>
               ) : (
                 <>
-                {/* General information */}
-                <div className="event__options">
-                  <h2>General Information</h2>
-                  <div className="divider" />
-                  <div className="event__option_item">
-                    <div>
-                      <label>Voter Name</label>
-                      {data ? (
-                        <>
-                        {(moment() > moment(data.end_event_date)) ? (
-                          <input
-                            disabled
-                            type="text"
-                            placeholder="Jane Doe"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                          />
-                        ) : (
-                          <>
-                          <p>Please enter your name:</p>
-                          <input
-                            type="text"
-                            placeholder="Jane Doe"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                          />
-                          </>
-                        )}
-                        </>
-                      ) : null}
-                    </div>
-                  </div>
+                <div className="button-container">
+                  <RemainingCredits
+                    creditBalance={data.credits_per_voter}
+                    creditsRemaining={credits}
+                  />
                 </div>
 
                 {/* Voteable options */}
@@ -331,6 +304,16 @@ function Vote({ query }) {
                                 </>
                               ) : null}
                             </div>
+                            {alreadyVoted ? (
+                              // If user has voted before, show historic votes
+                              <div className="existing__votes">
+                                <span>
+                                  Da última vez você alocou{" "}
+                                  <strong>{data.vote_data[i].votes} votos </strong>
+                                  para esta opção.
+                                </span>
+                              </div>
+                            ) : null}
                           </div>
                         </div>
                       );
@@ -345,9 +328,7 @@ function Vote({ query }) {
                   ) : (
                     <>
                       {/* Submission button states */}
-                      {name !== "" ? (
-                        // Check for name being filled
-                        submitLoading ? (
+                      {submitLoading ? (
                           // Check for existing button loading state
                           <button className="submit__button" disabled>
                             <Loader />
@@ -357,6 +338,7 @@ function Vote({ query }) {
                           <button name="input-element" onClick={submitVotes} className="submit__button">
                             Submit Votes
                           </button>
+<<<<<<< HEAD
                         )
                       ) : (
                         // If name isn't filled, request fulfillment
@@ -364,6 +346,9 @@ function Vote({ query }) {
                           Enter your name to vote
                         </button>
                       )}
+=======
+                        )}
+>>>>>>> 05c70ce (remove name field)
                     </>
                   )}
                   </>
