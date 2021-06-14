@@ -106,7 +106,7 @@ function Vote({ query }) {
       return current <= 0 ? true : canOccur;
     } else {
       // Or check for inverse state when subtracting
-      return (current >= 0 ? true : canOccur) && (current !== 0);
+      return current >= 0 ? true : canOccur;
     }
   };
 
