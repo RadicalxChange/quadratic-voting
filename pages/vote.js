@@ -13,10 +13,10 @@ function Vote({ query }) {
   const router = useRouter(); // Hook into router
   const [data, setData] = useState(null); // Data retrieved from DB
   const [loading, setLoading] = useState(true); // Global loading state
-  const [name, setName] = useState(""); // Voter name
   const [votes, setVotes] = useState(null); // Option votes array
   const [credits, setCredits] = useState(0); // Total available credits
   const [submitLoading, setSubmitLoading] = useState(false); // Component (button) submission loading state
+  const [alreadyVoted, setAlreadyVoted] = useState(false); // has user voted already?
 
   /**
    * Calculates culmulative number of votes and available credits on load
@@ -29,13 +29,12 @@ function Vote({ query }) {
     const votesArrMultiple = votesArr.map((item, _) => item * item);
     // Set votes variable to array
     setVotes(votesArr);
+    const creditsSpent = votesArrMultiple.reduce((a, b) => a + b, 0);
     // Set credits to:
-    setCredits(
-      // Maximum votes -
-      rData.event_data.credits_per_voter -
-        // Sum of all QV multiplied votes
-        votesArrMultiple.reduce((a, b) => a + b, 0)
-    );
+    setCredits(rData.event_data.credits_per_voter - creditsSpent);
+    if (creditsSpent > 0) {
+      setAlreadyVoted(true);
+    }
   };
 
   /**
@@ -70,10 +69,6 @@ function Vote({ query }) {
       .then((response) => {
         // Set response data
         setData(response.data);
-        // Set name if exists
-        setName(
-          response.data.voter_name !== null ? response.data.voter_name : ""
-        );
         // Calculate QV votes with data
         calculateVotes(response.data);
         // Toggle global loading state to false
@@ -123,7 +118,7 @@ function Vote({ query }) {
     const { status } = await axios.post("/api/events/vote", {
       id: query.user, // Voter ID
       votes: votes, // Vote data
-      name: name, // Voter name
+      name: "", // Voter name
     });
 
     // If POST is a success
@@ -233,39 +228,6 @@ function Vote({ query }) {
                 <></>
               ) : (
                 <>
-                {/* General information */}
-                <div className="event__options">
-                  <h2>Informações gerais</h2>
-                  <div className="divider" />
-                  <div className="event__option_item">
-                    <div>
-                      <label>Nome do eleitor</label>
-                      {data ? (
-                        <>
-                        {(moment() > moment(data.event_data.end_event_date)) ? (
-                          <input
-                            disabled
-                            type="text"
-                            placeholder="Maria da Silva"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                          />
-                        ) : (
-                          <>
-                          <p>Insira seu nome completo:</p>
-                          <input
-                            type="text"
-                            placeholder="Maria da Silva"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                          />
-                          </>
-                        )}
-                        </>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
                 <div className="button-container">
                   <RemainingCredits
                     creditBalance={data.event_data.credits_per_voter}
@@ -344,7 +306,7 @@ function Vote({ query }) {
                                 </>
                               ) : null}
                             </div>
-                            {data.voter_name !== "" && data.voter_name !== null ? (
+                            {alreadyVoted ? (
                               // If user has voted before, show historic votes
                               <div className="existing__votes">
                                 <span>
@@ -368,9 +330,7 @@ function Vote({ query }) {
                   ) : (
                     <>
                       {/* Submission button states */}
-                      {name !== "" ? (
-                        // Check for name being filled
-                        submitLoading ? (
+                      {submitLoading ? (
                           // Check for existing button loading state
                           <button className="submit__button" disabled>
                             <Loader />
@@ -380,13 +340,7 @@ function Vote({ query }) {
                           <button name="input-element" onClick={submitVotes} className="submit__button">
                             Enviar votos
                           </button>
-                        )
-                      ) : (
-                        // If name isn't filled, request fulfillment
-                        <button className="submit__button button__disabled" disabled>
-                          Digite seu nome para votar
-                        </button>
-                      )}
+                        )}
                     </>
                   )}
                   </>
