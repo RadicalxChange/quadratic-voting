@@ -83,10 +83,10 @@ function Place({ query }) {
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Home",
+          title: "Início",
           link: "/",
         }}
-        title="Place Votes"
+        title="Distribua seus votos"
       />
 
       {/* Place vote block */}
@@ -94,17 +94,17 @@ function Place({ query }) {
         {!error ? (
           // If no error, show enter code block
           <div className="place__votes">
-            <h2>Enter your voting code</h2>
-            <p>
-              This should be a long code with multiple characters and dashes.
-            </p>
+           <h2> Digite seu código de votação </h2>
+             <p>
+               Deve ser um código longo com vários caracteres e travessões.
+             </p>
             <input
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="0918cd22-a487-4cd0-8e29-8144b9580b80"
             />
             {!loading ? (
-              <button onClick={checkVoterExists}>Submit</button>
+              <button onClick={checkVoterExists}>Enviar</button>
             ) : (
               <button disabled>
                 <Loader />
@@ -114,14 +114,14 @@ function Place({ query }) {
         ) : (
           // If there is an error, show invalid voting code block
           <div className="place__votes">
-            <h2>Invalid voting code</h2>
-            <p>Oops! It doesn't look like that voting code exists.</p>
+            <h2>Código de votação inválido</h2>
+            <p>Ups! Não parece que esse código de votação não existe.</p>
             <button className="retry__button" onClick={tryAgain}>
-              Try Again
+              Tente novamente
             </button>
             <span>
-              Automatic redirect in{" "}
-              <Countdown date={Date.now() + 5000} renderer={renderer} /> seconds
+            Redirecionamento automático em{" "}
+              <Countdown date={Date.now() + 5000} renderer={renderer} /> segundos
             </span>
           </div>
         )}
