@@ -1,5 +1,6 @@
 import axios from "axios"; // Axios for requests
 import moment from "moment"; // Moment date parsing
+import QRCode from "qrcode.react"; // QR code generator
 import Link from "next/link"; // Dynamic links
 import Loader from "components/loader"; // Placeholder loader
 import Layout from "components/layout"; // Layout wrapper
@@ -17,6 +18,7 @@ function Vote({ query }) {
   const [credits, setCredits] = useState(0); // Total available credits
   const [submitLoading, setSubmitLoading] = useState(false); // Component (button) submission loading state
   const [alreadyVoted, setAlreadyVoted] = useState(false); // has user voted already?
+  const [mudamosUrl, setMudamosUrl] = useState(null);
 
   /**
    * Calculates culmulative number of votes and available credits on load
@@ -115,18 +117,25 @@ function Vote({ query }) {
     setSubmitLoading(true);
 
     // POST data and collect status
-    const { status } = await axios.post("/api/events/vote", {
+    const response = await axios.post("/api/events/vote", {
       id: query.user, // Voter ID
       votes: votes, // Vote data
       name: "", // Voter name
     });
 
-    // If POST is a success
-    if (status === 200) {
-      // Redirect to success page
-      router.push(`success?event=${data.event_id}&user=${query.user}`);
+    if (response.status === 200) {
+      setMudamosUrl(response.data.url);
+
+      // TESTING ONLY send data to callback API
+      const callback_status = await axios.post("/api/events/callback", {
+        hash: response.data.hash,
+        message: response.data.message,
+      });
+      console.log(callback_status)
+      // END TESTING CODE
+
     } else {
-      // Else, redirec to failure page
+      // Else, redirect to failure page
       router.push(`failure?event=${data.event_id}&user=${query.user}`);
     }
 
@@ -330,17 +339,26 @@ function Vote({ query }) {
                   ) : (
                     <>
                       {/* Submission button states */}
-                      {submitLoading ? (
-                          // Check for existing button loading state
+                      {mudamosUrl ? (
+                        <div className="qrcode">
+                          <p>Open the Mudamos app on your mobile device and scan the QR code below to sign this ballot.</p>
+                          <QRCode value={mudamosUrl} />
+                        </div>
+                      ) : (
+                        <>
+                        {submitLoading ? (
+                          /* Check for existing button loading state */
                           <button className="submit__button" disabled>
                             <Loader />
                           </button>
                         ) : (
-                          // Else, enable submission
+                          /* Else, enable submission */
                           <button name="input-element" onClick={submitVotes} className="submit__button">
-                            Enviar votos
+                            Sign the ballot with Mudamos
                           </button>
                         )}
+                        </>
+                      )}
                     </>
                   )}
                   </>
@@ -658,6 +676,10 @@ function Vote({ query }) {
           border-radius: 5px;
           text-align: center;
           border: 1px solid #fada5e;
+        }
+
+        .qrcode {
+          margin-top: 50px;
         }
       `}</style>
     </Layout>

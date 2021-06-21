@@ -33,8 +33,12 @@ export default async (req, res) => {
       select: {
         start_event_date: true,
         end_event_date: true,
+        event_data: true,
       },
     });
+
+    const options = JSON.parse(event_data.event_data).map((option) => option.title)
+
     if ((moment() > moment(event_data.start_event_date)) &&
       (moment() < moment(event_data.end_event_date))) {
       // Loop through vote_data in DB
@@ -42,6 +46,26 @@ export default async (req, res) => {
         // Update with new votes from request body
         vote_data[i].votes = vote.votes[i];
       }
+
+      const crypto = require('crypto');
+
+      // pack vote data into a string
+      var vote_data_str = "";
+      for (let i = 0; i < vote_data.length; i++) {
+        vote_data_str += options[i]
+        vote_data_str += vote_data[i]
+      }
+
+      // pack user, vote data, and timestamp into message
+      const message = vote.id + ';' + vote_data_str + ';' + moment(); // TODO: formatAsPGTimestamp
+      const encodedMessage = Buffer.from(message, "utf8").toString("hex");
+
+      // hash message
+      const signature = crypto
+        .createHmac("sha256", process.env.APP_SECRET)
+        .update(message)
+        .digest("hex");
+
       // Update voter object
       await prisma.voters.update({
         // Using individual, secret vote ID passed from request body
@@ -50,16 +74,27 @@ export default async (req, res) => {
         data: {
           voter_name: vote.name !== "" ? vote.name : "",
           vote_data: vote_data,
+          hash: signature,
         },
       });
+
+      const deeplink = `https://sign.mudamos.org/signlink?message=${encodedMessage}&appid=${process.env.APP_ID}&signature=${signature}`;
+      const encodedDeepLink = encodeURIComponent(deeplink);
+      const url = `https://${process.env.FB_SUBDOMAIN}.app.goo.gl/?link=${encodedDeepLink}&apn=${process.env.ANDROID_PKG_NAME}&ibi=${process.env.IOS_BUNDLE_ID}&isi=${process.env.APP_STORE_ID}&efr=1`;
+
       // Upon success, respond with 200
-      res.status(200).send("Successful update");
+      res.status(200).json({
+        msg: "Successful update",
+        url: url,
+        hash: signature, // TESTING ONLY
+        message: message, // TESTING ONLY
+      });
     } else {
       // If voting is closed, respond with 400
-      res.status(400).send("Voting is closed for this event")
+      res.status(400).json({ msg: "Voting is closed for this event" });
     }
   } else {
     // If user does not exist, respond with 400
-    res.status(400).send("Invalid voter link")
+    res.status(400).json({ msg: "Invalid voter link" });
   }
 };

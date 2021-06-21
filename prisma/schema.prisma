@@ -26,5 +26,8 @@ model Voters {
   event_uuid String
   voter_name String?
   vote_data  Json?
+  hash String
+  signature String
+  public_key String
   Events     Events  @relation(fields: [event_uuid], references: [id])
 }

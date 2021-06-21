@@ -20,6 +20,9 @@ export default async (req, res) => {
   // Fill array with voter data based on num_voters in request body
   const voters = new Array(event.num_voters).fill({
     vote_data: vote_data, // Placeholder zeroed vote_data
+    hash: "",
+    signature: "",
+    public_key: "",
   });
 
   // Create new event

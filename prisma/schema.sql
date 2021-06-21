@@ -21,6 +21,9 @@ CREATE TABLE "public"."Voters"
   event_uuid uuid NOT NULL,
   voter_name VARCHAR,
   vote_data JSON,
+  hash VARCHAR,
+  signature VARCHAR,
+  public_key VARCHAR,
   PRIMARY KEY (id),
   FOREIGN KEY ("event_uuid") REFERENCES "public"."Events"(id)
 );

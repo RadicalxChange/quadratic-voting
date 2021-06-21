@@ -169,9 +169,9 @@ export default function Create() {
           {/* Global settings header */}
           <h2>Configurações globais</h2>
           <p>
-            Essas configurações são usadas para configurar seu evento. 
-            Você pode adicionar um título e uma descrição do evento, 
-            selecionar o número de votantes, quantos créditos de voto 
+            Essas configurações são usadas para configurar seu evento.
+            Você pode adicionar um título e uma descrição do evento,
+            selecionar o número de votantes, quantos créditos de voto
             cada um receberá e uma data de início e término para a votação.
           </p>
 
@@ -259,7 +259,7 @@ export default function Create() {
           {/* Subject settings heading */}
           <h2>Opções</h2>
           <p>
-           Essas configurações permitem adicionar opções às quais os eleitores podem delegar seus créditos de voto. 
+           Essas configurações permitem adicionar opções às quais os eleitores podem delegar seus créditos de voto.
            Você pode escolher adicionar um título de opção, descrição e link.
           </p>
 
