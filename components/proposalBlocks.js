@@ -42,7 +42,8 @@ function ProposalBlocks(props) {
 
   // draw
   const drawGraph = (canvas, ctx) => {
-    const cellHeight = Math.min(canvas.height / totalHeightBlocks, 10);
+    const maxCellHeight = window.innerWidth < 768 ? 16 : 10;
+    const cellHeight = Math.min(canvas.height / totalHeightBlocks, maxCellHeight);
     const blockHeight = cellHeight * .7;
     const gutter = cellHeight - blockHeight;
     const px = (canvas.width - cellHeight*totalHeightBlocks) / 2
