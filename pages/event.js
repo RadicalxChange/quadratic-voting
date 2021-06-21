@@ -277,7 +277,7 @@ function Event({ query }) {
               readOnly
             />
             <button onClick={downloadTXT} className="download__button">
-              Baixar como um arquivo de texto (.txt) 
+              Baixar como um arquivo de texto (.txt)
             </button>
           </div>
         ) : null}
@@ -331,7 +331,7 @@ function Event({ query }) {
                 <label> Participantes votantes </label>
                   <h3>
                     {!loading && data
-                      ? `${data.statistics.numberVoters.toLocaleString()} / ${data.statistics.numberVotersTotal.toLocaleString()}`
+                      ? `${data.statistics.numberVoters.toLocaleString()}`
                       : "Loading..."}
                   </h3>
                 </div>
@@ -339,7 +339,7 @@ function Event({ query }) {
                 <label> Créditos usados </label>
                   <h3>
                     {!loading && data
-                      ? `${data.statistics.numberVotes.toLocaleString()} / ${data.statistics.numberVotesTotal.toLocaleString()}`
+                      ? `${data.statistics.numberVotes.toLocaleString()}`
                       : "Loading..."}
                   </h3>
                 </div>
