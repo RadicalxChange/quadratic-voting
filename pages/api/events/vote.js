@@ -57,7 +57,7 @@ export default async (req, res) => {
       }
 
       // pack user, vote data, and timestamp into message
-      const message = vote.id + ';' + vote_data_str + ';' + moment(); // TODO: formatAsPGTimestamp
+      const message = vote.id + ';' + vote_data_str + ';' + formatAsPGTimestamp(moment());
       const encodedMessage = Buffer.from(message, "utf8").toString("hex");
 
       // hash message
@@ -86,8 +86,6 @@ export default async (req, res) => {
       res.status(200).json({
         msg: "Successful update",
         url: url,
-        hash: signature, // TESTING ONLY
-        message: message, // TESTING ONLY
       });
     } else {
       // If voting is closed, respond with 400

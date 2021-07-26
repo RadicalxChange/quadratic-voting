@@ -125,15 +125,6 @@ function Vote({ query }) {
 
     if (response.status === 200) {
       setMudamosUrl(response.data.url);
-
-      // TESTING ONLY send data to callback API
-      const callback_status = await axios.post("/api/events/callback", {
-        hash: response.data.hash,
-        message: response.data.message,
-      });
-      console.log(callback_status)
-      // END TESTING CODE
-
     } else {
       // Else, redirect to failure page
       router.push(`failure?event=${data.event_id}&user=${query.user}`);
