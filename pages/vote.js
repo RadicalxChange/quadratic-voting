@@ -143,6 +143,11 @@ function Vote({ query }) {
     setSubmitLoading(false);
   };
 
+  const exitVotingPage = () => {
+    // Redirect to success page
+    router.push(`success?event=${data.event_id}&user=${query.user}`);
+  };
+
   /**
    * Toggle show/hide description
    * @param {number} key identifying the option the user clicked on
@@ -340,10 +345,24 @@ function Vote({ query }) {
                     <>
                       {/* Submission button states */}
                       {mudamosUrl ? (
-                        <div className="qrcode">
-                          <p>Open the Mudamos app on your mobile device and scan the QR code below to sign this ballot.</p>
-                          <QRCode value={mudamosUrl} />
+                        <>
+                        <div className="vote__info_heading">
+                          <h2 className="sign_message">Signing the ballot</h2>
+                          <p>For your votes to be counted, you must sign the ballot using Mudamos. Follow the instructions below to sign. Don't leave this page until you see the success message on your Mudamos app, or your votes will not be counted. When you see the success message on your Mudamos app, you may click the button at the bottom of this screen to exit.</p>
                         </div>
+                        <div className="qrcode">
+                          <h3>Desktop users</h3>
+                          <p>Open the Mudamos app on your mobile device and scan the QR code below to sign the ballot.</p>
+                          <QRCode value={mudamosUrl} />
+                          <h3>Mobile users</h3>
+                          <p><a href={mudamosUrl}>Click to open Mudamos and sign the ballot.</a></p>
+                        </div>
+                        <a>
+                        </a>
+                        <button name="input-element" onClick={exitVotingPage} className="submit__button">
+                          I successfully signed using Mudamos
+                        </button>
+                        </>
                       ) : (
                         <>
                         {submitLoading ? (
@@ -354,7 +373,7 @@ function Vote({ query }) {
                         ) : (
                           /* Else, enable submission */
                           <button name="input-element" onClick={submitVotes} className="submit__button">
-                            Sign the ballot with Mudamos
+                            Sign and submit with Mudamos
                           </button>
                         )}
                         </>
@@ -680,6 +699,15 @@ function Vote({ query }) {
 
         .qrcode {
           margin-top: 50px;
+        }
+
+        .qrcode > h3,
+        .qrcode > p {
+          text-align: left;
+        }
+
+        .sign_message {
+          margin-top: 4rem;
         }
       `}</style>
     </Layout>
