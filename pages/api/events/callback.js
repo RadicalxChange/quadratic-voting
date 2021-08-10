@@ -24,7 +24,7 @@ export default async (req, res) => {
   const secret = toBase64(process.env.APP_SECRET);
 
   if (isValidAuth(auth, secret)) {
-    const user_id = data.message.split(';')[0];
+    const user_id = data.message.split(';')[0].substring(5);
 
     // Collect voter information
     const user = await prisma.voters.findUnique({
