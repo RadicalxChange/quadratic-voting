@@ -24,41 +24,33 @@ export default async (req, res) => {
   const secret = toBase64(process.env.APP_SECRET);
 
   if (isValidAuth(auth, secret)) {
-    const user_id = data.message.split(';')[0].substring(5);
-
     // Collect voter information
-    const user = await prisma.voters.findUnique({
+    const user = await prisma.voters.findFirst({
       // With user id from message
       where: {
-        id: user_id,
+        hash: data.message,
       },
       // And selecting the hashed message representing the vote data
       select: {
-        hash: true,
+        id: true,
       },
     });
 
     if (user) {
       const verify = crypto.createVerify('SHA256');
-      verify.write(user.hash);
+      verify.write(data.message);
       verify.end();
       const signature_verified = verify.verify(data.publicKey, data.signature, 'hex');
 
-      const payload_hash = crypto
-        .createHmac("sha256", process.env.APP_SECRET)
-        .update(data.message)
-        .digest("hex");
-      const message_verified = user.hash === payload_hash;
-
-      if (signature_verified && message_verified) {
+      if (signature_verified) {
         // Update voter object
         await prisma.voters.update({
           // With user id from message
-          where: { id: user_id },
+          where: { id: user.id },
           // With signature and public key from payload
           data: {
-            signature: signature.toString(),
-            public_key: publicKey.toString(),
+            signature: data.signature.toString(),
+            public_key: data.publicKey.toString(),
           },
         });
         // Upon success, respond with 200
