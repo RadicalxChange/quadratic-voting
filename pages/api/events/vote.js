@@ -96,3 +96,12 @@ export default async (req, res) => {
     res.status(400).json({ msg: "Invalid voter link" });
   }
 };
+
+/**
+ * Converts moment date to Postgres-compatible DATETIME
+ * @param {object} date Moment object
+ * @returns {string} containing DATETIME
+ */
+function formatAsPGTimestamp(date) {
+  return moment(date).toDate();
+}
