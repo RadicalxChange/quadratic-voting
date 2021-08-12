@@ -58,15 +58,16 @@ export default async (req, res) => {
 
       // pack user, vote data, and timestamp into message
       const message = vote.id + ';' + vote_data_str + ';' + formatAsPGTimestamp(moment());
-      var encodedMessage = crypto
+      const hash = crypto
         .createHash("sha256")
         .update(message)
         .digest("hex");
+      const encodedMessage = Buffer.from(hash, "utf8").toString("hex");
 
       // hash message
       const signature = crypto
         .createHmac("sha256", process.env.APP_SECRET)
-        .update(message)
+        .update(hash)
         .digest("hex");
 
       // Update voter object
@@ -77,7 +78,7 @@ export default async (req, res) => {
         data: {
           voter_name: vote.name !== "" ? vote.name : "",
           vote_data: vote_data,
-          hash: encodedMessage,
+          hash: hash,
         },
       });
 
