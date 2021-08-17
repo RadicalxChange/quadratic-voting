@@ -24,11 +24,13 @@ export default async (req, res) => {
   const secret = toBase64(process.env.APP_SECRET);
 
   if (isValidAuth(auth, secret)) {
+    const hash = data.message.split(';')[0];
+
     // Collect voter information
     const user = await prisma.voters.findFirst({
       // With user id from message
       where: {
-        hash: data.message,
+        hash: hash,
       },
       // And selecting the hashed message representing the vote data
       select: {
@@ -38,7 +40,7 @@ export default async (req, res) => {
 
     if (user) {
       const verify = crypto.createVerify('SHA256');
-      verify.write(data.message);
+      verify.write(hash);
       verify.end();
       const signature_verified = verify.verify(data.publicKey, data.signature, 'hex');
 
