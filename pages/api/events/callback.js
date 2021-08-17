@@ -39,28 +39,18 @@ export default async (req, res) => {
     });
 
     if (user) {
-      const verify = crypto.createVerify('SHA256');
-      verify.write(hash);
-      verify.end();
-      const signature_verified = verify.verify(data.publicKey, data.signature, 'hex');
-
-      if (signature_verified) {
-        // Update voter object
-        await prisma.voters.update({
-          // With user id from message
-          where: { id: user.id },
-          // With signature and public key from payload
-          data: {
-            signature: data.signature.toString(),
-            public_key: data.publicKey.toString(),
-          },
-        });
-        // Upon success, respond with 200
-        res.status(200).send("Successful update");
-      } else {
-        // If user does not exist, respond with 400
-        res.status(400).send("Invalid signature")
-      }
+      // Update voter object
+      await prisma.voters.update({
+        // With user id from message
+        where: { id: user.id },
+        // With signature and public key from payload
+        data: {
+          signature: data.signature,
+          public_key: data.publicKey,
+        },
+      });
+      // Upon success, respond with 200
+      res.status(200).send("Successful update");
     } else {
       // If user does not exist, respond with 400
       res.status(400).send("Invalid voter id")
