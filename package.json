@@ -8,8 +8,7 @@
   "scripts": {
     "dev": "next dev -p 2001",
     "build": "next build",
-    "start": "next start -p 2001",
-    "postinstall": "prisma generate"
+    "start": "next start -p 2001"
   },
   "dependencies": {
     "@prisma/cli": "^2.8.0",
