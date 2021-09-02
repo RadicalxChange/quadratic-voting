@@ -33,7 +33,6 @@ function Event({ query }) {
       refreshInterval: 500,
     }
   );
-  console.log(data);
 
   /**
    * Admin view: download voter URLs as text file
@@ -41,7 +40,7 @@ function Event({ query }) {
   const downloadTXT = () => {
     // Collect voter URLs in single text string
     const text = data.event.voters
-      .map((voter, _) => `https://quadraticvote.radicalxchange.org/vote?user=${voter.id}`)
+      .map((voter, _) => `https://staging.qv.radicalxchange.org/vote?user=${voter.id}`)
       .join("\n");
 
     // Create link component
@@ -246,7 +245,7 @@ function Event({ query }) {
           <label>Event URL</label>
           <p>URL do painel de estatísticas</p>
           <input
-            value={`https://quadraticvote.radicalxchange.org/event?id=${query.id}`}
+            value={`https://staging.qv.radicalxchange.org/event?id=${query.id}`}
             readOnly
           />
         </div>
@@ -261,7 +260,7 @@ function Event({ query }) {
             <label className="private__label">URL de administrador privado</label>
             <p>Salve este URL para gerenciar o evento e fazer alterações</p>
             <input
-              value={`https://quadraticvote.radicalxchange.org/event?id=${query.id}&secret=${query.secret}`}
+              value={`https://staging.qv.radicalxchange.org/event?id=${query.id}&secret=${query.secret}`}
               readOnly
             />
           </div>
@@ -275,7 +274,7 @@ function Event({ query }) {
             <label className="private__label">Links de votação</label>
             <p>Para compartilhar com os eleitores</p>
             <input
-              value={`https://quadraticvote.radicalxchange.org/vote?id=${query.id}`}
+              value={`https://staging.qv.radicalxchange.org/vote?id=${query.id}`}
               readOnly
             />
           </div>
