@@ -40,7 +40,7 @@ function Event({ query }) {
   const downloadTXT = () => {
     // Collect voter URLs in single text string
     const text = data.event.voters
-      .map((voter, _) => `https://quadraticvote.radicalxchange.org/vote?user=${voter.id}`)
+      .map((voter, _) => `https://qv.radicalxchange.org/vote?user=${voter.id}`)
       .join("\n");
 
     // Create link component
@@ -236,7 +236,7 @@ function Event({ query }) {
           <label>Event URL</label>
           <p>URL do painel de estatísticas</p>
           <input
-            value={`https://quadraticvote.radicalxchange.org/event?id=${query.id}`}
+            value={`https://qv.radicalxchange.org/event?id=${query.id}`}
             readOnly
           />
         </div>
@@ -251,7 +251,7 @@ function Event({ query }) {
             <label className="private__label">URL de administrador privado</label>
             <p>Salve este URL para gerenciar o evento e fazer alterações</p>
             <input
-              value={`https://quadraticvote.radicalxchange.org/event?id=${query.id}&secret=${query.secret}`}
+              value={`https://qv.radicalxchange.org/event?id=${query.id}&secret=${query.secret}`}
               readOnly
             />
           </div>
@@ -265,19 +265,19 @@ function Event({ query }) {
         data ? (
           <div className="event__section">
             <label className="private__label">Links de votação individual</label>
-            <p>For private sharing with voters</p>
+            <p>Para compartilhamento privado com eleitores</p>
             <textarea
               className="event__section_textarea"
               // Collect voter urls as one text element
               value={data.event.voters
                 .map(
-                  (voter, _) => `https://quadraticvote.radicalxchange.org/vote?user=${voter.id}`
+                  (voter, _) => `https://qv.radicalxchange.org/vote?user=${voter.id}`
                 )
                 .join("\n")}
               readOnly
             />
             <button onClick={downloadTXT} className="download__button">
-              Baixar como um arquivo de texto (.txt) 
+              Baixar como um arquivo de texto (.txt)
             </button>
           </div>
         ) : null}
