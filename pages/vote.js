@@ -338,23 +338,23 @@ function Vote({ query }) {
                       {mudamosUrl ? (
                         <>
                         <div className="vote__info_heading">
-                          <h2 className="sign_message">Signing the ballot</h2>
-                          <p>For your votes to be counted, you must sign the ballot using Mudamos. Follow the instructions below to sign. Don't leave this page until you see the success message on your Mudamos app, or your votes will not be counted. When you see the success message on your Mudamos app, you may click the button at the bottom of this screen to exit.</p>
+                          <h2 className="sign_message">Assinando o voto</h2>
+                          <p>Para que seu voto seja contado, você deve assiná-lo usando o aplicativo Mudamos. Siga as instruções abaixo para assinar. Não saia desta página até ver a mensagem de sucesso em seu aplicativo Mudamos, ou seu voto não será contado. Ao ver a mensagem de sucesso em seu aplicativo Mudamos, você pode clicar no botão na parte inferior desta tela para sair.</p>
                         </div>
                         <div className="qrcode">
-                          <h3>Desktop users</h3>
-                          <p>Open the Mudamos app on your mobile device and scan the QR code below to sign the ballot.</p>
+                          <h3>Usuários de computador</h3>
+                          <p>Abra o aplicativo Mudamos em seu dispositivo móvel e leia o QR code abaixo para assinar seu voto.</p>
                           <QRCode
                             value={mudamosUrl}
                             {...(window.innerWidth>=768 ? {size: '256'} : {size: '128'})}
                           />
-                          <h3>Mobile users</h3>
-                          <p><a href={mudamosUrl}>Click to open Mudamos and sign the ballot.</a></p>
+                          <h3>Usuários de celular</h3>
+                          <p><a href={mudamosUrl}>Clique para abrir o aplicativo Mudamos e assinar o voto.</a></p>
                         </div>
                         <a>
                         </a>
                         <button name="input-element" onClick={exitVotingPage} className="submit__button">
-                          I successfully signed using Mudamos
+                          Eu assinei com sucesso usando o aplicativo Mudamos
                         </button>
                         </>
                       ) : (
@@ -367,7 +367,7 @@ function Vote({ query }) {
                         ) : (
                           /* Else, enable submission */
                           <button name="input-element" onClick={submitVotes} className="submit__button">
-                            Sign and submit with Mudamos
+                             Assinar com o aplicativo Mudamos+
                           </button>
                         )}
                         </>
