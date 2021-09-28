@@ -170,6 +170,7 @@ function Event({ query }) {
                 <Datetime
                   className="create__settings_datetime"
                   value={startDate}
+                  dateFormat="DD/MM/YYYY"
                   onChange={(value) => setStartDate(value)}
                 />
                 <button
@@ -205,6 +206,7 @@ function Event({ query }) {
                 <Datetime
                   className="create__settings_datetime"
                   value={endDate}
+                  dateFormat="DD/MM/YYYY"
                   onChange={(value) => setEndDate(value)}
                 />
                 <button
