@@ -162,11 +162,14 @@ function Event({ query }) {
                 <p>
                   {moment(data.event.start_event_date).format('MMMM Do YYYY, h:mm a')}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => toggleEditMode(true)}
-                >edit
-                </button>
+                {query.secret !== "" &&
+                query.secret !== undefined ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleEditMode(true)}
+                  >edit
+                  </button>
+                ) : null}
               </div>
             </div>
           )
@@ -201,11 +204,14 @@ function Event({ query }) {
                 <p>
                   {moment(data.event.end_event_date).format('MMMM Do YYYY, h:mm a')}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => toggleEditMode(true)}
-                >edit
-                </button>
+                {query.secret !== "" &&
+                query.secret !== undefined ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleEditMode(true)}
+                  >edit
+                  </button>
+                ) : null}
               </div>
             </div>
           )
