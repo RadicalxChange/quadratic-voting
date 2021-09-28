@@ -15,23 +15,7 @@ export default async (req, res) => {
 
   // Collect voter information using event ID
   const voters = await prisma.voters.findMany({
-    where: {
-      AND: [
-        {
-          event_uuid: id
-        },
-        {
-          signature: {
-            not: '',
-          },
-        },
-        {
-          public_key: {
-            not: '',
-          },
-        },
-      ],
-    },
+    where: { event_uuid: id },
   });
 
   // Check for administrator access based on passed secret_key
@@ -48,6 +32,9 @@ export default async (req, res) => {
 
   var statistics = null;
   var chart = null;
+  const signedVoters = voters.filter(function(voter) {
+    return voter.signature !== '' && voter.public_key != ''
+  });
 
   // If event is concluded or private_key enables administrator access
   if (isAdmin || (moment() > moment(event.end_event_date))) {
@@ -60,7 +47,7 @@ export default async (req, res) => {
       // Number of credits per voter
       event.credits_per_voter,
       // Array of voter preferences
-      voters
+      signedVoters
     );
   }
 
