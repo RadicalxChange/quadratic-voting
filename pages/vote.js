@@ -344,7 +344,10 @@ function Vote({ query }) {
                         <div className="qrcode">
                           <h3>Desktop users</h3>
                           <p>Open the Mudamos app on your mobile device and scan the QR code below to sign the ballot.</p>
-                          <QRCode value={mudamosUrl} />
+                          <QRCode
+                            value={mudamosUrl}
+                            {...(window.innerWidth>=768 ? {size: '256'} : {size: '128'})}
+                          />
                           <h3>Mobile users</h3>
                           <p><a href={mudamosUrl}>Click to open Mudamos and sign the ballot.</a></p>
                         </div>
