@@ -66,16 +66,14 @@ function Event({ query }) {
   const downloadXLSX = () => {
     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
     const fileExtension = '.xlsx';
-    const options = data.event.event_data
+    const options = data.chart.labels
     const effectiveVotes = data.chart.datasets[0].data
     const percentCredits = data.chart.datasets[1].data
     var rows = [];
     var i;
     for (i = 0; i < options.length; i++) {
       var option = {
-        title: options[i].title,
-        description: options[i].description,
-        url: options[i].url,
+        title: options[i],
         effective_votes: effectiveVotes[i],
         percent_credits: percentCredits[i],
       }
