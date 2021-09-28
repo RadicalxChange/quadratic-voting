@@ -152,9 +152,9 @@ function Event({ query }) {
             ) : (
               <>
               {(moment() < moment(data.event.start_event_date)) ? (
-                <h3>Esse evento começa {moment(data.event.start_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                <h3>Esse evento começa {moment(data.event.start_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
               ) : (
-                <h3>Esse evento encerra {moment(data.event.end_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                <h3>Esse evento encerra {moment(data.event.end_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
               )}
               </>
             )}
