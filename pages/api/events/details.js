@@ -15,7 +15,23 @@ export default async (req, res) => {
 
   // Collect voter information using event ID
   const voters = await prisma.voters.findMany({
-    where: { event_uuid: id },
+    where: {
+      AND: [
+        {
+          event_uuid: id
+        },
+        {
+          signature: {
+            not: '',
+          },
+        },
+        {
+          public_key: {
+            not: '',
+          },
+        },
+      ],
+    },
   });
 
   // Check for administrator access based on passed secret_key
