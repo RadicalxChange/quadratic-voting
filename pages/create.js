@@ -236,6 +236,7 @@ export default function Create() {
             <Datetime
               className="create__settings_datetime"
               value={globalSettings.start_event_date}
+              dateFormat="DD/MM/YYYY"
               onChange={(value) => setEventData("start_event_date", value)}
             />
           </div>
@@ -247,6 +248,7 @@ export default function Create() {
             <Datetime
               className="create__settings_datetime"
               value={globalSettings.end_event_date}
+              dateFormat="DD/MM/YYYY"
               onChange={(value) => setEventData("end_event_date", value)}
             />
           </div>
