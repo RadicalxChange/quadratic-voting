@@ -338,17 +338,7 @@ function Vote({ query }) {
                           <button name="input-element" onClick={submitVotes} className="submit__button">
                             Submit Votes
                           </button>
-<<<<<<< HEAD
-                        )
-                      ) : (
-                        // If name isn't filled, request fulfillment
-                        <button className="submit__button button__disabled" disabled>
-                          Enter your name to vote
-                        </button>
-                      )}
-=======
                         )}
->>>>>>> 05c70ce (remove name field)
                     </>
                   )}
                   </>
