@@ -31,7 +31,7 @@ export default function Home() {
           <div className="home__cta_button">
             <img src="/vectors/place_vote.svg" alt="Place vote" />
             <h2> Dê o seu voto </h2>
-            <p> Use seu código secreto para votar em uma votação quadrática.</p>
+            <p>  Use seu código secreto para participar em uma votação quadrática.</p>
             <Link href = "/place">
               <a> Colocar votos </a>
             </Link>
