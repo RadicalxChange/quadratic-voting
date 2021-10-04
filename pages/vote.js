@@ -346,7 +346,7 @@ function Vote({ query }) {
                           <p>Abra o aplicativo Mudamos em seu dispositivo móvel e leia o QR code abaixo para assinar seu voto.</p>
                           <QRCode
                             value={mudamosUrl}
-                            {...(window.innerWidth>=768 ? {size: '256'} : {size: '128'})}
+                            size='200'
                           />
                           <h3>Usuários de celular</h3>
                           <p><a href={mudamosUrl}>Clique para abrir o aplicativo Mudamos e assinar o voto.</a></p>
