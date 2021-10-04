@@ -151,9 +151,9 @@ function Event({ query }) {
             ) : (
               <>
               {(moment() < moment(data.event.start_event_date)) ? (
-                <h3>Esse evento começa {moment(data.event.start_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
+                <h3>Esse evento começa {moment(data.event.start_event_date).format('DD/MM/YYYY, HH:mm')}</h3>
               ) : (
-                <h3>Esse evento encerra {moment(data.event.end_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
+                <h3>Esse evento encerra {moment(data.event.end_event_date).format('DD/MM/YYYY, HH:mm')}</h3>
               )}
               </>
             )}
@@ -171,6 +171,7 @@ function Event({ query }) {
                   className="create__settings_datetime"
                   value={startDate}
                   dateFormat="DD/MM/YYYY"
+                  timeFormat="HH:mm"
                   onChange={(value) => setStartDate(value)}
                 />
                 <button
@@ -185,7 +186,7 @@ function Event({ query }) {
               <label>Data de início do evento</label>
               <div className="event__dates">
                 <p>
-                  {moment(data.event.start_event_date).format('MMMM Do YYYY, h:mm a')}
+                  {moment(data.event.start_event_date).format('DD/MM/YYYY, HH:mm')}
                 </p>
                 {query.secret !== "" &&
                 query.secret !== undefined ? (
@@ -210,6 +211,7 @@ function Event({ query }) {
                   className="create__settings_datetime"
                   value={endDate}
                   dateFormat="DD/MM/YYYY"
+                  timeFormat="HH:mm"
                   onChange={(value) => setEndDate(value)}
                 />
                 <button
@@ -224,7 +226,7 @@ function Event({ query }) {
               <label>Data de término do evento</label>
               <div className="event__dates">
                 <p>
-                  {moment(data.event.end_event_date).format('MMMM Do YYYY, h:mm a')}
+                  {moment(data.event.end_event_date).format('DD/MM/YYYY, HH:mm')}
                 </p>
                 {query.secret !== "" &&
                 query.secret !== undefined ? (

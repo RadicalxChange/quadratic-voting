@@ -214,9 +214,9 @@ function Vote({ query }) {
                   ) : (
                     <>
                     {(moment() < moment(data.event_data.start_event_date)) ? (
-                      <h3>Este evento começa em {moment(data.event_data.start_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                      <h3>Este evento começa em {moment(data.event_data.start_event_date).format('DD/MM/YYYY, HH:mm')}</h3>
                     ) : (
-                      <h3>Este evento termina em {moment(data.event_data.end_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                      <h3>Este evento termina em {moment(data.event_data.end_event_date).format('DD/MM/YYYY, HH:mm')}</h3>
                     )}
                     </>
                   )}
