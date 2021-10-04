@@ -233,7 +233,7 @@ function Vote({ query }) {
                 <></>
               ) : (
                 <>
-                <div className="button-container">
+                <div className="credits-container">
                   <RemainingCredits
                     creditBalance={data.event_data.credits_per_voter}
                     creditsRemaining={credits}
@@ -406,14 +406,16 @@ function Vote({ query }) {
           position: relative;
         }
 
-        .button-container {
-          padding: 1vw 2vw;
+        .credits-container {
           position: -webkit-sticky;
           position: sticky;
           top: 0;
           left: 0;
           z-index: 1;
-          background: white;
+          background: #fff;
+          border: 1px solid #f1f2e5;
+          border-radius: 10px;
+          box-shadow: 0 0 35px rgba(127, 150, 174, 0.125);
         }
 
         @media only screen and (min-width: 768px) {
@@ -427,11 +429,13 @@ function Vote({ query }) {
             margin: 50px 0 50px auto;
           }
 
-          .button-container {
+          .credits-container {
             grid-column: 2;
             position: fixed;
             background: none;
-            padding: auto auto;
+            border: none;
+            box-shadow: none;
+            margin: 1vw;
             top: auto;
             right: 0;
             bottom: 5vh;

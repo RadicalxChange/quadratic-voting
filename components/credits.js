@@ -136,7 +136,6 @@ function CanvasBlocks(props) {
       <style jsx>{`
         .canvas-wrapper {
           position: relative;
-          margin: 1vw;
         }
 
         #remaining-credits-blocks {
