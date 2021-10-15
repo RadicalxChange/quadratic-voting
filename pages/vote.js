@@ -344,10 +344,17 @@ function Vote({ query }) {
                         <div className="qrcode">
                           <h3>Usuários de computador</h3>
                           <p>Abra o aplicativo Mudamos em seu dispositivo móvel e leia o QR code abaixo para assinar seu voto.</p>
-                          <QRCode
-                            value={mudamosUrl}
-                            size='200'
-                          />
+                          {window.innerWidth <= 768 ? (
+                            <QRCode
+                              value={mudamosUrl}
+                              size='140'
+                            />
+                          ) : (
+                            <QRCode
+                              value={mudamosUrl}
+                              size='256'
+                            />
+                          )}
                           <h3>Usuários de celular</h3>
                           <p><a href={mudamosUrl}>Clique para abrir o aplicativo Mudamos e assinar o voto.</a></p>
                         </div>
