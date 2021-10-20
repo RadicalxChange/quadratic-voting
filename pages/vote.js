@@ -356,7 +356,14 @@ function Vote({ query }) {
                             />
                           )}
                           <h3>Usuários de celular</h3>
-                          <p><a href={mudamosUrl}>Clique para abrir o aplicativo Mudamos e assinar o voto.</a></p>
+                          <p>Clique para abrir o aplicativo Mudamos e assinar o voto.</p>
+                          <a
+                            href={mudamosUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <img className="mudamos_button" src="/mudamos_button.png" alt="Mudamos button" />
+                          </a>
                         </div>
                         <a>
                         </a>
@@ -713,6 +720,10 @@ function Vote({ query }) {
 
         .sign_message {
           margin-top: 4rem;
+        }
+
+        .mudamos_button:hover {
+          opacity: 0.8;
         }
       `}</style>
     </Layout>
