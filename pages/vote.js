@@ -347,7 +347,7 @@ function Vote({ query }) {
                           {window.innerWidth <= 768 ? (
                             <QRCode
                               value={mudamosUrl}
-                              size='140'
+                              size='100'
                             />
                           ) : (
                             <QRCode
