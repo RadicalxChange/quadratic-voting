@@ -52,11 +52,18 @@ export default async (req, res) => {
     statistics.qv
   );
 
+  // Generate 1p1v chart data for chartJS
+  const chart2 = generateChart2(
+    event.event_data,
+    statistics.traditional
+  );
+
   // Return event data, computed statistics, and chart
   res.send({
     event,
     statistics,
     chart,
+    chart2
   });
 };
 
@@ -71,7 +78,8 @@ export default async (req, res) => {
 function generateStatistics(subjects, num_voters, credits_per_voter, voters) {
   let numberVoters = 0, // Placeholder for number of participating voters
     numberVotes = 0, // Placeholder for number of placed votes
-    qvRaw = new Array(subjects).fill([]); // Empty raw array to hold individual votes
+    qvRaw = new Array(subjects).fill([]), // Empty raw array to hold individual votes
+    traditional = new Array(subjects).fill(0); // Empty raw array to hold estimated 1p1v results
 
   // For each voter
   for (const voter of voters) {
@@ -93,6 +101,15 @@ function generateStatistics(subjects, num_voters, credits_per_voter, voters) {
         // Increment raw voting array for each subject
         qvRaw[i] = [...qvRaw[i], voter_data[i].votes];
       }
+      // Estimate what this voter would have chosen in one person one vote
+      const max_index = voter_data.reduce((curr_max, x, i, arr) => {
+        if (x.votes > arr[curr_max].votes) {
+          return i;
+        } else {
+          return curr_max;
+        }
+      }, 0)
+      traditional[max_index] += 1;
     }
   }
 
@@ -113,6 +130,7 @@ function generateStatistics(subjects, num_voters, credits_per_voter, voters) {
     qvRaw,
     linear,
     qv,
+    traditional,
   };
 }
 
@@ -222,6 +240,53 @@ function generateChart(subjects, linearWeights, weights) {
         backgroundColor: "#edff38",
         label: "% Créditos",
         data: linearData,
+      },
+    ],
+  };
+}
+
+/**
+ * Returns chartJS chart data
+ * @param {subjects[]} subjects voteable subjects
+ * @param {integer[]} traditional estimated 1p1v results
+ */
+function generateChart2(subjects, traditional) {
+  let labels = [], // Placeholder labels
+    linearData = [], // Placeholder series linear weight array
+    data = [], // Placeholder series weight array
+    sorted_data = []; // Subject array for sorting by votes received
+
+  // For each subject
+  for (let i = 0; i < subjects.length; i++) {
+    // Collect title for xaxis
+    // labels.push(subjects[i].title);
+    // Collect linear weight for series
+    // linearData.push((linearWeights[i] * 100).toFixed(2));
+    // Collect weight for series
+    // data.push(weights[i]);
+    // Package subject data for sorting;
+    var subject = {
+      label: subjects[i].title,
+      data: traditional[i],
+    }
+    sorted_data.push(subject)
+  }
+
+  // Sort by votes received
+  sorted_data = sorted_data.sort((a, b) => {
+    return b.data - a.data;
+  });
+  labels = sorted_data.map((subject) => subject.label);
+  data = sorted_data.map((subject) => subject.data);
+
+  // Return data in chartJS format
+  return {
+    labels,
+    datasets: [
+      {
+        backgroundColor: "#000",
+        label: "Votos",
+        data,
       },
     ],
   };

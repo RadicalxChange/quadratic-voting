@@ -290,6 +290,7 @@ function Event({ query }) {
         {query.id !== "" &&
         !loading &&
         data ? (
+          <>
           <div className="event__section">
             <label> Votos de evento </label>
             {data.chart ? (
@@ -320,6 +321,32 @@ function Event({ query }) {
               <p> Os resultados da votação aparecerão aqui quando o evento for concluído </p>
             )}
           </div>
+          <div className="event__section">
+            <label> Mais dados </label>
+            {data.chart2 ? (
+            <>
+            <p> Resultados estimados da votação ponderada por votação tradicional </p>
+            {!loading && data ? (
+              <div className="chart">
+                <HorizontalBar data={data.chart2} width={90} height={60} />
+              </div>
+            ) : (
+              <div className="loading__chart">
+                <HashLoader
+                  size={50}
+                  color="#000"
+                  css={{ display: "inline-block" }}
+                />
+                <h3> Carregando gráfico ... </h3>
+                <span> Dê-nos um momento </span>
+              </div>
+            )}
+            </>
+            ) : (
+              <p> Os resultados da votação aparecerão aqui quando o evento for concluído </p>
+            )}
+          </div>
+          </>
         ) : null}
 
 
