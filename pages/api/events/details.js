@@ -55,7 +55,8 @@ export default async (req, res) => {
   // Generate 1p1v chart data for chartJS
   const chart2 = generateChart2(
     event.event_data,
-    statistics.traditional
+    statistics.traditional,
+    statistics.qv
   );
 
   // Return event data, computed statistics, and chart
@@ -200,13 +201,6 @@ function generateChart(subjects, linearWeights, weights) {
 
   // For each subject
   for (let i = 0; i < subjects.length; i++) {
-    // Collect title for xaxis
-    // labels.push(subjects[i].title);
-    // Collect linear weight for series
-    // linearData.push((linearWeights[i] * 100).toFixed(2));
-    // Collect weight for series
-    // data.push(weights[i]);
-    // Package subject data for sorting;
     var subject = {
       label: subjects[i].title,
       linearData: (linearWeights[i] * 100).toFixed(2),
@@ -250,24 +244,18 @@ function generateChart(subjects, linearWeights, weights) {
  * @param {subjects[]} subjects voteable subjects
  * @param {integer[]} traditional estimated 1p1v results
  */
-function generateChart2(subjects, traditional) {
+function generateChart2(subjects, traditional, weights) {
   let labels = [], // Placeholder labels
-    linearData = [], // Placeholder series linear weight array
-    data = [], // Placeholder series weight array
+    qvData = [], // Placeholder series weight array
+    data = [], // Placeholder series 1p1v array
     sorted_data = []; // Subject array for sorting by votes received
 
   // For each subject
   for (let i = 0; i < subjects.length; i++) {
-    // Collect title for xaxis
-    // labels.push(subjects[i].title);
-    // Collect linear weight for series
-    // linearData.push((linearWeights[i] * 100).toFixed(2));
-    // Collect weight for series
-    // data.push(weights[i]);
-    // Package subject data for sorting;
     var subject = {
       label: subjects[i].title,
       data: traditional[i],
+      qvData: weights[i],
     }
     sorted_data.push(subject)
   }
@@ -278,6 +266,7 @@ function generateChart2(subjects, traditional) {
   });
   labels = sorted_data.map((subject) => subject.label);
   data = sorted_data.map((subject) => subject.data);
+  qvData = sorted_data.map((subject) => subject.qvData);
 
   // Return data in chartJS format
   return {
@@ -285,8 +274,13 @@ function generateChart2(subjects, traditional) {
     datasets: [
       {
         backgroundColor: "#000",
-        label: "Votos",
+        label: "Votos tradicionais",
         data,
+      },
+      {
+        backgroundColor: "#edff38",
+        label: "Votos quadráticos",
+        data: qvData,
       },
     ],
   };
