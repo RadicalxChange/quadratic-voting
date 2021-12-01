@@ -14,6 +14,8 @@ export default async (req, res) => {
       voter_name: "",
       vote_data: "",
       event_data: {},
+      signature_exists: false,
+      mudamos_url: "",
     }; // Setup response object
 
     // Collect voter information
@@ -34,6 +36,26 @@ export default async (req, res) => {
       response.voter_name = user.voter_name;
       // Set response object vote_data field to value retrieved from DB
       response.vote_data = user.vote_data;
+      // determine whether the user has signed using Mudamos
+      response.signature_exists = user.signature !== '' && user.public_key != '';
+
+      // recreate mudamos url if necessary
+      if (!response.signature_exists) {
+        const crypto = require('crypto');
+
+        // pack user, vote data, and timestamp into message
+        const encodedMessage = Buffer.from(user.hash, "utf8").toString("hex");
+
+        // hash message
+        const signature = crypto
+          .createHmac("sha256", process.env.APP_SECRET)
+          .update(user.hash)
+          .digest("hex");
+
+        const deeplink = `https://sign.mudamos.org/signlink?message=${encodedMessage}&appid=${process.env.APP_ID}&signature=${signature}`;
+        const encodedDeepLink = encodeURIComponent(deeplink);
+        response.mudamos_url = `https://${process.env.FB_SUBDOMAIN}.app.goo.gl/?link=${encodedDeepLink}&apn=${process.env.ANDROID_PKG_NAME}&ibi=${process.env.IOS_BUNDLE_ID}&isi=${process.env.APP_STORE_ID}&efr=1`;
+      }
 
       // Collect misc event data
       const event_data = await prisma.events.findUnique({

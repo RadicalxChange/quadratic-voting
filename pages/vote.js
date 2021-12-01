@@ -18,7 +18,9 @@ function Vote({ query }) {
   const [credits, setCredits] = useState(0); // Total available credits
   const [submitLoading, setSubmitLoading] = useState(false); // Component (button) submission loading state
   const [alreadyVoted, setAlreadyVoted] = useState(false); // has user voted already?
-  const [mudamosUrl, setMudamosUrl] = useState(null);
+  const [mudamosUrl, setMudamosUrl] = useState(null); // url for Mudamos signing
+  const [retrySign, setRetrySign] = useState(false); // is the user retrying the Mudamos signature process?
+  const [showBallot, setShowBallot] = useState(true); // optionally hide the ballot when signing
 
   /**
    * Calculates culmulative number of votes and available credits on load
@@ -124,6 +126,7 @@ function Vote({ query }) {
     });
 
     if (response.status === 200) {
+      setShowBallot(false);
       setMudamosUrl(response.data.url);
     } else {
       // Else, redirect to failure page
@@ -137,6 +140,12 @@ function Vote({ query }) {
   const exitVotingPage = () => {
     // Redirect to success page
     router.push(`success?event=${data.event_id}&user=${query.user}`);
+  };
+
+  const retrySigning = () => {
+    setShowBallot(false);
+    setMudamosUrl(data.mudamos_url)
+    setRetrySign(true);
   };
 
   /**
@@ -227,172 +236,193 @@ function Vote({ query }) {
 
             {/* Ballot */}
             {data ? (
-              <>
-              {/* Hide ballot if event hasn't started yet */}
-              {(moment() < moment(data.event_data.start_event_date)) ? (
-                <></>
+              alreadyVoted && !data.signature_exists && !retrySign ? (
+                <>
+                <h2 className="sign_message">Assinatura Mudamos necessária</h2>
+                <p>Parece que você já votou, mas não assinou a cédula com Mudamos. Para que seu voto seja contado, você deve assiná-lo usando o aplicativo Mudamos.</p>
+                <button name="input-element" onClick={retrySigning} className="submit__button">
+                   Assinar com o aplicativo Mudamos+
+                </button>
+                </>
               ) : (
                 <>
-                <div className="credits-container">
-                  <RemainingCredits
-                    creditBalance={data.event_data.credits_per_voter}
-                    creditsRemaining={credits}
-                  />
-                </div>
-
-                {/* Voteable options */}
-                <div className="event__options">
-                  <h2>Opções disponíveis para votação</h2>
-                  <div className="divider" />
-                  <div className="event__options_list">
-                    {data.vote_data.map((option, i) => {
-                      // Loop through each voteable option
-                      return (
-                        <div key={i} className="event__option_item">
-                          <div>
-                            <button className="title-container" onClick={() => toggleDescription(i)}>
-                              <label>Título</label>
-                              <h3>{option.title}</h3>
-                                <img id={`toggle-button-${i}`} src="/vectors/down_arrow.svg" alt="down arrow" />
-                            </button>
-                            {option.description !== "" ? (
-                              // If description exists, show description
-                              <div id={`description-container-${i}`}>
-                                <label>Descrição</label>
-                                <p className="event__option_item_desc">{option.description}</p>
-                              </div>
-                            ) : null}
-                            {option.url !== "" ? (
-                              // If URL exists, show URL
-                              <div id={`link-container-${i}`}>
-                                <label>Link</label>
-                                <a
-                                  href={option.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  {option.url}
-                                </a>
-                              </div>
-                            ) : null}
-                          </div>
-                          <ProposalBlocks
-                            cost={Math.pow(votes[i], 2)}
-                          />
-                          <div className="event__option_item_vote">
-                            <label>Votos</label>
-                            <input type="number" value={votes[i]} disabled />
-                            <div className="item__vote_buttons">
-                              {data ? (
-                                <>
-                                {(moment() > moment(data.event_data.end_event_date)) ? (
-                                  <></>
-                                ) : (
-                                  <>
-                                    {/* Toggleable button states based on remaining credits */}
-                                    {calculateShow(votes[i], false) ? (
-                                      <button name="input-element" onClick={() => makeVote(i, false)}>
-                                        -
-                                      </button>
-                                    ) : (
-                                      <button className="button__disabled" disabled>
-                                        -
-                                      </button>
-                                    )}
-                                    {calculateShow(votes[i], true) ? (
-                                      <button name="input-element" onClick={() => makeVote(i, true)}>+</button>
-                                    ) : (
-                                      <button className="button__disabled" disabled>
-                                        +
-                                      </button>
-                                    )}
-                                  </>
-                                )}
-                                </>
-                              ) : null}
-                            </div>
-                            {alreadyVoted ? (
-                              // If user has voted before, show historic votes
-                              <div className="existing__votes">
-                                <span>
-                                  Da última vez você alocou{" "}
-                                  <strong>{data.vote_data[i].votes} votos </strong>
-                                  para esta opção.
-                                </span>
-                              </div>
-                            ) : null}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {data ? (
+                {/* Hide ballot if event hasn't started yet */}
+                {(moment() < moment(data.event_data.start_event_date)) ? (
+                  <></>
+                ) : (
                   <>
-                  {(moment() > moment(data.event_data.end_event_date)) ? (
-                    <></>
-                  ) : (
+                  {showBallot ? (
                     <>
-                      {/* Submission button states */}
-                      {mudamosUrl ? (
-                        <>
-                        <div className="vote__info_heading">
-                          <h2 className="sign_message">Assinando o voto</h2>
-                          <p>Para que seu voto seja contado, você deve assiná-lo usando o aplicativo Mudamos. Siga as instruções abaixo para assinar. Não saia desta página até ver a mensagem de sucesso em seu aplicativo Mudamos, ou seu voto não será contado. Ao ver a mensagem de sucesso em seu aplicativo Mudamos, você pode clicar no botão na parte inferior desta tela para sair.</p>
+                    {!alreadyVoted ? (
+                      <div className="credits-container">
+                        <RemainingCredits
+                          creditBalance={data.event_data.credits_per_voter}
+                          creditsRemaining={credits}
+                        />
+                      </div>
+                    ) : null}
+
+                      {/* Voteable options */}
+                      <div className="event__options">
+                        <h2>Opções disponíveis para votação</h2>
+                        <div className="divider" />
+                        <div className="event__options_list">
+                          {data.vote_data.map((option, i) => {
+                            // Loop through each voteable option
+                            return (
+                              <div key={i} className="event__option_item">
+                                <div>
+                                  <button className="title-container" onClick={() => toggleDescription(i)}>
+                                    <label>Título</label>
+                                    <h3>{option.title}</h3>
+                                      <img id={`toggle-button-${i}`} src="/vectors/down_arrow.svg" alt="down arrow" />
+                                  </button>
+                                  {option.description !== "" ? (
+                                    // If description exists, show description
+                                    <div id={`description-container-${i}`}>
+                                      <label>Descrição</label>
+                                      <p className="event__option_item_desc">{option.description}</p>
+                                    </div>
+                                  ) : null}
+                                  {option.url !== "" ? (
+                                    // If URL exists, show URL
+                                    <div id={`link-container-${i}`}>
+                                      <label>Link</label>
+                                      <a
+                                        href={option.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        {option.url}
+                                      </a>
+                                    </div>
+                                  ) : null}
+                                </div>
+                                <ProposalBlocks
+                                  cost={Math.pow(votes[i], 2)}
+                                />
+                                <div className="event__option_item_vote">
+                                  <label>Votos</label>
+                                  <input type="number" value={votes[i]} disabled />
+                                  <div className="item__vote_buttons">
+                                    {data ? (
+                                      <>
+                                      {(moment() > moment(data.event_data.end_event_date)) ? (
+                                        <></>
+                                      ) : (
+                                        <>
+                                          {!alreadyVoted && !mudamosUrl ? (
+                                            <>
+                                              {/* Toggleable button states based on remaining credits */}
+                                              {calculateShow(votes[i], false) ? (
+                                                <button name="input-element" onClick={() => makeVote(i, false)}>
+                                                  -
+                                                </button>
+                                              ) : (
+                                                <button className="button__disabled" disabled>
+                                                  -
+                                                </button>
+                                              )}
+                                              {calculateShow(votes[i], true) ? (
+                                                <button name="input-element" onClick={() => makeVote(i, true)}>+</button>
+                                              ) : (
+                                                <button className="button__disabled" disabled>
+                                                  +
+                                                </button>
+                                              )}
+                                            </>
+                                          ) : null}
+                                        </>
+                                      )}
+                                      </>
+                                    ) : null}
+                                  </div>
+                                  {alreadyVoted ? (
+                                    // If user has voted before, show historic votes
+                                    <div className="existing__votes">
+                                      <span>
+                                        Da última vez você alocou{" "}
+                                        <strong>{data.vote_data[i].votes} votos </strong>
+                                        para esta opção.
+                                      </span>
+                                    </div>
+                                  ) : null}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                        <div className="qrcode">
-                          <h3>Usuários de computador</h3>
-                          <p>Abra o aplicativo Mudamos em seu dispositivo móvel e leia o QR code abaixo para assinar seu voto.</p>
-                          {window.innerWidth <= 768 ? (
-                            <QRCode
-                              value={mudamosUrl}
-                              size='100'
-                            />
-                          ) : (
-                            <QRCode
-                              value={mudamosUrl}
-                              size='256'
-                            />
-                          )}
-                          <h3>Usuários de celular</h3>
-                          <p>Clique para abrir o aplicativo Mudamos e assinar o voto.</p>
-                          <a
-                            href={mudamosUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <img className="mudamos_button" src="/mudamos_button.png" alt="Mudamos button" />
-                          </a>
-                        </div>
-                        <a>
-                        </a>
-                        <button name="input-element" onClick={exitVotingPage} className="submit__button">
-                          Eu assinei com sucesso usando o aplicativo Mudamos
-                        </button>
-                        </>
-                      ) : (
-                        <>
-                        {submitLoading ? (
-                          /* Check for existing button loading state */
-                          <button className="submit__button" disabled>
-                            <Loader />
-                          </button>
-                        ) : (
-                          /* Else, enable submission */
-                          <button name="input-element" onClick={submitVotes} className="submit__button">
-                             Assinar com o aplicativo Mudamos+
-                          </button>
-                        )}
-                        </>
-                      )}
+                      </div>
                     </>
+                  ) : (
+                    <button name="input-element" onClick={() => setShowBallot(true)} className="submit__button">
+                       Reveja seus votos
+                    </button>
                   )}
+                  {data ? (
+                    <>
+                    {(moment() > moment(data.event_data.end_event_date)) ? (
+                      <></>
+                    ) : (
+                      <>
+                        {/* Submission button states */}
+                        {mudamosUrl ? (
+                          <>
+                          <div className="vote__info_heading">
+                            <h2 className="sign_message">Assinando o voto</h2>
+                            <p>Para que seu voto seja contado, você deve assiná-lo usando o aplicativo Mudamos. Siga as instruções abaixo para assinar. Não saia desta página até ver a mensagem de sucesso em seu aplicativo Mudamos, ou seu voto não será contado.</p>
+                          </div>
+                          <div className="qrcode">
+                            <h3>Usuários de celular</h3>
+                            <p>Clique para abrir o aplicativo Mudamos e assinar o voto.</p>
+                            <a
+                              href={mudamosUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img className="mudamos_button" src="/mudamos_button.png" alt="Mudamos button" />
+                            </a>
+                            <h3>Usuários de computador</h3>
+                            <p>Abra o aplicativo Mudamos em seu dispositivo móvel e leia o QR code abaixo para assinar seu voto.</p>
+                            {window.innerWidth <= 768 ? (
+                              <QRCode
+                                value={mudamosUrl}
+                                size='100'
+                              />
+                            ) : (
+                              <QRCode
+                                value={mudamosUrl}
+                                size='256'
+                              />
+                            )}
+                          </div>
+                          <div className="vote__info_heading">
+                            <p>Ao ver a mensagem de sucesso em seu aplicativo Mudamos, você concluiu o processo! O administrador do evento enviará os resultados a você quando a votação for concluída.</p>
+                          </div>
+                          </>
+                        ) : (
+                          <>
+                          {submitLoading ? (
+                            /* Check for existing button loading state */
+                            <button className="submit__button" disabled>
+                              <Loader />
+                            </button>
+                          ) : (
+                            /* Else, enable submission */
+                            <button name="input-element" onClick={submitVotes} className="submit__button">
+                               Assinar com o aplicativo Mudamos+
+                            </button>
+                          )}
+                          </>
+                        )}
+                      </>
+                    )}
+                    </>
+                  ) : null}
                   </>
-                ) : null}
+                )}
                 </>
-              )}
-              </>
+              )
             ) : null}
           </div>
           </>
@@ -710,7 +740,7 @@ function Vote({ query }) {
         }
 
         .qrcode {
-          margin-top: 50px;
+          margin: 50px auto;
         }
 
         .qrcode > h3,
