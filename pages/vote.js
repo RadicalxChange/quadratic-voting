@@ -38,6 +38,7 @@ function Vote({ query }) {
     setCredits(rData.event_data.credits_per_voter - creditsSpent);
     if (creditsSpent > 0) {
       setAlreadyVoted(true);
+      setShowBallot(false);
     }
   };
 
@@ -143,7 +144,6 @@ function Vote({ query }) {
   };
 
   const retrySigning = () => {
-    setShowBallot(false);
     setMudamosUrl(data.mudamos_url)
     setRetrySign(true);
   };
@@ -237,17 +237,19 @@ function Vote({ query }) {
             {/* Ballot */}
             {data ? (
               alreadyVoted && !data.signature_exists && !retrySign ? (
-                <>
-                <h2 className="sign_message">Assinatura Mudamos necessária</h2>
-                <p>Parece que você já votou, mas não assinou a cédula com Mudamos. Para que seu voto seja contado, você deve assiná-lo usando o aplicativo Mudamos.</p>
-                <button name="input-element" onClick={retrySigning} className="submit__button">
-                   Assinar com o aplicativo Mudamos+
-                </button>
-                </>
+                moment() < moment(data.event_data.end_event_date) ? (
+                  <>
+                  <h2 className="sign_message">Assinatura Mudamos necessária</h2>
+                  <p>Parece que você já votou, mas não assinou a cédula com Mudamos. Para que seu voto seja contado, você deve assiná-lo usando o aplicativo Mudamos.</p>
+                  <button name="input-element" onClick={retrySigning} className="submit__button">
+                     Assinar com o aplicativo Mudamos+
+                  </button>
+                  </>
+                ) : null
               ) : (
                 <>
                 {/* Hide ballot if event hasn't started yet */}
-                {(moment() < moment(data.event_data.start_event_date)) ? (
+                {(moment() < moment(data.event_data.start_event_date)) || (moment(data.event_data.end_event_date) < moment() && !alreadyVoted) ? (
                   <></>
                 ) : (
                   <>
@@ -408,15 +410,24 @@ function Vote({ query }) {
                               <Loader />
                             </button>
                           ) : (
-                            /* Else, enable submission */
-                            <button name="input-element" onClick={submitVotes} className="submit__button">
-                               Assinar com o aplicativo Mudamos+
-                            </button>
+                            alreadyVoted && data.signature_exists ? (
+                              null
+                            ) : (
+                              /* Else, enable submission */
+                              <button name="input-element" onClick={submitVotes} className="submit__button">
+                                 Assinar com o aplicativo Mudamos+
+                              </button>
+                            )
                           )}
                           </>
                         )}
                       </>
                     )}
+                    {alreadyVoted && data.signature_exists ? (
+                      <div id="success-message" className="vote__info_heading">
+                        <p>Você assinou e enviou seus votos com sucesso! O administrador do evento enviará os resultados a você quando a votação for concluída.</p>
+                      </div>
+                    ) : null}
                     </>
                   ) : null}
                   </>
@@ -754,6 +765,10 @@ function Vote({ query }) {
 
         .mudamos_button:hover {
           opacity: 0.8;
+        }
+
+        #success-message {
+          margin-top: 4rem;
         }
       `}</style>
     </Layout>
