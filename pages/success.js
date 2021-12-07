@@ -16,12 +16,12 @@ function Success({ query }) {
 
       {/* Success dialog */}
       <div className="success">
-        <h1>Seus votos foram computados!</h1>
-        <p>Você enviou seus votos com sucesso.</p>
+        <h1>Your vote is in!</h1>
+        <p>You have successfully placed your votes.</p>
 
         {/* Redirect to event dashboard */}
         <Link href={`/event?id=${query.id}`}>
-          <a>Ver painel do evento</a>
+          <a>See event dashboard</a>
         </Link>
       </div>
 

@@ -8,25 +8,25 @@ function Failure({ query }) {
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Votação",
+          title: "Voting",
           link: `/vote?id=${query.id}`,
         }}
-        title="Falha ao votar"
+        title="Vote Failure"
       />
 
       {/* Failure dialog */}
       <div className="failure">
-        <h1> Ixi! Seu voto falhou. </h1>
-        <p>Isso não deveria acontecer - tente novamente mais tarde!</p>
+        <h1>Oops! Your vote failed.</h1>
+        <p>This shouldn't happen—please try again later!</p>
 
         {/* Return to voting */}
         <Link href={`/vote?id=${query.id}`}>
-          <a>Tente votar novamente</a>
+          <a>Try voting again</a>
         </Link>
 
         {/* Redirect to event dashboard */}
         <Link href={`/event?id=${query.id}`}>
-          <a>Veja o painel do evento</a>
+          <a>See event dashboard</a>
         </Link>
       </div>
 

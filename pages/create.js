@@ -148,39 +148,42 @@ export default function Create() {
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Início",
+          title: "Home",
           link: "/",
         }}
-        title="Criar evento"
+        title="Create Event"
       />
 
       {/* Create page */}
       <div className="create">
         {/* Create page heading */}
         <div className="create__content">
-          <h1>Crie um novo evento</h1>
-          <p>Para criar um evento, basta preencher as configurações do evento, adicionar suas opções, e nós geraremos links rápidos para você compartilhar com seu público.</p>
+          <h1>Create a new event</h1>
+          <p>
+            To create an event, simply fill out the event settings, add your
+            options, and we will generate you quicklinks that you can share with
+            your audience.
+          </p>
         </div>
 
         {/* Global settings */}
         <div className="create__settings">
           {/* Global settings header */}
-          <h2>Configurações globais</h2>
+          <h2>Global Settings</h2>
           <p>
-            Essas configurações são usadas para configurar seu evento.
-            Você pode adicionar um título e uma descrição do evento,
-            selecionar o número de votantes, quantos créditos de voto
-            cada um receberá e uma data de início e término para a votação.
+            These settings are used to setup your event. You can add an event
+            title and description, select the number of voters, how many vote
+            credits they'll each receive, and a start and end date for voting.
           </p>
 
           {/* Event title selection */}
           <div className="create__settings_section">
-            <label htmlFor="event_title">Título do evento</label>
-            <p>Qual é o nome do seu evento?</p>
+            <label htmlFor="event_title">Event title</label>
+            <p>What is your event called?</p>
             <input
               type="text"
               id="event_title"
-              placeholder="Nome do meu evento"
+              placeholder="My Event Title"
               value={globalSettings.event_title}
               onChange={(e) => setEventData("event_title", e.target.value)}
             />
@@ -188,12 +191,12 @@ export default function Create() {
 
           {/* Event description selection */}
           <div className="create__settings_section">
-            <label htmlFor="event_description">Descrição do evento</label>
-            <p>Descreva seu evento em menos de 240 caracteres:</p>
+            <label htmlFor="event_description">Event description</label>
+            <p>Describe your event in under 240 characters:</p>
             <input
               type="text"
               id="event_description"
-              placeholder="Descrição do meu evento"
+              placeholder="My Event Description"
               value={globalSettings.event_description}
               maxLength="240"
               onChange={(e) =>
@@ -204,8 +207,8 @@ export default function Create() {
 
           {/* Number of voters selection */}
           <div className="create__settings_section">
-            <label htmlFor="num_voters">Número de eleitores</label>
-            <p> Quantos links de votação você gostaria de gerar? (Máx: 250) </p>
+            <label htmlFor="num_voters">Number of voters</label>
+            <p>How many voting links would you like to generate? (Max: 250)</p>
             <input
               type="number"
               id="num_voters"
@@ -216,8 +219,8 @@ export default function Create() {
 
           {/* Number of credits per voter selection */}
           <div className="create__settings_section">
-            <label htmlFor="credits_per_voter">Créditos de voto por eleitor</label>
-            <p> Quantos votos cada eleitor receberá? </p>
+            <label htmlFor="credits_per_voter">Vote credits per voter</label>
+            <p>How many votes will each voter receive?</p>
             <input
               type="number"
               max="100"
@@ -231,24 +234,22 @@ export default function Create() {
 
           {/* Event start date selection */}
           <div className="create__settings_section">
-            <label>Data de início do evento</label>
-            <p>Quando você gostaria de começar a votação?</p>
+            <label>Event start date</label>
+            <p>When would you like to begin polling?</p>
             <Datetime
               className="create__settings_datetime"
               value={globalSettings.start_event_date}
-              dateFormat="DD/MM/YYYY"
               onChange={(value) => setEventData("start_event_date", value)}
             />
           </div>
 
           {/* Event end date selection */}
           <div className="create__settings_section">
-            <label> Data de término do evento </label>
-            <p>Quando você gostaria de terminar a votação?</p>
+            <label>Event end date</label>
+            <p>When would you like to end polling?</p>
             <Datetime
               className="create__settings_datetime"
               value={globalSettings.end_event_date}
-              dateFormat="DD/MM/YYYY"
               onChange={(value) => setEventData("end_event_date", value)}
             />
           </div>
@@ -257,10 +258,11 @@ export default function Create() {
         {/* Subject settings */}
         <div className="create__settings">
           {/* Subject settings heading */}
-          <h2>Opções</h2>
+          <h2>Options</h2>
           <p>
-           Essas configurações permitem adicionar opções às quais os eleitores podem delegar seus créditos de voto.
-           Você pode escolher adicionar um título de opção, descrição e link.
+            These settings enable you to add options that voters can delegate
+            their voting credits to. You can choose to add an option title,
+            description, and link.
           </p>
 
           {/* Listing of all subjects via accordion*/}
@@ -282,7 +284,7 @@ export default function Create() {
                         {subject.description !== "" ? (
                           // If subject has a description
                           <div className="accordion__value">
-                            <label>Descrição</label>
+                            <label>Description</label>
                             <textarea value={subject.description} disabled />
                           </div>
                         ) : null}
@@ -301,10 +303,10 @@ export default function Create() {
                         ) : null}
                         <div className="accordion__buttons">
                           <button onClick={() => editSubject(i)}>
-                            Editar opção
+                            Edit Option
                           </button>
                           <button onClick={() => deleteSubject(i)}>
-                            Deletar opção
+                            Delete Option
                           </button>
                         </div>
                       </AccordionItemPanel>
@@ -314,21 +316,21 @@ export default function Create() {
               </Accordion>
             ) : (
               // Else, if no subjects in subjects array
-              <span className="empty__subjects">Sem opções adicionadas</span>
+              <span className="empty__subjects">No options added</span>
             )}
           </div>
 
           {/* Form to add subjects */}
-          <h3>Adicionar opções</h3>
+          <h3>Add Options</h3>
           <div className="create__settings_section">
             {/* Subject addition form */}
             <div className="create__subject_form">
               {/* Add subject tile */}
               <div>
-                <label>Título</label>
+                <label>Title</label>
                 <input
                   type="text"
-                  placeholder="Título da opção"
+                  placeholder="My Option Title"
                   value={currentSubject.title}
                   onChange={(e) => setSubjectData("title", e.target.value)}
                 />
@@ -336,9 +338,9 @@ export default function Create() {
 
               {/* Add subject description */}
               <div>
-                <label>Descrição</label>
+                <label>Description</label>
                 <textarea
-                  placeholder="Descrição da opção"
+                  placeholder="Description of the option"
                   value={currentSubject.description}
                   onChange={(e) =>
                     setSubjectData("description", e.target.value)
@@ -351,7 +353,7 @@ export default function Create() {
                 <label>Link</label>
                 <input
                   type="text"
-                  placeholder="www.com.br"
+                  placeholder="www.council.org/vote_info/1"
                   value={currentSubject.url}
                   onChange={(e) => setSubjectData("url", e.target.value)}
                 />
@@ -359,11 +361,11 @@ export default function Create() {
 
               {currentSubject.title !== "" ? (
                 // If form has title filled, allow submission
-                <button onClick={submitSubject}>Adicionar opção</button>
+                <button onClick={submitSubject}>Add Option</button>
               ) : (
                 // Else, show disabled state
                 <button className="button__disabled" disabled>
-                  Adicionar opção
+                  Enter Title
                 </button>
               )}
             </div>
@@ -375,12 +377,12 @@ export default function Create() {
           {subjects.length > 1 ? (
             // If subjects have been provided, enable event creation
             <button className="create__event_button" onClick={submitEvent}>
-              {loading ? <Loader /> : "Criar evento"}
+              {loading ? <Loader /> : "Create Event"}
             </button>
           ) : (
             // Else, prompt to add subject via disabled state
             <button className="create__event_disabled" disabled>
-              Adicione ao menos duas opções
+              Add at least two options
             </button>
           )}
         </div>

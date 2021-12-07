@@ -83,10 +83,10 @@ function Place({ query }) {
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Início",
+          title: "Home",
           link: "/",
         }}
-        title="Distribua seus votos"
+        title="Place Votes"
       />
 
       {/* Place vote block */}
@@ -94,9 +94,9 @@ function Place({ query }) {
         {!error ? (
           // If no error, show enter code block
           <div className="place__votes">
-           <h2> Digite seu código de votação </h2>
+            <h2>Enter your voting code</h2>
             <p>
-              Deve ser um código longo com vários caracteres e travessões.
+              This should be a long code with multiple characters and dashes.
             </p>
             <input
               value={code}
@@ -114,14 +114,14 @@ function Place({ query }) {
         ) : (
           // If there is an error, show invalid voting code block
           <div className="place__votes">
-            <h2>Código de votação inválido</h2>
-            <p>Ups! Não parece que esse código de votação não existe.</p>
+            <h2>Invalid voting code</h2>
+            <p>Oops! It doesn't look like that voting code exists.</p>
             <button className="retry__button" onClick={tryAgain}>
-              Tente novamente
+              Try Again
             </button>
             <span>
-              Redirecionamento automático em{" "}
-              <Countdown date={Date.now() + 5000} renderer={renderer} /> segundos
+              Automatic redirect in{" "}
+              <Countdown date={Date.now() + 5000} renderer={renderer} /> seconds
             </span>
           </div>
         )}

@@ -163,10 +163,10 @@ function Vote({ query }) {
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Início",
+          title: "Home",
           link: "/",
         }}
-        title="Distribua seus votos"
+        title="Place Votes"
       />
 
       <div className="vote">
@@ -176,11 +176,11 @@ function Vote({ query }) {
           <div className="vote__info">
             {/* General voting header */}
             <div className="vote__info_heading">
-              <h1>Distribua seus votos</h1>
+              <h1>Place your votes</h1>
               <p>
-                Você pode usar até{" "}
-                <strong>{data.credits_per_voter} créditos</strong> para
-                votar durante este evento.
+                You can use up to{" "}
+                <strong>{data.credits_per_voter} credits</strong> to
+                vote during this event.
               </p>
             </div>
 
@@ -193,7 +193,7 @@ function Vote({ query }) {
                   <>
                   {(moment() > moment(data.end_event_date)) ? (
                     <>
-                    <h3> Este evento foi concluído. Clique abaixo para ver os resultados! </h3>
+                    <h3>This event has concluded. Click below to to see the results!</h3>
                     {/* Redirect to event dashboard */}
                     <Link href={`/event?id=${data.event_id}`}>
                       <a>See event dashboard</a>
@@ -202,9 +202,9 @@ function Vote({ query }) {
                   ) : (
                     <>
                     {(moment() < moment(data.start_event_date)) ? (
-                      <h3>Este evento começa em {moment(data.start_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
+                      <h3>This event begins {moment(data.start_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
                     ) : (
-                      <h3>Este evento termina em {moment(data.end_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
+                      <h3>This event closes {moment(data.end_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
                     )}
                     </>
                   )}
@@ -230,7 +230,7 @@ function Vote({ query }) {
 
                 {/* Voteable options */}
                 <div className="event__options">
-                  <h2>Opções disponíveis para votação</h2>
+                  <h2>Voteable Options</h2>
                   <div className="divider" />
                   <div className="event__options_list">
                     {data.event_data.map((option, i) => {
@@ -239,14 +239,14 @@ function Vote({ query }) {
                         <div key={i} className="event__option_item">
                           <div>
                             <button className="title-container" onClick={() => toggleDescription(i)}>
-                              <label>Título</label>
+                              <label>Title</label>
                               <h3>{option.title}</h3>
                                 <img id={`toggle-button-${i}`} src="/vectors/down_arrow.svg" alt="down arrow" />
                             </button>
                             {option.description !== "" ? (
                               // If description exists, show description
                               <div id={`description-container-${i}`}>
-                                <label>Descrição</label>
+                                <label>Description</label>
                                 <p className="event__option_item_desc">{option.description}</p>
                               </div>
                             ) : null}
@@ -268,7 +268,7 @@ function Vote({ query }) {
                             cost={Math.pow(votes[i], 2)}
                           />
                           <div className="event__option_item_vote">
-                            <label>Votos</label>
+                            <label>Votes</label>
                             <input type="number" value={votes[i]} disabled />
                             <div className="item__vote_buttons">
                               {data ? (
@@ -303,9 +303,9 @@ function Vote({ query }) {
                               // If user has voted before, show historic votes
                               <div className="existing__votes">
                                 <span>
-                                  Da última vez você alocou{" "}
-                                  <strong>{data.vote_data[i].votes} votos </strong>
-                                  para esta opção.
+                                  You last allocated{" "}
+                                  <strong>{data.vote_data[i].votes} votes </strong>
+                                  to this option.
                                 </span>
                               </div>
                             ) : null}
@@ -331,7 +331,7 @@ function Vote({ query }) {
                         ) : (
                           // Else, enable submission
                           <button name="input-element" onClick={submitVotes} className="submit__button">
-                            Enviar votos
+                            Submit Votes
                           </button>
                         )}
                     </>
@@ -347,8 +347,8 @@ function Vote({ query }) {
         ) : (
           // If loading, show global loading state
           <div className="vote__loading">
-            <h1>Carregando...</h1>
-            <p>Por favor, nos dê um momento para recuperar seu perfil de voto.</p>
+            <h1>Loading...</h1>
+            <p>Please give us a moment to retrieve your voting profile.</p>
           </div>
         )}
       </div>

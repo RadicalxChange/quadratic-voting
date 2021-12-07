@@ -6,7 +6,7 @@ export default function Navigation(props) {
     <div className="navigation">
       {/* Navigation title and history */}
       <Link href={props.history.link}>
-        <a>⟵ Voltar ao {props.history.title}</a>
+        <a>⟵ Return to {props.history.title}</a>
       </Link>
       <span>{props.title}</span>
 

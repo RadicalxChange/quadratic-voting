@@ -215,12 +215,12 @@ function generateChart(subjects, linearWeights, weights) {
     datasets: [
       {
         backgroundColor: "#000",
-        label: "Votos",
+        label: "Votes",
         data,
       },
       {
         backgroundColor: "#edff38",
-        label: "% Créditos",
+        label: "% Credits",
         data: linearData,
       },
     ],
