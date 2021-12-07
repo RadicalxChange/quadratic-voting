@@ -220,7 +220,7 @@ function Event({ query }) {
           <label>Event URL</label>
           <p>Statistics dashboard URL</p>
           <input
-            value={`https://quadraticvote.radicalxchange.org/event?id=${query.id}`}
+            value={`https://demo.quadraticvote.radicalxchange.org/event?id=${query.id}`}
             readOnly
           />
         </div>
@@ -235,7 +235,7 @@ function Event({ query }) {
             <label className="private__label">Private Admin URL</label>
             <p>Save this URL to manage event and make changes</p>
             <input
-              value={`https://quadraticvote.radicalxchange.org/event?id=${query.id}&secret=${query.secret}`}
+              value={`https://demo.quadraticvote.radicalxchange.org/event?id=${query.id}&secret=${query.secret}`}
               readOnly
             />
           </div>
@@ -249,7 +249,7 @@ function Event({ query }) {
             <label className="private__label">Public Voting Link</label>
             <p>For sharing with voters</p>
             <input
-              value={`https://quadraticvote.radicalxchange.org/vote?id=${query.id}`}
+              value={`https://demo.quadraticvote.radicalxchange.org/vote?id=${query.id}`}
               readOnly
             />
           </div>
