@@ -33,7 +33,7 @@ RUN adduser -S nextjs -u 1001
 RUN chown -R nextjs:nodejs /app/.next
 USER nextjs
 
-EXPOSE 2000
+EXPOSE 2002
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
