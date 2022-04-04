@@ -19,13 +19,13 @@ Important files:
 1. [prisma/schema.sql](https://github.com/RadicalxChange/quadratic-voting/blob/master/prisma/schema.sql) contains the SQL schema for the application.
 2. [pages/api/events/details.js](https://github.com/RadicalxChange/quadratic-voting/blob/master/pages/api/events/details.js) contains the QV calculation logic.
 
-## Run locally / redeploy
+## Run locally
 
 1. Setup your PostgreSQL database
 
 ```
 # Import schema
-pg:psql -f prisma/schema.sql
+psql -f prisma/schema.sql
 ```
 
 2. Setup environment variables. Copy [prisma/.env.sample](https://github.com/RadicalxChange/quadratic-voting/blob/master/prisma/.env.sample) to `prisma/.env` and replace `DATABASE_URL` with your PostgreSQL DB url.
@@ -52,4 +52,4 @@ docker run -d --env DATABASE_URL=postgresql://__USER__:__PASSWORD__@__HOST__/__D
 
 ## License
 
-[GNU Affero General Public License v3.0](https://github.com/RadicalxChange/quadratic-voting/blob/master/LICENSE)
+[CC BY-NC 2.0](https://github.com/RadicalxChange/quadratic-voting/blob/master/LICENSE)

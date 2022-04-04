@@ -27,7 +27,7 @@
     "react-countdown": "^2.2.2",
     "react-datetime": "^3.0.4",
     "react-dom": "16.13.1",
-    "react-spinners": "^0.9.0",
+    "react-spinners": "^0.11.0",
     "swr": "^0.3.5",
     "unfetch": "^4.2.0",
     "xlsx": "^0.16.9"

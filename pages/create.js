@@ -19,7 +19,7 @@ const defaultGlobalSettings = {
   event_title: "",
   event_description: "",
   num_voters: 10,
-  credits_per_voter: 100,
+  credits_per_voter: 99,
   start_event_date: moment(),
   end_event_date: moment().add(1, "days"),
 };

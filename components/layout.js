@@ -108,16 +108,15 @@ export default function Layout(props) {
           property="twitter:description"
           content="An easy tool to host a quadratic vote"
         />
-{/*
         {props.event ? null : (
           <>
             <meta
               property="og:image"
-              content="https://quadraticvote.co/meta.png"
+              content="/open-graph-logo.png"
             />
             <meta
               property="twitter:image"
-              content="https://quadraticvote.co/meta.png"
+              content="/open-graph-logo.png"
             />
           </>
         )}
@@ -126,7 +125,6 @@ export default function Layout(props) {
           href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
           rel="stylesheet"
         />
-*/}
       </Head>
 
       {/* Page global header */}

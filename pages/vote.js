@@ -6,6 +6,8 @@ import Layout from "components/layout"; // Layout wrapper
 import { useRouter } from "next/router"; // Router for URL params
 import { useState, useEffect } from "react"; // State management
 import Navigation from "components/navigation"; // Navigation component
+import RemainingCredits from "components/credits";
+import ProposalBlocks from "components/proposalBlocks";
 
 function Vote({ query }) {
   const router = useRouter(); // Hook into router
@@ -90,8 +92,9 @@ function Vote({ query }) {
    * @param {boolean} increment -/+ button toggle
    */
   const calculateShow = (current, increment) => {
+    const change = increment ? 1 : -1;
     const canOccur =
-      Math.abs(Math.pow(current, 2) - Math.pow(current + 1, 2)) <= credits;
+      Math.abs(Math.pow(current, 2) - Math.pow(current + change, 2)) <= credits;
     // Check for absolute squared value of current - absolute squared valueof current + 1 <= credits
 
     // If current votes === 0, and available credits === 0
@@ -145,7 +148,6 @@ function Vote({ query }) {
     const description = document.getElementById("description-container-" + key);
     const link = document.getElementById("link-container-" + key);
     const toggleButton = document.getElementById("toggle-button-" + key);
-    console.log(toggleButton)
     if (toggleButton.alt === "down arrow") {
       toggleButton.src = "/vectors/up_arrow.svg";
       toggleButton.alt = "up arrow";
@@ -183,6 +185,7 @@ function Vote({ query }) {
       <div className="vote">
         {/* Loading state check */}
         {!loading ? (
+          <>
           <div className="vote__info">
             {/* General voting header */}
             <div className="vote__info_heading">
@@ -269,6 +272,12 @@ function Vote({ query }) {
                   </div>
                 </div>
                 */}
+                <div className="button-container">
+                  <RemainingCredits
+                    creditBalance={data.event_data.credits_per_voter}
+                    creditsRemaining={credits}
+                  />
+                </div>
 
                 {/* Voteable options */}
                 <div className="event__options">
@@ -306,19 +315,11 @@ function Vote({ query }) {
                               </div>
                             ) : null}
                           </div>
+                          <ProposalBlocks
+                            cost={Math.pow(votes[i], 2)}
+                          />
                           <div className="event__option_item_vote">
                             <label>Clicks</label>
-                            {data ? (
-                              <>
-                              {(moment() > moment(data.event_data.end_event_date)) ? (
-                                <></>
-                              ) : (
-                                <span className="item__vote_credits">
-                                  Remaining credits: {credits}
-                                </span>
-                              )}
-                              </>
-                            ) : null}
                             <input type="number" value={votes[i]} disabled />
                             <div className="item__vote_buttons">
                               {data ? (
@@ -404,6 +405,7 @@ function Vote({ query }) {
               </>
             ) : null}
           </div>
+          </>
         ) : (
           // If loading, show global loading state
           <div className="vote__loading">
@@ -426,6 +428,50 @@ function Vote({ query }) {
           padding: 0px 20px;
           display: inline-block;
           position: relative;
+        }
+
+        .button-container {
+          padding: 1vw 2vw;
+          position: -webkit-sticky;
+          position: sticky;
+          top: 0;
+          left: 0;
+          z-index: 1;
+          background: white;
+        }
+
+        @media only screen and (min-width: 768px) {
+          .vote {
+            display: grid;
+            grid-template-columns: auto 20vw;
+          }
+
+          .vote__info {
+            grid-column: 1;
+            margin: 50px 0 50px auto;
+          }
+
+          .button-container {
+            grid-column: 2;
+            position: fixed;
+            background: none;
+            padding: auto auto;
+            top: auto;
+            right: 0;
+            bottom: 5vh;
+            left: auto;
+            z-index: auto;
+          }
+        }
+
+        @media only screen and (min-width: 1150px) {
+          .vote {
+            display: block;
+          }
+
+          .vote__info {
+            margin: 50px auto;
+          }
         }
 
         .event__summary {
@@ -583,7 +629,7 @@ function Vote({ query }) {
         }
 
         .event__option_item_desc {
-          white-space: pre;
+          white-space: pre-wrap;
         }
 
         .event__option_item_vote {
