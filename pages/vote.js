@@ -149,21 +149,21 @@ function Vote({ query }) {
     const link = document.getElementById("link-container-" + key);
     const toggleButton = document.getElementById("toggle-button-" + key);
     if (toggleButton.alt === "down arrow") {
-      toggleButton.src = "/vectors/up_arrow.svg";
-      toggleButton.alt = "up arrow";
+      toggleButton.src = "/vectors/side_arrow.svg";
+      toggleButton.alt = "side arrow";
     } else {
       toggleButton.src = "/vectors/down_arrow.svg";
       toggleButton.alt = "down arrow";
     }
     if (description) {
-      if (description.style.display === "none") {
+      if (description.style.display !== "block") {
         description.style.display = "block";
       } else {
         description.style.display = "none";
       }
     }
     if (link) {
-      if (link.style.display === "none") {
+      if (link.style.display !== "block") {
         link.style.display = "block";
       } else {
         link.style.display = "none";
@@ -201,13 +201,15 @@ function Vote({ query }) {
             <div className="event__details">
               <div className="vote__loading event__summary">
                 <h2>{data.event_data.event_title}</h2>
-                <p>Welcome to the 2021 Appropriations Prioritization Poll. Each member has 100 credits to spend on one or more bills or Long Bill amendments. The more credits you spend on a single item, the more it is worth to you.  This is a way to convey which bills receive more impassioned support. The outcome of this poll will be used to prioritize bills through the Appropriations committee, spending down the $50 million General Fund legislative set aside, as well as utilized by the Long Bill conference committee. For purposes of the poll, the General Fund, cash fund, and federal fund details are included to provide a clear picture of the fiscal impact of the bill, however, members should pay particular attention to the General Fund cost. To see the full list of House and Senate bills as well as Long Bill amendments included in this poll, please visit the{" "}
-                <a
-                  href="https://docs.google.com/spreadsheets/d/1WrTjN8OFKnYNIJvEjcuCi86kEUO0Cah-r-3_PC-db14/edit#gid=861560760"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >Approps Prioritization Data
-                </a> spreadsheet.</p>
+                <div id="event__long_description">
+                  <p>Welcome to the 2022 Appropriations Prioritization Poll.</p>
+
+                  <p>Each member has 100 credits that they can use to place “support clicks” on bills or Long Bill amendments. “Support clicks” are a way to convey which bills have more impassioned support.</p>
+
+                  <p>Placing one support click on a bill costs one credit. Placing two support clicks costs four credits. Placing three support clicks costs nine credits. This means you may place multiple support clicks on a single bill, but doing so means you quickly deplete your budget of credits to show support for other bills. The outcome of this poll will be used to prioritize bills through the Appropriations committee, spending down the General Fund legislative set aside, as well as utilized by the Long Bill conference committee.</p>
+
+                  <p>Click the dropdown button to the right of each bill title to display the full information. To see the full list, see the [link].</p>
+                </div>
                 {data ? (
                   <>
                   {(moment() > moment(data.event_data.end_event_date)) ? (
@@ -288,18 +290,18 @@ function Vote({ query }) {
                             <button className="title-container" onClick={() => toggleDescription(i)}>
                               <label>Title</label>
                               <h3>{option.title}</h3>
-                                <img id={`toggle-button-${i}`} src="/vectors/down_arrow.svg" alt="down arrow" />
+                                <img id={`toggle-button-${i}`} className="toggle-button" src="/vectors/side_arrow.svg" alt="side arrow" />
                             </button>
                             {option.description !== "" ? (
                               // If description exists, show description
-                              <div id={`description-container-${i}`}>
+                              <div id={`description-container-${i}`} className="description-container">
                                 <label>Description</label>
                                 <p className="event__option_item_desc">{option.description}</p>
                               </div>
                             ) : null}
                             {option.url !== "" ? (
                               // If URL exists, show URL
-                              <div id={`link-container-${i}`}>
+                              <div id={`link-container-${i}`} className="link-container">
                                 <label>Link</label>
                                 <a
                                   href={option.url}
@@ -594,6 +596,16 @@ function Vote({ query }) {
         .title-container > label {
           text-transform: uppercase;
         }
+        .toggle-button {
+          height: 14px;
+          width: 14px;
+        }
+        .description-container {
+          display: none;
+        }
+        .link-container {
+          display: none;
+        }
 
         .event__option_item > div > div:nth-child(1) {
           margin-top: 5px;
@@ -711,6 +723,16 @@ function Vote({ query }) {
           border-radius: 5px;
           text-align: center;
           border: 1px solid #fada5e;
+        }
+
+        #event__long_description {
+          text-align: left;
+          font-size: 18px;
+          line-height: 150%;
+          color: #80806b;
+        }
+        #event__long_description > p {
+          margin-bottom: 20px;
         }
       `}</style>
     </Layout>
