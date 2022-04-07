@@ -317,7 +317,7 @@ function Vote({ query }) {
                             cost={Math.pow(votes[i], 2)}
                           />
                           <div className="event__option_item_vote">
-                            <label>Clicks</label>
+                            <label>Support Clicks</label>
                             <input type="number" value={votes[i]} disabled />
                             <div className="item__vote_buttons">
                               {data ? (
