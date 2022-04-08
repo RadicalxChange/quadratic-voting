@@ -208,7 +208,7 @@ function Vote({ query }) {
 
                   <p>Placing one support click on a bill costs one credit. Placing two support clicks costs four credits. Placing three support clicks costs nine credits. This means you may place multiple support clicks on a single bill, but doing so means you quickly deplete your budget of credits to show support for other bills. The outcome of this poll will be used to prioritize bills through the Appropriations committee, spending down the General Fund legislative set aside, as well as utilized by the Long Bill conference committee.</p>
 
-                  <p>Click the dropdown button to the right of each bill title to display the full information. To see the full list, see the [link].</p>
+                  <p>Click the dropdown button to the right of each bill title to display the full information.</p>
                 </div>
                 {data ? (
                   <>
