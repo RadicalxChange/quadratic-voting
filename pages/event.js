@@ -68,14 +68,12 @@ function Event({ query }) {
     const fileExtension = '.xlsx';
     const options = data.chart.labels
     const effectiveVotes = data.chart.datasets[0].data
-    const percentCredits = data.chart.datasets[1].data
     var rows = [];
     var i;
     for (i = 0; i < options.length; i++) {
       var option = {
         title: options[i],
-        effective_votes: effectiveVotes[i],
-        percent_credits: percentCredits[i],
+        support_clicks: effectiveVotes[i],
       }
       rows.push(option);
     }

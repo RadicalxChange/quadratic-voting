@@ -234,14 +234,9 @@ function generateChart(subjects, linearWeights, weights) {
     labels,
     datasets: [
       {
-        backgroundColor: "#002868",
-        label: "Clicks",
+        backgroundColor: "#000",
+        label: "Support Clicks",
         data,
-      },
-      {
-        backgroundColor: "#bf0a30",
-        label: "% Credits",
-        data: linearData,
       },
     ],
   };
