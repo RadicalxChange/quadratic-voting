@@ -481,6 +481,7 @@ function Vote({ query }) {
           margin: 20px 0px !important;
           padding-left: 20px !important;
           padding-right: 20px !important;
+          box-sizing: border-box;
         }
 
         .event__summary > h2 {
