@@ -313,9 +313,11 @@ function Vote({ query }) {
                               </div>
                             ) : null}
                           </div>
-                          <ProposalBlocks
-                            cost={Math.pow(votes[i], 2)}
-                          />
+                          {votes[i] !== 0 ? (
+                            <ProposalBlocks
+                              cost={Math.pow(votes[i], 2)}
+                            />
+                          ) : null}
                           <div className="event__option_item_vote">
                             <label>Support Clicks</label>
                             <input type="number" value={votes[i]} disabled />
