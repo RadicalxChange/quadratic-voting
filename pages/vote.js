@@ -477,6 +477,9 @@ function Vote({ query }) {
           box-shadow: 0 0 35px rgba(127, 150, 174, 0.125);
           background-color: #fff;
           margin: 20px 0px !important;
+          padding-left: 20px !important;
+          padding-right: 20px !important;
+          box-sizing: border-box;
         }
 
         .event__summary > h2 {
