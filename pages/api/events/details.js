@@ -238,6 +238,11 @@ function generateChart(subjects, linearWeights, weights) {
         label: "Support Clicks",
         data,
       },
+      {
+        backgroundColor: "#edff38",
+        label: "% Credits",
+        data: linearData,
+      },
     ],
   };
 }
