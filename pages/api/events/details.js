@@ -239,7 +239,7 @@ function generateChart(subjects, linearWeights, weights) {
         data,
       },
       {
-        backgroundColor: "#edff38",
+        backgroundColor: "#bf0a30",
         label: "% Credits",
         data: linearData,
       },
