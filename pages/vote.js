@@ -497,6 +497,9 @@ function Vote({ query }) {
             text-decoration: none;
             color: black;
           }
+          .toc-item > a:hover {
+            opacity: 0.8;
+          }
 
           .ballot_container {
             grid-column-start: column 3;
