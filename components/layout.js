@@ -98,7 +98,7 @@ export default function Layout(props) {
           content="An easy tool to host a quadratic vote"
         />
 
-        <meta property="twitter:card" content="/open-graph-logo.png" />
+        <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content="https://quadraticvote.radicalxchange.org/" />
         <meta
           property="twitter:title"
@@ -112,11 +112,11 @@ export default function Layout(props) {
           <>
             <meta
               property="og:image"
-              content="/open-graph-logo.png"
+              content="https://quadraticvote.radicalxchange.org/open-graph-logo.png"
             />
             <meta
               property="twitter:image"
-              content="/open-graph-logo.png"
+              content="https://quadraticvote.radicalxchange.org/open-graph-logo.png"
             />
           </>
         )}
