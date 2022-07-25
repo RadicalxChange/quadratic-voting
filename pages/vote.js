@@ -193,6 +193,28 @@ function Vote({ query }) {
                 creditBalance={data.credits_per_voter}
                 creditsRemaining={credits}
               />
+              {data ? (
+                <>
+                  {(moment() > moment(data.end_event_date)) ? (
+                    <></>
+                  ) : (
+                    <>
+                      {/* Submission button states */}
+                      {submitLoading ? (
+                        // Check for existing button loading state
+                        <button className="submit__button" disabled>
+                          <Loader />
+                        </button>
+                      ) : (
+                        // Else, enable submission
+                        <button name="input-element" onClick={submitVotes} className="submit__button">
+                          Submit Votes
+                        </button>
+                      )}
+                    </>
+                  )}
+                </>
+              ) : null}
             </aside>
             <div className="ballot_container">
               <div className="vote__info">
@@ -316,29 +338,6 @@ function Vote({ query }) {
                           );
                         })}
                       </div>
-
-                      {data ? (
-                        <>
-                          {(moment() > moment(data.end_event_date)) ? (
-                            <></>
-                          ) : (
-                            <>
-                              {/* Submission button states */}
-                              {submitLoading ? (
-                                // Check for existing button loading state
-                                <button className="submit__button" disabled>
-                                  <Loader />
-                                </button>
-                              ) : (
-                                // Else, enable submission
-                                <button name="input-element" onClick={submitVotes} className="submit__button">
-                                  Submit Votes
-                                </button>
-                              )}
-                            </>
-                          )}
-                        </>
-                      ) : null}
                     </div>
                   </>
                 ) : null}
@@ -706,7 +705,7 @@ function Vote({ query }) {
           transition: 100ms ease-in-out;
           border: none;
           cursor: pointer;
-          margin-top: 50px;
+          margin-top: 20px;
         }
 
         .submit__button:hover {
