@@ -278,12 +278,12 @@ function generateChart2(subjects, traditional, weights) {
     datasets: [
       {
         backgroundColor: "#000",
-        label: "Votos tradicionais",
+        label: "Traditional Votes",
         data,
       },
       {
         backgroundColor: "#edff38",
-        label: "Votos quadráticos",
+        label: "Quadratic Votes",
         data: qvData,
       },
     ],
