@@ -322,10 +322,10 @@ function Event({ query }) {
             )}
           </div>
           <div className="event__section">
-            <label> Mais dados </label>
+            <label>Additional data</label>
             {data.chart2 ? (
             <>
-            <p> Resultados estimados da votação ponderada por votação tradicional </p>
+            <p>Quadratic Voting compared with estimated traditional voting results</p>
             {!loading && data ? (
               <div className="chart">
                 <HorizontalBar data={data.chart2} width={90} height={60} />
@@ -337,13 +337,13 @@ function Event({ query }) {
                   color="#000"
                   css={{ display: "inline-block" }}
                 />
-                <h3> Carregando gráfico ... </h3>
-                <span> Dê-nos um momento </span>
+                <h3>Loading chart ...</h3>
+                <span>Please give us a moment</span>
               </div>
             )}
             </>
             ) : (
-              <p> Os resultados da votação aparecerão aqui quando o evento for concluído </p>
+              <p>Voting results will appear here when the event has concluded</p>
             )}
           </div>
           </>
