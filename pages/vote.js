@@ -173,176 +173,175 @@ function Vote({ query }) {
         {/* Loading state check */}
         {!loading ? (
           <>
-          <div className="vote__info">
-            {/* General voting header */}
-            <div className="vote__info_heading">
-              <h1>Place your votes</h1>
-              <p>
-                You can use up to{" "}
-                <strong>{data.credits_per_voter} credits</strong> to
-                vote during this event.
-              </p>
-            </div>
+            <aside id="table-of-contents_container">
+              <div className="toc-header">
+                <h3>Jump to an Option</h3>
+              </div>
+              <div id="table-of-contents">
+                {data.event_data.map((option, i) => {
+                  // Loop through each voteable option
+                  return (
+                    <div key={i} className="toc-item">
+                      <a href={'#' + i}>{option.title}</a>
+                    </div>
+                  );
+                })}
+              </div>
+            </aside>
+            <aside id="budget-container">
+              <RemainingCredits
+                creditBalance={data.credits_per_voter}
+                creditsRemaining={credits}
+              />
+            </aside>
+            <div className="ballot_container">
+              <div className="vote__info">
+                {/* General voting header */}
+                <div className="vote__info_heading">
+                  <h1>Place your votes</h1>
+                  <p>
+                    You can use up to{" "}
+                    <strong>{data.credits_per_voter} credits</strong> to
+                    vote during this event.
+                  </p>
+                </div>
 
-            {/* Project name and description */}
-            <div className="event__details">
-              <div className="vote__loading event__summary">
-                <h2>{data.event_title}</h2>
-                <p>{data.event_description}</p>
+                {/* Project name and description */}
+                <div className="event__details">
+                  <div className="vote__loading event__summary">
+                    <h2>{data.event_title}</h2>
+                    <p>{data.event_description}</p>
+                    {data ? (
+                      <>
+                        {(moment() > moment(data.end_event_date)) ? (
+                          <>
+                            <h3>This event has concluded. Click below to to see the results!</h3>
+                            {/* Redirect to event dashboard */}
+                            <Link href={`/event?id=${data.event_id}`}>
+                              <a>See event dashboard</a>
+                            </Link>
+                          </>
+                        ) : (
+                          <>
+                            {(moment() < moment(data.start_event_date)) ? (
+                              <h3>This event begins {moment(data.start_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                            ) : (
+                              <h3>This event closes {moment(data.end_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                            )}
+                          </>
+                        )}
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Ballot */}
                 {data ? (
                   <>
-                  {(moment() > moment(data.end_event_date)) ? (
-                    <>
-                    <h3>This event has concluded. Click below to to see the results!</h3>
-                    {/* Redirect to event dashboard */}
-                    <Link href={`/event?id=${data.event_id}`}>
-                      <a>See event dashboard</a>
-                    </Link>
-                    </>
-                  ) : (
-                    <>
-                    {(moment() < moment(data.start_event_date)) ? (
-                      <h3>This event begins {moment(data.start_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
-                    ) : (
-                      <h3>This event closes {moment(data.end_event_date).format('MMMM Do YYYY, h:mm a')}</h3>
-                    )}
-                    </>
-                  )}
+                    {/* Voteable options */}
+                    <div className="event__options">
+                      <h2>Voteable Options</h2>
+                      <div className="divider" />
+                      <div className="event__options_list">
+                        {data.event_data.map((option, i) => {
+                          // Loop through each voteable option
+                          return (
+                            <div key={i} id={i} className="event__option_item">
+                              <div>
+                                <button className="title-container" onClick={() => toggleDescription(i)}>
+                                  <label>Title</label>
+                                  <h3>{option.title}</h3>
+                                    <img id={`toggle-button-${i}`} src="/vectors/down_arrow.svg" alt="down arrow" />
+                                </button>
+                                {option.description !== "" ? (
+                                  // If description exists, show description
+                                  <div id={`description-container-${i}`}>
+                                    <label>Description</label>
+                                    <p className="event__option_item_desc">{option.description}</p>
+                                  </div>
+                                ) : null}
+                                {option.url !== "" ? (
+                                  // If URL exists, show URL
+                                  <div id={`link-container-${i}`}>
+                                    <label>Link</label>
+                                    <a
+                                      href={option.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      {option.url}
+                                    </a>
+                                  </div>
+                                ) : null}
+                              </div>
+                              <ProposalBlocks
+                                cost={Math.pow(votes[i], 2)}
+                              />
+                              <div className="event__option_item_vote">
+                                <label>Votes</label>
+                                <input type="number" value={votes[i]} disabled />
+                                <div className="item__vote_buttons">
+                                  {data ? (
+                                    <>
+                                      {(moment() > moment(data.end_event_date)) ? (
+                                        <></>
+                                      ) : (
+                                        <>
+                                          {/* Toggleable button states based on remaining credits */}
+                                          {calculateShow(votes[i], false) ? (
+                                            <button name="input-element" onClick={() => makeVote(i, false)}>
+                                              -
+                                            </button>
+                                          ) : (
+                                            <button className="button__disabled" disabled>
+                                              -
+                                            </button>
+                                          )}
+                                          {calculateShow(votes[i], true) ? (
+                                            <button name="input-element" onClick={() => makeVote(i, true)}>+</button>
+                                          ) : (
+                                            <button className="button__disabled" disabled>
+                                              +
+                                            </button>
+                                          )}
+                                        </>
+                                      )}
+                                    </>
+                                  ) : null}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {data ? (
+                        <>
+                          {(moment() > moment(data.end_event_date)) ? (
+                            <></>
+                          ) : (
+                            <>
+                              {/* Submission button states */}
+                              {submitLoading ? (
+                                // Check for existing button loading state
+                                <button className="submit__button" disabled>
+                                  <Loader />
+                                </button>
+                              ) : (
+                                // Else, enable submission
+                                <button name="input-element" onClick={submitVotes} className="submit__button">
+                                  Submit Votes
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </>
+                      ) : null}
+                    </div>
                   </>
                 ) : null}
               </div>
             </div>
-
-            {/* Ballot */}
-            {data ? (
-              <>
-              {/* Hide ballot if event hasn't started yet */}
-              {(moment() < moment(data.start_event_date)) ? (
-                <></>
-              ) : (
-                <>
-                <div className="button-container">
-                  <RemainingCredits
-                    creditBalance={data.credits_per_voter}
-                    creditsRemaining={credits}
-                  />
-                </div>
-
-                {/* Voteable options */}
-                <div className="event__options">
-                  <h2>Voteable Options</h2>
-                  <div className="divider" />
-                  <div className="event__options_list">
-                    {data.event_data.map((option, i) => {
-                      // Loop through each voteable option
-                      return (
-                        <div key={i} className="event__option_item">
-                          <div>
-                            <button className="title-container" onClick={() => toggleDescription(i)}>
-                              <label>Title</label>
-                              <h3>{option.title}</h3>
-                                <img id={`toggle-button-${i}`} src="/vectors/down_arrow.svg" alt="down arrow" />
-                            </button>
-                            {option.description !== "" ? (
-                              // If description exists, show description
-                              <div id={`description-container-${i}`}>
-                                <label>Description</label>
-                                <p className="event__option_item_desc">{option.description}</p>
-                              </div>
-                            ) : null}
-                            {option.url !== "" ? (
-                              // If URL exists, show URL
-                              <div id={`link-container-${i}`}>
-                                <label>Link</label>
-                                <a
-                                  href={option.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  {option.url}
-                                </a>
-                              </div>
-                            ) : null}
-                          </div>
-                          <ProposalBlocks
-                            cost={Math.pow(votes[i], 2)}
-                          />
-                          <div className="event__option_item_vote">
-                            <label>Votes</label>
-                            <input type="number" value={votes[i]} disabled />
-                            <div className="item__vote_buttons">
-                              {data ? (
-                                <>
-                                {(moment() > moment(data.end_event_date)) ? (
-                                  <></>
-                                ) : (
-                                  <>
-                                    {/* Toggleable button states based on remaining credits */}
-                                    {calculateShow(votes[i], false) ? (
-                                      <button name="input-element" onClick={() => makeVote(i, false)}>
-                                        -
-                                      </button>
-                                    ) : (
-                                      <button className="button__disabled" disabled>
-                                        -
-                                      </button>
-                                    )}
-                                    {calculateShow(votes[i], true) ? (
-                                      <button name="input-element" onClick={() => makeVote(i, true)}>+</button>
-                                    ) : (
-                                      <button className="button__disabled" disabled>
-                                        +
-                                      </button>
-                                    )}
-                                  </>
-                                )}
-                                </>
-                              ) : null}
-                            </div>
-                            {alreadyVoted ? (
-                              // If user has voted before, show historic votes
-                              <div className="existing__votes">
-                                <span>
-                                  You last allocated{" "}
-                                  <strong>{data.vote_data[i].votes} votes </strong>
-                                  to this option.
-                                </span>
-                              </div>
-                            ) : null}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {data ? (
-                  <>
-                  {(moment() > moment(data.end_event_date)) ? (
-                    <></>
-                  ) : (
-                    <>
-                      {/* Submission button states */}
-                      {submitLoading ? (
-                          // Check for existing button loading state
-                          <button className="submit__button" disabled>
-                            <Loader />
-                          </button>
-                        ) : (
-                          // Else, enable submission
-                          <button name="input-element" onClick={submitVotes} className="submit__button">
-                            Submit Votes
-                          </button>
-                        )}
-                    </>
-                  )}
-                  </>
-                ) : null}
-                </>
-              )}
-              </>
-            ) : null}
-          </div>
           </>
         ) : (
           // If loading, show global loading state
@@ -368,9 +367,8 @@ function Vote({ query }) {
           position: relative;
         }
 
-        .button-container {
+        #budget-container {
           padding: 1vw 2vw;
-          position: -webkit-sticky;
           position: sticky;
           top: 0;
           left: 0;
@@ -378,10 +376,18 @@ function Vote({ query }) {
           background: white;
         }
 
+        #table-of-contents_container {
+          display: none;
+        }
+
         @media only screen and (min-width: 768px) {
           .vote {
             display: grid;
-            grid-template-columns: auto 20vw;
+            grid-template-columns: 1fr auto;
+          }
+
+          .ballot_container {
+            grid-row: 1;
           }
 
           .vote__info {
@@ -389,26 +395,71 @@ function Vote({ query }) {
             margin: 50px 0 50px auto;
           }
 
-          .button-container {
-            grid-column: 2;
-            position: fixed;
+          #budget-container {
             background: none;
-            padding: auto auto;
-            top: auto;
-            right: 0;
-            bottom: 5vh;
-            left: auto;
-            z-index: auto;
+            grid-column: 2;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            padding: 50px 2rem;
           }
         }
 
         @media only screen and (min-width: 1150px) {
           .vote {
-            display: block;
+            display: grid;
+            grid-template-columns: [margin] 2rem [column] 1fr repeat(9, [gutter] 2rem [column] 1fr) [margin] 2rem;
+          }
+
+          #budget-container {
+            grid-column-start: column 9;
+            grid-column-end: gutter 10;
+          }
+
+          #table-of-contents_container {
+            grid-row: 1;
+            grid-column-start: 1;
+            grid-column-end: gutter 2;
+            display: inline-block;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            padding: 50px 2rem;
+            text-align: left;
+          }
+
+          #table-of-contents {
+            height: calc(100vh - 260px);
+            overflow-y: auto;
+            position: sticky;
+            padding-bottom: 1rem;
+            border-bottom: solid 1px black;
+            border-top: solid 1px black;
+          }
+
+          .toc-header {
+            box-sizing: border-box;
+            width: 100%;
+          }
+
+          .toc-item {
+            box-sizing: border-box;
+            width: 100%;
+            padding: .5rem 1rem;
+          }
+          .toc-item > a {
+            text-decoration: none;
+            color: black;
+          }
+
+          .ballot_container {
+            grid-column-start: column 3;
+            grid-column-end: gutter 8;
           }
 
           .vote__info {
-            margin: 50px auto;
+            margin: 50px 0 50px auto;
+            width: auto;
           }
         }
 
