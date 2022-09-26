@@ -18,6 +18,7 @@ model Events {
   end_event_date    DateTime @default(now())
   created_at        DateTime @default(now())
   event_data        Json?
+  social_graph      Json?
   Voters            Voters[]
 }
 
@@ -26,5 +27,6 @@ model Voters {
   event_uuid String
   voter_name String?
   vote_data  Json?
+  social_data Json?
   Events     Events  @relation(fields: [event_uuid], references: [id])
 }

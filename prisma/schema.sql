@@ -12,6 +12,7 @@ CREATE TABLE "public"."Events"
   end_event_date TIMESTAMP NOT NULL DEFAULT NOW(),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   event_data JSON,
+  social_graph JSON,
   PRIMARY KEY (id)
 );
 
@@ -21,6 +22,7 @@ CREATE TABLE "public"."Voters"
   event_uuid uuid NOT NULL,
   voter_name VARCHAR,
   vote_data JSON,
+  social_data JSON,
   PRIMARY KEY (id),
   FOREIGN KEY ("event_uuid") REFERENCES "public"."Events"(id)
 );

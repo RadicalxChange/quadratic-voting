@@ -31,6 +31,14 @@ const defaultCurrentSubject = {
   url: "",
 };
 
+// Initial empty social category
+const defaultCurrentCategory = {
+  title: "",
+  prompt: "",
+  options: [""],
+  type: "",
+};
+
 export default function Create() {
   // Router object
   const router = useRouter();
@@ -38,8 +46,14 @@ export default function Create() {
   const [globalSettings, setGlobalSettings] = useState(defaultGlobalSettings);
   // Current subject object
   const [currentSubject, setCurrentSubject] = useState(defaultCurrentSubject);
+  // Current social category
+  const [currentCategory, setCurrentCategory] = useState(defaultCurrentCategory);
   // Array of all subjects
   const [subjects, setSubjects] = useState([]);
+  // Toggle plural voting
+  const [showCategories, setShowCategories] = useState(false);
+  // Array of all social categories
+  const [categories, setCategories] = useState([]);
   // Loading state
   const [loading, setLoading] = useState(false);
 
@@ -90,6 +104,18 @@ export default function Create() {
   };
 
   /**
+   * Updates social category object with input field information
+   * @param {string} field object key
+   * @param {string} value input field value
+   */
+  const setCategoryData = (field, value) => {
+    setCurrentCategory({
+      ...currentCategory,
+      [field]: value,
+    });
+  };
+
+  /**
    * Submits subject to array
    */
   const submitSubject = () => {
@@ -97,6 +123,16 @@ export default function Create() {
     setSubjects((oldSubjects) => [...oldSubjects, currentSubject]);
     // Clear current subject by resetting to default
     setCurrentSubject(defaultCurrentSubject);
+  };
+
+  /**
+   * Submits social category to array
+   */
+  const submitCategory = () => {
+    // Push subject to social categories array
+    setCategories((oldCategories) => [...oldCategories, currentCategory]);
+    // Clear current social category by resetting to default
+    setCurrentCategory(defaultCurrentCategory);
   };
 
   /**
@@ -111,12 +147,32 @@ export default function Create() {
   };
 
   /**
+   * Edits item with x index by setting it to current and deleting from categories[]
+   * @param {number} index array index of item to edit
+   */
+  const editCategory = (index) => {
+    // Set current category to to-be-edited item
+    setCurrentCategory(categories[index]);
+    // Delete to-be-edited item from categories array
+    deleteCategory(index);
+  };
+
+  /**
    * Deletes item with x index by filtering it out of subjects[]
    * @param {number} index array index of item to delete
    */
   const deleteSubject = (index) => {
     // Filter array for all items that are not subjects[index]
     setSubjects(subjects.filter((item, i) => i !== index));
+  };
+
+  /**
+   * Deletes item with x index by filtering it out of categories[]
+   * @param {number} index array index of item to delete
+   */
+  const deleteCategory = (index) => {
+    // Filter array for all items that are not categories[index]
+    setCategories(categories.filter((item, i) => i !== index));
   };
 
   /**
@@ -130,6 +186,7 @@ export default function Create() {
     const eventDetails = await axios.post("/api/events/create", {
       ...globalSettings,
       subjects,
+      categories,
     });
 
     // Toggle loading
@@ -253,7 +310,142 @@ export default function Create() {
               onChange={(value) => setEventData("end_event_date", value)}
             />
           </div>
+
+          {/* Toggle plural voting on/off */}
+          <div className="create__settings_section">
+            <label>Plural Voting [Beta]</label>
+            <p>Would you like to try a new kind of Quadratic Voting that accounts for voters' social graphs? With these feature, agreement across diversity will be weighted more heavily than agreement within a social group.</p>
+            <label className="checkbox-label">
+              <input
+                className="checkbox-button"
+                type="checkbox"
+                checked={showCategories}
+                onChange={() => setShowCategories(prevState => !prevState)}
+              />Try Plural Voting
+            </label>
+          </div>
         </div>
+
+        {/* Social graph settings */}
+        {showCategories ? (
+          <div className="create__settings">{/* Social Graph settings heading */}
+            <h2>Social Categories</h2>
+            <p>
+              These settings enable you to add social categories within which
+              voters must identify themselves. You can add a category
+              title, prompt, and options.
+            </p>
+
+            {/* Listing of all categories via accordion*/}
+            <h3>Social Categories</h3>
+            <div className="create__settings_section">
+              {categories.length > 0 ? (
+                // If categories array contains at least one category
+                <Accordion>
+                  {categories.map((category, i) => {
+                    // Render categories in accordion
+                    return (
+                      <AccordionItem key={i}>
+                        <AccordionItemHeading>
+                          <AccordionItemButton>
+                            {category.title}
+                          </AccordionItemButton>
+                        </AccordionItemHeading>
+                        <AccordionItemPanel>
+                          <div className="accordion__value">
+                            <label>Prompt</label>
+                            <textarea value={category.prompt} disabled />
+                          </div>
+                          <div className="accordion__value">
+                            <label>Options</label>
+                            <textarea value={category.options.join('\n')} disabled />
+                          </div>
+                          <div className="accordion__buttons">
+                            <button onClick={() => editCategory(i)}>
+                              Edit Category
+                            </button>
+                            <button onClick={() => deleteCategory(i)}>
+                              Delete Category
+                            </button>
+                          </div>
+                        </AccordionItemPanel>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
+              ) : (
+                // Else, if no categories in categories array
+                <span className="empty__subjects">No Categories Added</span>
+              )}
+            </div>
+
+            {/* Form to add categories */}
+            <h3>Add Categories</h3>
+            <div className="create__settings_section">
+              {/* Category addition form */}
+              <div className="create__subject_form">
+                {/* Add category tile */}
+                <div>
+                  <label>Category Title</label>
+                  <input
+                    type="text"
+                    placeholder="i.e. Affiliation"
+                    value={currentCategory.title}
+                    onChange={(e) => setCategoryData("title", e.target.value)}
+                  />
+                </div>
+
+                {/* Add category prompt */}
+                <div>
+                  <label>Category Prompt</label>
+                  <textarea
+                    placeholder="i.e. What organization/company/institution are you affiliated with?"
+                    value={currentCategory.prompt}
+                    onChange={(e) =>
+                      setCategoryData("prompt", e.target.value)
+                    }
+                  />
+                </div>
+
+                {/* Add category options */}
+                <div>
+                  <label>Category Options</label>
+                  <p>Each voter will have to choose one of the following. Please list options separated by newlines.</p>
+                  <textarea
+                    placeholder="i.e. Hector's Hardware"
+                    value={currentCategory.options.join('\n')}
+                    onChange={(e) =>
+                      setCategoryData("options", e.target.value.split('\n'))
+                    }
+                  />
+                </div>
+
+                {/* Choose category type */}
+                <div>
+                  <label>Category Type</label>
+                  <select
+                    className="dropdown-select"
+                    defaultValue="multiple-choice"
+                    onChange={(e) => setCategoryData("type", e.target.value)}
+                  >
+                    <option value="multiple-choice">Pick one</option>
+                    <option value="checkboxes">Check all that apply</option>
+                  </select>
+                </div>
+
+                {currentCategory.title !== "" ? (
+                  // If form has title filled, allow submission
+                  <button onClick={submitCategory}>Add Category</button>
+                ) : (
+                  // Else, show disabled state
+                  <button className="button__disabled" disabled>
+                    Enter Title
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {/* Subject settings */}
         <div className="create__settings">
@@ -588,6 +780,15 @@ export default function Create() {
           margin: 0px auto;
           max-width: 660px;
           padding: 50px 20px;
+        }
+        .checkbox-label {
+          margin: 15px 0;
+        }
+        .checkbox-button {
+          margin-right: 10px;
+        }
+        .dropdown-select {
+          margin-top: 15px;
         }
 
         @font-face {
