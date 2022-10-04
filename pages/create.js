@@ -389,7 +389,7 @@ export default function Create() {
                   <label>Category Title</label>
                   <input
                     type="text"
-                    placeholder="i.e. Affiliation"
+                    placeholder="e.g. Affiliation"
                     value={currentCategory.title}
                     onChange={(e) => setCategoryData("title", e.target.value)}
                   />
@@ -399,7 +399,7 @@ export default function Create() {
                 <div>
                   <label>Category Prompt</label>
                   <textarea
-                    placeholder="i.e. What organization/company/institution are you affiliated with?"
+                    placeholder="e.g. What organization/company/institution are you affiliated with?"
                     value={currentCategory.prompt}
                     onChange={(e) =>
                       setCategoryData("prompt", e.target.value)
@@ -412,7 +412,7 @@ export default function Create() {
                   <label>Category Options</label>
                   <p>Each voter will have to choose one of the following. Please list options separated by newlines.</p>
                   <textarea
-                    placeholder="i.e. Hector's Hardware"
+                    placeholder="e.g. Hector's Hardware"
                     value={currentCategory.options.join('\n')}
                     onChange={(e) =>
                       setCategoryData("options", e.target.value.split('\n'))
