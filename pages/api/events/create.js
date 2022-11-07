@@ -18,15 +18,10 @@ export default async (req, res) => {
     });
   }
 
-  // Loop through all social categories
-  for (const category of event.categories) {
-    social_data.push({[category.title]: ""});
-  }
-
   // Fill array with voter data based on num_voters in request body
   const voters = new Array(event.num_voters).fill({
     vote_data: vote_data, // Placeholder zeroed vote_data
-    social_data: social_data, // Placeholder nulled social_data
+    social_data: undefined, // Placeholder nulled social_data
   });
 
   // Create new event

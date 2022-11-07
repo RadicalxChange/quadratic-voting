@@ -36,7 +36,7 @@ const defaultCurrentCategory = {
   title: "",
   prompt: "",
   options: [""],
-  type: "",
+  type: "multiple-choice",
 };
 
 export default function Create() {
@@ -428,7 +428,7 @@ export default function Create() {
                     defaultValue="multiple-choice"
                     onChange={(e) => setCategoryData("type", e.target.value)}
                   >
-                    <option value="multiple-choice">Pick one</option>
+                    <option value="multiple-choice" selected>Pick one</option>
                     <option value="checkboxes">Check all that apply</option>
                   </select>
                 </div>
