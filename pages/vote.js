@@ -156,11 +156,7 @@ function Vote({ query }) {
       return current <= 0 ? true : canOccur;
     } else {
       // Or check for inverse state when subtracting
-      if (data.event_data.event_title === "Wish List Poll") {
-        return (current >= 0 ? true : canOccur) && (current !== 0);
-      } else {
-        return current >= 0 ? true : canOccur;
-      }
+      return current >= 0 ? true : canOccur;
     }
   };
 
