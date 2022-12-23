@@ -274,7 +274,7 @@ function generateStatisticsPlural(subjects, num_voters, credits_per_voter, voter
     // For each of a users votes:
     for (let j = 0; j < voter_data.length; j++) {
       // Increment raw voting array for each subject
-      contributions[j] = [...contributions[j], Math.pow(voter_data[j].votes, 2)];
+      contributions[j] = [...contributions[j], Math.pow(voter_data[j].votes, 2) * Math.sign(voter_data[j].votes)];
     }
   }
 
