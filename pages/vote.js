@@ -325,10 +325,10 @@ function Vote({ query }) {
                                 <p>{category.type === 'multiple-choice' ? 'Choose one' : 'Select all that apply'}</p>
                                 {category.type === 'multiple-choice' ? (
                                   <div className="survey_question__options">
-                                  {category.options.map((option) => {
+                                  {category.options.map((option, j) => {
                                     return (
-                                      <label className="survey_question__option" for={option}>
-                                        <input type="radio" id={option} name={category.title} value={option} onClick={() => updateSocialData(i, option)} />
+                                      <label key={i + " " + j} className="survey_question__option" htmlFor={option}>
+                                        <input type="radio" id={option} name={i + "-" + category.title} value={option} onClick={() => updateSocialData(i, option)} />
                                         {option}
                                       </label>
                                     );
@@ -338,7 +338,7 @@ function Vote({ query }) {
                                   <div className="survey_question__options">
                                   {category.options.map((option) => {
                                     return (
-                                      <label className="survey_question__option" for={option}>
+                                      <label className="survey_question__option" htmlFor={option}>
                                         <input type="checkbox" id={option} name={option} value={option} onClick={() => updateSocialData(i, option)} />
                                         {option}
                                       </label>
