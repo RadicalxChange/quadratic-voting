@@ -108,18 +108,14 @@ export default function Layout(props) {
           property="twitter:description"
           content="An easy tool to host a quadratic vote"
         />
-        {props.event ? null : (
-          <>
-            <meta
-              property="og:image"
-              content="/open-graph-logo.png"
-            />
-            <meta
-              property="twitter:image"
-              content="/open-graph-logo.png"
-            />
-          </>
-        )}
+        <meta
+          property="og:image"
+          content="/open-graph-logo.png"
+        />
+        <meta
+          property="twitter:image"
+          content="/open-graph-logo.png"
+        />
 
         <link
           href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
