@@ -36,7 +36,7 @@ export default async (req, res) => {
   // If event is concluded or private_key enables administrator access
   if (isAdmin || (moment() > moment(event.end_event_date))) {
     // Pass voting statistics to endpoint
-    if (event.social_graph) {
+    if (event.survey_questions) {
       statistics = generateStatisticsPlural(
         // Number of voteable subjects
         JSON.parse(event.event_data).length,
@@ -46,7 +46,7 @@ export default async (req, res) => {
         event.credits_per_voter,
         // Array of voter preferences
         voters,
-        JSON.parse(event.social_graph)
+        JSON.parse(event.survey_questions)
       );
     } else {
       statistics = generateStatistics(
@@ -228,10 +228,10 @@ function calculatePluralVotes(groups, contributions) {
  * @param {number} num_voters number of max voters
  * @param {number} credits_per_voter number of credits per voter
  * @param {voter[]} voters array of voter preferences
- * @param {social_graph[]} social_graph array of survey questions
+ * @param {survey_questions[]} survey_questions array of survey questions
  * @return {object} containing QV statistics and calculated weights
  */
-function generateStatisticsPlural(subjects, num_voters, credits_per_voter, voters, social_graph) {
+function generateStatisticsPlural(subjects, num_voters, credits_per_voter, voters, survey_questions) {
   let numberVoters = 0, // Placeholder for number of participating voters
     numberVotes = 0, // Placeholder for number of placed votes
     contributions = new Array(subjects).fill([]), // Empty raw array to hold individual contributions
@@ -240,8 +240,8 @@ function generateStatisticsPlural(subjects, num_voters, credits_per_voter, voter
     finalVotes = new Array(subjects).fill(0);
 
   // pull all groups into one groups array
-  for (let i = 0; i < social_graph.length; i++) {
-    groups = groups.concat(social_graph[i]["options"].map((option) => {
+  for (let i = 0; i < survey_questions.length; i++) {
+    groups = groups.concat(survey_questions[i]["options"].map((option) => {
     	return {
       	"key": i + " " + option,
         "group": option,
@@ -254,7 +254,7 @@ function generateStatisticsPlural(subjects, num_voters, credits_per_voter, voter
   for (let i = 0; i < voters.length; i++) {
     // Collect voter preferences
     const voter_data = voters[i].vote_data;
-    const social_data = voters[i].social_data;
+    const survey_data = voters[i].survey_data;
 
     // Sum voter preferences to check if user has placed at least 1 vote
     const sumVotes = voter_data
@@ -265,8 +265,8 @@ function generateStatisticsPlural(subjects, num_voters, credits_per_voter, voter
     if (sumVotes > 0) {
       numberVoters++; // Increment number of participating voters
       numberVotes += sumVotes; // Increment number of placed votes
-      for (let j = 0; j < social_data.length; j++) {
-        const groupIndex = groups.findIndex(group => group.key === j + " " + social_data[j]["response"]);
+      for (let j = 0; j < survey_data.length; j++) {
+        const groupIndex = groups.findIndex(group => group.key === j + " " + survey_data[j]["response"]);
         groups[groupIndex].members.push(i);
       }
     }

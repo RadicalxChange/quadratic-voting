@@ -14,11 +14,11 @@ function Vote({ query }) {
   const [data, setData] = useState(null); // Data retrieved from DB
   const [loading, setLoading] = useState(true); // Global loading state
   const [name, setName] = useState(""); // Voter name
-  const [socialData, setSocialData] = useState(null); // Survey questions array
+  const [surveyData, setSurveyData] = useState(null); // Survey questions array
   const [votes, setVotes] = useState(null); // Option votes array
   const [credits, setCredits] = useState(0); // Total available credits
   const [submitLoading, setSubmitLoading] = useState(false); // Component (button) submission loading state
-
+  console.log(surveyData)
   /**
    * Calculates culmulative number of votes and available credits on load
    * @param {object} rData vote data object
@@ -40,21 +40,21 @@ function Vote({ query }) {
   };
 
   /**
-   * Initializes socialData
+   * Initializes surveyData
    * @param {object} rData response data object
    */
-  const initSocialData = (rData) => {
-    if (rData.social_data) {
-      setSocialData(rData.social_data);
+  const initSurveyData = (rData) => {
+    if (rData.survey_data) {
+      setSurveyData(rData.survey_data);
     } else {
       const initialData = [];
-      for (const category of rData.event_data.social_graph) {
+      for (const question of rData.event_data.survey_questions) {
         initialData.push({
-          ...category,
-          response: category.type === 'multiple-choice' ? '' : [],
+          ...question,
+          response: question.type === 'multiple-choice' ? '' : [],
         });
       }
-      setSocialData(initialData);
+      setSurveyData(initialData);
     }
   };
 
@@ -80,12 +80,12 @@ function Vote({ query }) {
   };
 
   /**
-   * Update socialData array with survey responses
-   * @param {number} index of category to update
+   * Update surveyData array with survey responses
+   * @param {number} index of survey response to update
    * @param {boolean} value of response
    */
-  const updateSocialData = (index, value) => {
-    const tempArr = socialData;
+  const updateSurveyData = (index, value) => {
+    const tempArr = surveyData;
     if (tempArr[index].type === 'multiple-choice') {
       // for multiple choice, overwrite the current recorded response
       tempArr[index].response = value;
@@ -101,7 +101,7 @@ function Vote({ query }) {
         tempArr[index].response.push(value);
       }
     }
-    setSocialData(tempArr);
+    setSurveyData(tempArr);
   };
 
   /**
@@ -120,7 +120,7 @@ function Vote({ query }) {
           response.data.voter_name !== null ? response.data.voter_name : ""
         );
         // Initialize survey responses
-        initSocialData(response.data);
+        initSurveyData(response.data);
         // Calculate QV votes with data
         calculateVotes(response.data);
         // Toggle global loading state to false
@@ -170,7 +170,7 @@ function Vote({ query }) {
     // POST data and collect status
     const { status } = await axios.post("/api/events/submitSurvey", {
       id: query.user, // Voter ID
-      social_data: socialData, // survey responses
+      survey_data: surveyData, // survey responses
       name: name, // Voter name
     });
 
@@ -179,7 +179,7 @@ function Vote({ query }) {
       // Update page with survey data
       setData({
         ...data,
-        social_data: socialData,
+        survey_data: surveyData,
       });
     } else {
       // Else, redirect to failure page
@@ -262,7 +262,7 @@ function Vote({ query }) {
       <div className="vote">
         {/* Loading state check */}
         {!loading ? (
-          !data.social_data ? (
+          !data.survey_data ? (
             <div className="survey_container">
               <div className="vote__info">
                 {/* General voting header */}
@@ -315,20 +315,20 @@ function Vote({ query }) {
                     <h2>Survey questions</h2>
                     <div className="divider" />
                     <div className="event__options_list">
-                      {data.event_data.social_graph.map((category, i) => {
+                      {data.event_data.survey_questions.map((question, i) => {
                         // Loop through each voteable option
                         return (
                           <div key={i} id={i} className="event__option_item">
                             <div>
                               <div className="question-container">
-                                <h3>{category.prompt}</h3>
-                                <p>{category.type === 'multiple-choice' ? 'Choose one' : 'Select all that apply'}</p>
-                                {category.type === 'multiple-choice' ? (
+                                <h3>{question.prompt}</h3>
+                                <p>{question.type === 'multiple-choice' ? 'Choose one' : 'Select all that apply'}</p>
+                                {question.type === 'multiple-choice' ? (
                                   <div className="survey_question__options">
-                                  {category.options.map((option, j) => {
+                                  {question.options.map((option, j) => {
                                     return (
                                       <label key={i + " " + j} className="survey_question__option" htmlFor={option}>
-                                        <input type="radio" id={option} name={i + "-" + category.title} value={option} onClick={() => updateSocialData(i, option)} />
+                                        <input type="radio" id={option} name={i + "-" + question.title} value={option} onClick={() => updateSurveyData(i, option)} />
                                         {option}
                                       </label>
                                     );
@@ -336,10 +336,10 @@ function Vote({ query }) {
                                   </div>
                                 ) : (
                                   <div className="survey_question__options">
-                                  {category.options.map((option) => {
+                                  {question.options.map((option) => {
                                     return (
                                       <label className="survey_question__option" htmlFor={option}>
-                                        <input type="checkbox" id={option} name={option} value={option} onClick={() => updateSocialData(i, option)} />
+                                        <input type="checkbox" id={option} name={option} value={option} onClick={() => updateSurveyData(i, option)} />
                                         {option}
                                       </label>
                                     );

@@ -13,7 +13,7 @@ export default async (req, res) => {
       event_id: "",
       voter_name: "",
       vote_data: "",
-      social_data: "",
+      survey_data: "",
       event_data: {},
     }; // Setup response object
 
@@ -35,8 +35,8 @@ export default async (req, res) => {
       response.voter_name = user.voter_name;
       // Set response object vote_data field to value retrieved from DB
       response.vote_data = user.vote_data;
-      // Set response object social_data field to value retrieved from DB
-      response.social_data = user.social_data;
+      // Set response object survey_data field to value retrieved from DB
+      response.survey_data = user.survey_data;
 
       // Collect misc event data
       const event_data = await prisma.events.findUnique({
@@ -51,12 +51,12 @@ export default async (req, res) => {
           start_event_date: true,
           end_event_date: true,
           credits_per_voter: true,
-          social_graph: true,
+          survey_questions: true,
         },
       });
 
       // Set response object field to values retrieved from DB
-      event_data.social_graph = JSON.parse(event_data.social_graph)
+      event_data.survey_questions = JSON.parse(event_data.survey_questions)
       response.event_data = event_data;
     }
 

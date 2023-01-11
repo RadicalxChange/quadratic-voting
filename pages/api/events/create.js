@@ -7,7 +7,7 @@ export default async (req, res) => {
   // Collect event details from request body
   const event = req.body;
   const vote_data = [];
-  const social_data = [];
+  const survey_data = [];
 
   // Loop through all subjects
   for (const subject of event.subjects) {
@@ -21,7 +21,7 @@ export default async (req, res) => {
   // Fill array with voter data based on num_voters in request body
   const voters = new Array(event.num_voters).fill({
     vote_data: vote_data, // Placeholder zeroed vote_data
-    social_data: undefined, // Placeholder nulled social_data
+    survey_data: undefined, // Placeholder nulled survey_data
   });
 
   // Create new event
@@ -35,7 +35,7 @@ export default async (req, res) => {
       end_event_date: formatAsPGTimestamp(event.end_event_date),
       // Stringify voteable subject data
       event_data: JSON.stringify(event.subjects),
-      social_graph: JSON.stringify(event.categories),
+      survey_questions: JSON.stringify(event.questions),
       // Create voters from filled array
       Voters: { create: voters },
     },

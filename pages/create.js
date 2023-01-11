@@ -31,8 +31,8 @@ const defaultCurrentSubject = {
   url: "",
 };
 
-// Initial empty social category
-const defaultCurrentCategory = {
+// Initial empty survey question
+const defaultCurrentQuestion = {
   title: "",
   prompt: "",
   options: [""],
@@ -46,14 +46,14 @@ export default function Create() {
   const [globalSettings, setGlobalSettings] = useState(defaultGlobalSettings);
   // Current subject object
   const [currentSubject, setCurrentSubject] = useState(defaultCurrentSubject);
-  // Current social category
-  const [currentCategory, setCurrentCategory] = useState(defaultCurrentCategory);
+  // Current survey question
+  const [currentQuestion, setCurrentQuestion] = useState(defaultCurrentQuestion);
   // Array of all subjects
   const [subjects, setSubjects] = useState([]);
   // Toggle plural voting
-  const [showCategories, setShowCategories] = useState(false);
-  // Array of all social categories
-  const [categories, setCategories] = useState([]);
+  const [showQuestions, setShowQuestions] = useState(false);
+  // Array of all survey questions
+  const [questions, setQuestions] = useState([]);
   // Loading state
   const [loading, setLoading] = useState(false);
 
@@ -104,13 +104,13 @@ export default function Create() {
   };
 
   /**
-   * Updates social category object with input field information
+   * Updates survey question object with input field information
    * @param {string} field object key
    * @param {string} value input field value
    */
-  const setCategoryData = (field, value) => {
-    setCurrentCategory({
-      ...currentCategory,
+  const setQuestionData = (field, value) => {
+    setCurrentQuestion({
+      ...currentQuestion,
       [field]: value,
     });
   };
@@ -126,13 +126,13 @@ export default function Create() {
   };
 
   /**
-   * Submits social category to array
+   * Submits question to array
    */
-  const submitCategory = () => {
-    // Push subject to social categories array
-    setCategories((oldCategories) => [...oldCategories, currentCategory]);
-    // Clear current social category by resetting to default
-    setCurrentCategory(defaultCurrentCategory);
+  const submitQuestion = () => {
+    // Push subject to questions array
+    setQuestions((oldQuestions) => [...oldQuestions, currentQuestion]);
+    // Clear current question by resetting to default
+    setCurrentQuestion(defaultCurrentQuestion);
   };
 
   /**
@@ -147,14 +147,14 @@ export default function Create() {
   };
 
   /**
-   * Edits item with x index by setting it to current and deleting from categories[]
+   * Edits item with x index by setting it to current and deleting from questions[]
    * @param {number} index array index of item to edit
    */
-  const editCategory = (index) => {
-    // Set current category to to-be-edited item
-    setCurrentCategory(categories[index]);
-    // Delete to-be-edited item from categories array
-    deleteCategory(index);
+  const editQuestion = (index) => {
+    // Set current question to to-be-edited item
+    setCurrentQuestion(questions[index]);
+    // Delete to-be-edited item from questions array
+    deleteQuestion(index);
   };
 
   /**
@@ -167,12 +167,12 @@ export default function Create() {
   };
 
   /**
-   * Deletes item with x index by filtering it out of categories[]
+   * Deletes item with x index by filtering it out of questions[]
    * @param {number} index array index of item to delete
    */
-  const deleteCategory = (index) => {
-    // Filter array for all items that are not categories[index]
-    setCategories(categories.filter((item, i) => i !== index));
+  const deleteQuestion = (index) => {
+    // Filter array for all items that are not questions[index]
+    setQuestions(questions.filter((item, i) => i !== index));
   };
 
   /**
@@ -186,7 +186,7 @@ export default function Create() {
     const eventDetails = await axios.post("/api/events/create", {
       ...globalSettings,
       subjects,
-      categories,
+      questions,
     });
 
     // Toggle loading
@@ -314,58 +314,58 @@ export default function Create() {
           {/* Toggle plural voting on/off */}
           <div className="create__settings_section">
             <label>Plural Voting [Beta]</label>
-            <p>Would you like to try a new kind of Quadratic Voting that accounts for voters' social graphs? With these feature, agreement across diversity will be weighted more heavily than agreement within a social group.</p>
+            <p>If checked, this new feature will allow you to collect survey data from voters and identify agreement across social difference.</p>
             <label className="checkbox-label">
               <input
                 className="checkbox-button"
                 type="checkbox"
-                checked={showCategories}
-                onChange={() => setShowCategories(prevState => !prevState)}
+                checked={showQuestions}
+                onChange={() => setShowQuestions(prevState => !prevState)}
               />Try Plural Voting
             </label>
           </div>
         </div>
 
-        {/* Social graph settings */}
-        {showCategories ? (
-          <div className="create__settings">{/* Social Graph settings heading */}
-            <h2>Social Categories</h2>
+        {/* Survey questions */}
+        {showQuestions ? (
+          <div className="create__settings">{/* Survey questions heading */}
+            <h2>Survey Questions</h2>
             <p>
-              These settings enable you to add social categories within which
-              voters must identify themselves. You can add a category
-              title, prompt, and options.
+              Add survey questions for voters to answer when submitting their
+              ballots. Please add a title, prompt, and options, and select a
+              question type for each.
             </p>
 
-            {/* Listing of all categories via accordion*/}
-            <h3>Social Categories</h3>
+            {/* Listing of all survey questions via accordion*/}
+            <h3>Survey Questions</h3>
             <div className="create__settings_section">
-              {categories.length > 0 ? (
-                // If categories array contains at least one category
+              {questions.length > 0 ? (
+                // If questions array contains at least one question
                 <Accordion>
-                  {categories.map((category, i) => {
-                    // Render categories in accordion
+                  {questions.map((question, i) => {
+                    // Render questions in accordion
                     return (
                       <AccordionItem key={i}>
                         <AccordionItemHeading>
                           <AccordionItemButton>
-                            {category.title}
+                            {question.title}
                           </AccordionItemButton>
                         </AccordionItemHeading>
                         <AccordionItemPanel>
                           <div className="accordion__value">
                             <label>Prompt</label>
-                            <textarea value={category.prompt} disabled />
+                            <textarea value={question.prompt} disabled />
                           </div>
                           <div className="accordion__value">
                             <label>Options</label>
-                            <textarea value={category.options.join('\n')} disabled />
+                            <textarea value={question.options.join('\n')} disabled />
                           </div>
                           <div className="accordion__buttons">
-                            <button onClick={() => editCategory(i)}>
-                              Edit Category
+                            <button onClick={() => editQuestion(i)}>
+                              Edit Question
                             </button>
-                            <button onClick={() => deleteCategory(i)}>
-                              Delete Category
+                            <button onClick={() => deleteQuestion(i)}>
+                              Delete Question
                             </button>
                           </div>
                         </AccordionItemPanel>
@@ -374,68 +374,68 @@ export default function Create() {
                   })}
                 </Accordion>
               ) : (
-                // Else, if no categories in categories array
-                <span className="empty__subjects">No Categories Added</span>
+                // Else, if no questions in questions array
+                <span className="empty__subjects">No Questions Added</span>
               )}
             </div>
 
-            {/* Form to add categories */}
-            <h3>Add Categories</h3>
+            {/* Form to add questions */}
+            <h3>Add Survey Questions</h3>
             <div className="create__settings_section">
-              {/* Category addition form */}
+              {/* Survey question addition form */}
               <div className="create__subject_form">
-                {/* Add category tile */}
+                {/* Add survey question tile */}
                 <div>
-                  <label>Category Title</label>
+                  <label>Question Title</label>
                   <input
                     type="text"
                     placeholder="e.g. Affiliation"
-                    value={currentCategory.title}
-                    onChange={(e) => setCategoryData("title", e.target.value)}
+                    value={currentQuestion.title}
+                    onChange={(e) => setQuestionData("title", e.target.value)}
                   />
                 </div>
 
-                {/* Add category prompt */}
+                {/* Add survey question prompt */}
                 <div>
-                  <label>Category Prompt</label>
+                  <label>Question Prompt</label>
                   <textarea
                     placeholder="e.g. What organization/company/institution are you affiliated with?"
-                    value={currentCategory.prompt}
+                    value={currentQuestion.prompt}
                     onChange={(e) =>
-                      setCategoryData("prompt", e.target.value)
+                      setQuestionData("prompt", e.target.value)
                     }
                   />
                 </div>
 
-                {/* Add category options */}
+                {/* Add survey question options */}
                 <div>
-                  <label>Category Options</label>
+                  <label>Response Options</label>
                   <p>Each voter will have to choose one of the following. Please list options separated by newlines.</p>
                   <textarea
                     placeholder="e.g. Hector's Hardware"
-                    value={currentCategory.options.join('\n')}
+                    value={currentQuestion.options.join('\n')}
                     onChange={(e) =>
-                      setCategoryData("options", e.target.value.split('\n'))
+                      setQuestionData("options", e.target.value.split('\n'))
                     }
                   />
                 </div>
 
-                {/* Choose category type */}
+                {/* Choose survey question type */}
                 <div>
-                  <label>Category Type</label>
+                  <label>Question Type</label>
                   <select
                     className="dropdown-select"
                     defaultValue="multiple-choice"
-                    onChange={(e) => setCategoryData("type", e.target.value)}
+                    onChange={(e) => setQuestionData("type", e.target.value)}
                   >
-                    <option value="multiple-choice" selected>Pick one</option>
+                    <option value="multiple-choice">Pick one</option>
                     <option value="checkboxes">Check all that apply</option>
                   </select>
                 </div>
 
-                {currentCategory.title !== "" ? (
+                {currentQuestion.title !== "" ? (
                   // If form has title filled, allow submission
-                  <button onClick={submitCategory}>Add Category</button>
+                  <button onClick={submitQuestion}>Add Question</button>
                 ) : (
                   // Else, show disabled state
                   <button className="button__disabled" disabled>

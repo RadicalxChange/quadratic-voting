@@ -36,7 +36,7 @@ export default async (req, res) => {
         // With updated survey data from request body
         data: {
           voter_name: submission.name !== "" ? submission.name : "",
-          social_data: submission.social_data,
+          survey_data: submission.survey_data,
         },
       });
       // Upon success, respond with 200
