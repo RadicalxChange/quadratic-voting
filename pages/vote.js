@@ -18,7 +18,7 @@ function Vote({ query }) {
   const [votes, setVotes] = useState(null); // Option votes array
   const [credits, setCredits] = useState(0); // Total available credits
   const [submitLoading, setSubmitLoading] = useState(false); // Component (button) submission loading state
-  console.log(surveyData)
+
   /**
    * Calculates culmulative number of votes and available credits on load
    * @param {object} rData vote data object
@@ -262,7 +262,7 @@ function Vote({ query }) {
       <div className="vote">
         {/* Loading state check */}
         {!loading ? (
-          !data.survey_data ? (
+          data.event_data.survey_questions.length !== 0 && !data.survey_data ? (
             <div className="survey_container">
               <div className="vote__info">
                 {/* General voting header */}

@@ -36,7 +36,7 @@ export default async (req, res) => {
   // If event is concluded or private_key enables administrator access
   if (isAdmin || (moment() > moment(event.end_event_date))) {
     // Pass voting statistics to endpoint
-    if (event.survey_questions) {
+    if (JSON.parse(event.survey_questions).length !== 0) {
       statistics = generateStatisticsPlural(
         // Number of voteable subjects
         JSON.parse(event.event_data).length,
