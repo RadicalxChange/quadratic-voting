@@ -306,7 +306,7 @@ function Vote({ query }) {
               {data ? (
                 <>
                 {/* Hide ballot if event hasn't started yet */}
-                {(moment() < moment(data.event_data.start_event_date)) ? (
+                {(moment() < moment(data.event_data.start_event_date)) || (moment() > moment(data.event_data.end_event_date)) ? (
                   <></>
                 ) : (
                   <>
