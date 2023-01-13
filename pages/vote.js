@@ -489,7 +489,7 @@ function Vote({ query }) {
                                 ) : null}
                                 {option.url !== "" ? (
                                   // If URL exists, show URL
-                                  <div id={`link-container-${i}`}>
+                                  <div id={`link-container-${i}`} className="event__option_item_link">
                                     <label>Link</label>
                                     <a
                                       href={option.url}
@@ -825,6 +825,10 @@ function Vote({ query }) {
 
         .event__option_item > div > div {
           margin: 25px 0px;
+        }
+
+        .event__option_item_link {
+          overflow: scroll;
         }
 
         .title-container {
