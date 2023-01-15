@@ -15,6 +15,7 @@ function Vote({ query }) {
   const [loading, setLoading] = useState(true); // Global loading state
   const [name, setName] = useState(""); // Voter name
   const [surveyData, setSurveyData] = useState(null); // Survey questions array
+  const [surveyComplete, setSurveyComplete] = useState(false); // Is survey complete?
   const [votes, setVotes] = useState(null); // Option votes array
   const [credits, setCredits] = useState(0); // Total available credits
   const [submitLoading, setSubmitLoading] = useState(false); // Component (button) submission loading state
@@ -102,6 +103,15 @@ function Vote({ query }) {
       }
     }
     setSurveyData(tempArr);
+
+    // if survey is complete, enable submit button
+    let isSurveyDone = true;
+    for (const question of tempArr) {
+      if (!question.response) {
+        isSurveyDone = false;
+      }
+    }
+    setSurveyComplete(isSurveyDone);
   };
 
   /**
@@ -354,16 +364,23 @@ function Vote({ query }) {
                     </div>
                   </div>
                   {/* Submission button states */}
-                  {submitLoading ? (
-                      // Check for existing button loading state
-                      <button className="submit__button" disabled>
-                        <Loader />
-                      </button>
-                    ) : (
-                      // Else, enable submission
-                      <button name="input-element" onClick={submitResponse} className="submit__button">
-                        Submit Response
-                      </button>
+                  {!surveyComplete ? (
+                    // Else, enable submission
+                    <button className="submit__button_disabled" disabled>
+                      Please answer all the questions
+                    </button>
+                  ) : (
+                    submitLoading ? (
+                        // Check for existing button loading state
+                        <button className="submit__button" disabled>
+                          <Loader />
+                        </button>
+                      ) : (
+                        // Else, enable submission
+                        <button name="input-element" onClick={submitResponse} className="submit__button">
+                          Submit Response
+                        </button>
+                      )
                     )}
                   </>
                 )}
@@ -935,7 +952,8 @@ function Vote({ query }) {
           opacity: 0.8;
         }
 
-        .button__disabled {
+        .button__disabled,
+        .submit__button_disabled {
           background-color: #f1f2e5 !important;
           color: #000 !important;
           cursor: not-allowed !important;
@@ -949,7 +967,8 @@ function Vote({ query }) {
           transform: translateY(-7.5px);
         }
 
-        .submit__button {
+        .submit__button,
+        .submit__button_disabled {
           padding: 12px 0px;
           width: 100%;
           display: inline-block;
