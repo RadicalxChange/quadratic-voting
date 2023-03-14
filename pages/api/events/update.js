@@ -5,14 +5,6 @@ import moment from "moment"; // Time formatting
 export default async (req, res) => {
   const new_data = req.body; // Collect vote data from POST
 
-  const event = await prisma.events.findUnique({
-    where: { id: new_data.id },
-    select: {
-      start_event_date: true,
-      end_event_date: true,
-    },
-  });
-
   // Update event object
   await prisma.events.update({
     where: { id: new_data.id },
