@@ -136,7 +136,6 @@ function CanvasBlocks(props) {
       <style jsx>{`
         .canvas-wrapper {
           position: relative;
-          margin: 1vw;
         }
 
         #remaining-credits-blocks {
@@ -149,8 +148,6 @@ function CanvasBlocks(props) {
 
         @media only screen and (min-width: 768px) {
           .canvas-wrapper {
-            margin-bottom: 1rem;
-            width: 17vw;
           }
 
           #remaining-credits-blocks {
