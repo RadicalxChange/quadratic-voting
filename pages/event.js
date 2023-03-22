@@ -67,6 +67,7 @@ function Event({ query }) {
     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
     const fileExtension = '.xlsx';
     const options = data.chart.labels
+    const descriptions = data.chart.descriptions
     const effectiveVotes = data.chart.datasets[0].data
     const percentCredits = data.chart.datasets[1].data
     var rows = [];
@@ -74,6 +75,7 @@ function Event({ query }) {
     for (i = 0; i < options.length; i++) {
       var option = {
         title: options[i],
+        description: descriptions[i],
         support_clicks: effectiveVotes[i],
         percent_credits: percentCredits[i],
       }

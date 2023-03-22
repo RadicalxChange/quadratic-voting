@@ -196,6 +196,7 @@ function calculateQV(qvRaw) {
  */
 function generateChart(subjects, linearWeights, weights) {
   let labels = [], // Placeholder labels
+    descriptions = [],
     linearData = [], // Placeholder series linear weight array
     data = [], // Placeholder series weight array
     sorted_data = []; // Subject array for sorting by votes received
@@ -211,6 +212,7 @@ function generateChart(subjects, linearWeights, weights) {
     // Package subject data for sorting;
     var subject = {
       label: subjects[i].title,
+      description: subjects[i].description,
       linearData: (linearWeights[i] * 100).toFixed(2),
       data: weights[i],
     }
@@ -226,12 +228,14 @@ function generateChart(subjects, linearWeights, weights) {
     }
   });
   labels = sorted_data.map((subject) => subject.label);
+  descriptions = sorted_data.map((subject) => subject.description);
   data = sorted_data.map((subject) => subject.data);
   linearData = sorted_data.map((subject) => subject.linearData);
 
   // Return data in chartJS format
   return {
     labels,
+    descriptions,
     datasets: [
       {
         backgroundColor: "#002868",
