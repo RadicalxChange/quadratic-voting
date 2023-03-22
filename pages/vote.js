@@ -245,9 +245,9 @@ function Vote({ query }) {
                 <div className="vote__loading event__summary">
                   <h2>{data.event_data.event_title}</h2>
                   <div id="event__long_description">
-                    <p>Welcome to the 2022 Appropriations Prioritization Poll.</p>
+                    <p>Welcome to the 2023 Appropriations Prioritization Poll.</p>
 
-                    <p>Each member has 100 credits that they can use to place “support clicks” on bills or Long Bill amendments. “Support clicks” are a way to convey which bills have more impassioned support.</p>
+                    <p>Each member has 99 credits that they can use to place “support clicks” on bills or Long Bill amendments. “Support clicks” are a way to convey which bills have more impassioned support.</p>
 
                     <p>Placing one support click on a bill costs one credit. Placing two support clicks costs four credits. Placing three support clicks costs nine credits. This means you may place multiple support clicks on a single bill, but doing so means you quickly deplete your budget of credits to show support for other bills. The outcome of this poll will be used to prioritize bills through the Appropriations committee, spending down the General Fund legislative set aside.</p>
 
