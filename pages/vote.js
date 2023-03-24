@@ -173,15 +173,6 @@ function Vote({ query }) {
 
   return (
     <Layout>
-      {/* Navigation header */}
-      <Navigation
-        history={{
-          title: "Home",
-          link: "/",
-        }}
-        title="Participate"
-      />
-
       <div className="vote">
         {/* Loading state check */}
         {!loading ? (
