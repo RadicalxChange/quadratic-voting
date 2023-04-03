@@ -13,6 +13,7 @@ function Vote({ query }) {
   const router = useRouter(); // Hook into router
   const [data, setData] = useState(null); // Data retrieved from DB
   const [loading, setLoading] = useState(true); // Global loading state
+  const [name, setName] = useState(""); // Voter name
   const [votes, setVotes] = useState(null); // Option votes array
   const [credits, setCredits] = useState(0); // Total available credits
   const [submitLoading, setSubmitLoading] = useState(false); // Component (button) submission loading state
@@ -111,7 +112,7 @@ function Vote({ query }) {
     const { status } = await axios.post("/api/events/vote", {
       id: query.id, // Voter ID
       votes: vote_data, // Vote data
-      name: "", // Voter name
+      name: name, // Voter name
     });
 
     // If POST is a success
@@ -200,15 +201,23 @@ function Vote({ query }) {
                   ) : (
                     <>
                       {/* Submission button states */}
-                      {submitLoading ? (
-                        // Check for existing button loading state
-                        <button className="submit__button" disabled>
-                          <Loader />
-                        </button>
+                      {name !== "" ? (
+                        // Check for name being filled
+                        submitLoading ? (
+                          // Check for existing button loading state
+                          <button className="submit__button" disabled>
+                            <Loader />
+                          </button>
+                        ) : (
+                          // Else, enable submission
+                          <button name="input-element" onClick={submitVotes} className="submit__button">
+                            Submit Votes
+                          </button>
+                        )
                       ) : (
-                        // Else, enable submission
-                        <button name="input-element" onClick={submitVotes} className="submit__button">
-                          Submit Votes
+                        // If name isn't filled, request fulfillment
+                        <button className="submit__button button__disabled" disabled>
+                          Enter your name to vote
                         </button>
                       )}
                     </>
@@ -260,6 +269,40 @@ function Vote({ query }) {
                 {/* Ballot */}
                 {data ? (
                   <>
+                    {/* General information */}
+                    <div className="event__options">
+                      <h2>General Information</h2>
+                      <div className="divider" />
+                      <div className="event__option_item">
+                        <div>
+                          <label>Voter Name</label>
+                          {data ? (
+                            <>
+                            {(moment() > moment(data.event_data.end_event_date)) ? (
+                              <input
+                                disabled
+                                type="text"
+                                placeholder="Jane Doe"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                              />
+                            ) : (
+                              <>
+                              <p>Please enter your name:</p>
+                              <input
+                                type="text"
+                                placeholder="Jane Doe"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                              />
+                              </>
+                            )}
+                            </>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Voteable options */}
                     <div className="event__options">
                       <h2>Voteable Options</h2>
