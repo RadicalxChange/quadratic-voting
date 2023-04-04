@@ -217,7 +217,7 @@ function Vote({ query }) {
                       ) : (
                         // If name isn't filled, request fulfillment
                         <button className="submit__button button__disabled" disabled>
-                          Enter your name to vote
+                          Enter your name at the top to vote
                         </button>
                       )}
                     </>

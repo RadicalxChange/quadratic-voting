@@ -266,7 +266,7 @@ export default function Create() {
           </p>
 
           {/* Listing of all subjects via accordion*/}
-          <h3>Opções</h3>
+          <h3>Options</h3>
           <div className="create__settings_section">
             {subjects.length > 0 ? (
               // If subjects array contains at least one subject
