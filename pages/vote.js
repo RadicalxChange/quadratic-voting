@@ -177,48 +177,52 @@ function Vote({ query }) {
         {/* Loading state check */}
         {!loading ? (
           <>
-          <aside id="table-of-contents_container">
-            <div className="toc-header">
-              <h3>Jump to an Option</h3>
-            </div>
-            <div id="table-of-contents">
-              {data.vote_data.map((option, i) => {
-                // Loop through each voteable option
-                return (
-                  <div key={i} className="toc-item">
-                    <a href={'#' + i}>{option.title}</a>
-                  </div>
-                );
-              })}
-            </div>
-          </aside>
-          <aside id="budget-container">
-            <RemainingCredits
-              creditBalance={data.event_data.credits_per_voter}
-              creditsRemaining={credits}
-            />
-            {data ? (
-              <>
-              {(moment() > moment(data.event_data.end_event_date)) ? (
-                <></>
-              ) : (
+          {(moment() > moment(data.event_data.start_event_date)) && (moment() < moment(data.event_data.end_event_date)) ? (
+            <>
+            <aside id="table-of-contents_container">
+              <div className="toc-header">
+                <h3>Jump to an Option</h3>
+              </div>
+              <div id="table-of-contents">
+                {data.vote_data.map((option, i) => {
+                  // Loop through each voteable option
+                  return (
+                    <div key={i} className="toc-item">
+                      <a href={'#' + i}>{option.title}</a>
+                    </div>
+                  );
+                })}
+              </div>
+            </aside>
+            <aside id="budget-container">
+              <RemainingCredits
+                creditBalance={data.event_data.credits_per_voter}
+                creditsRemaining={credits}
+              />
+              {data ? (
                 <>
-                {submitLoading ? (
-                  // Check for existing button loading state
-                  <button className="submit__button" disabled>
-                    <Loader />
-                  </button>
+                {(moment() > moment(data.event_data.end_event_date)) ? (
+                  <></>
                 ) : (
-                  // Else, enable submission
-                  <button name="input-element" onClick={submitVotes} className="submit__button">
-                    Submit
-                  </button>
+                  <>
+                  {submitLoading ? (
+                    // Check for existing button loading state
+                    <button className="submit__button" disabled>
+                      <Loader />
+                    </button>
+                  ) : (
+                    // Else, enable submission
+                    <button name="input-element" onClick={submitVotes} className="submit__button">
+                      Submit
+                    </button>
+                  )}
+                  </>
                 )}
                 </>
-              )}
-              </>
-            ) : null}
-          </aside>
+              ) : null}
+            </aside>
+            </>
+          ) : null}
           <div className="ballot_container">
             <div className="vote__info">
               {/* General voting header */}
@@ -271,8 +275,8 @@ function Vote({ query }) {
               {/* Ballot */}
               {data ? (
                 <>
-                {/* Hide ballot if event hasn't started yet */}
-                {(moment() < moment(data.event_data.start_event_date)) ? (
+                {/* Hide ballot if event hasn't started or has ended */}
+                {(moment() < moment(data.event_data.start_event_date)) || (moment() > moment(data.event_data.end_event_date)) ? (
                   <></>
                 ) : (
                   <>
