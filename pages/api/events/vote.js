@@ -1,65 +1,51 @@
-import prisma from "db"; // Import prisma
-import moment from "moment"; // Time formatting
+import prisma from "db"; // Import the prisma client for interacting with the database
+import moment from "moment"; // Import the moment library for formatting and manipulating dates
 
-// --> /api/events/vote
+// This function handles the /api/events/vote route, which is used to submit votes for a specific event.
 export default async (req, res) => {
-  const vote = req.body; // Collect vote data from POST
+  // Collect vote data from the POST request body
+  const vote = req.body;
 
-  // Look for current JSON data
-  const { vote_data } = await prisma.voters.findUnique({
-    // Using individual, secret vote ID passed from request body
+  // Try to find the voter with the ID specified in the request body
+  const voter = await prisma.voters.findUnique({
     where: { id: vote.id },
-    // And select only existing JSON data
-    select: { vote_data: true },
   });
 
-  // Collect voter information
-  const user = await prisma.voters.findUnique({
-    // With ID from request body
-    where: {
-      id: vote.id,
-    },
-  });
-
-  // If voter exists in database
-  if (user) {
-    // Collect event data
-    const event_data = await prisma.events.findUnique({
-      // By searching for the Event ID from table of Events
-      where: {
-        id: user.event_uuid,
-      },
-      // And selecting the appropriate fields
+  // If the voter was found in the database
+  if (voter) {
+    // Get the event data for the event that the voter is participating in
+    const eventData = await prisma.events.findUnique({
+      where: { id: voter.event_uuid },
       select: {
         start_event_date: true,
         end_event_date: true,
       },
     });
-    if ((moment() > moment(event_data.start_event_date)) &&
-      (moment() < moment(event_data.end_event_date))) {
-      // Loop through vote_data in DB
-      for (let i = 0; i < vote_data.length; i++) {
-        // Update with new votes from request body
-        vote_data[i].votes = vote.votes[i];
-      }
-      // Update voter object
+
+    // Check if the current time is within the start and end dates of the event
+    if (moment().isBetween(eventData.start_event_date, eventData.end_event_date)) {
+      // Loop through the vote data for the voter and update the votes with the new values from the request body
+      voter.vote_data.forEach((voteData, i) => {
+        voteData.votes = vote.votes[i];
+      });
+
+      // Update the voter in the database with the updated vote data and (optionally) the updated voter name
       await prisma.voters.update({
-        // Using individual, secret vote ID passed from request body
         where: { id: vote.id },
-        // With updated votes from request body + preexisting vote_data from DB
         data: {
-          voter_name: vote.name !== "" ? vote.name : "",
-          vote_data: vote_data,
+          voter_name: vote.name !== "" ? vote.name : voter.voter_name,
+          vote_data: voter.vote_data,
         },
       });
-      // Upon success, respond with 200
+
+      // Send a success response to the client
       res.status(200).send("Successful update");
     } else {
-      // If voting is closed, respond with 400
-      res.status(400).send("Voting is closed for this event")
+      // If the voting period has ended, send a response indicating that voting is closed
+      res.status(400).send("Voting is closed for this event");
     }
   } else {
-    // If user does not exist, respond with 400
-    res.status(400).send("Invalid voter link")
+    // If the voter was not found in the database, send a response indicating an invalid voter link
+    res.status(400).send("Invalid voter link");
   }
 };
