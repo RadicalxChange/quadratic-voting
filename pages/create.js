@@ -44,13 +44,13 @@ export default function Create() {
   const [loading, setLoading] = useState(false);
 
   /**
-   * Sets the number of voters (between 1 - 250)
+   * Sets the number of voters (min. 1)
    * @param {number} value number of voters
    */
   const setNumVoters = (value) => {
     setGlobalSettings({
       ...globalSettings, // Current settings
-      num_voters: Math.max(1, Math.min(1000, Number(Math.round(value)))), // Number between 1 - 250 and not decimal
+      num_voters: Math.max(1, Number(Math.round(value))), // Number above 1 and not decimal
     });
   };
 
