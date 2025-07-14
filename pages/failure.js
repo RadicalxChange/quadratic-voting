@@ -20,12 +20,12 @@ function Failure({ query }) {
         <p>This shouldn't happen—please try again later!</p>
 
         {/* Return to voting */}
-        <Link href={`/vote?user=${query.user}`}>
+        <Link href={`/vote?user=${query.user}`} legacyBehavior>
           <a>Try voting again</a>
         </Link>
 
         {/* Redirect to event dashboard */}
-        <Link href={`/event?id=${query.event}`}>
+        <Link href={`/event?id=${query.event}`} legacyBehavior>
           <a>See event dashboard</a>
         </Link>
       </div>

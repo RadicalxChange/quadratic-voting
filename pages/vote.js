@@ -256,7 +256,7 @@ function Vote({ query }) {
                       <>
                       <h3>This event has concluded. Click below to to see the results!</h3>
                       {/* Redirect to event dashboard */}
-                      <Link href={`/event?id=${data.event_id}`}>
+                      <Link href={`/event?id=${data.event_id}`} legacyBehavior>
                         <a>See event dashboard</a>
                       </Link>
                       </>

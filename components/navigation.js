@@ -5,7 +5,7 @@ export default function Navigation(props) {
     // Navigation bar
     <div className="navigation">
       {/* Navigation title and history */}
-      <Link href={props.history.link}>
+      <Link href={props.history.link} legacyBehavior>
         <a>⟵ Return to {props.history.title}</a>
       </Link>
       <span>{props.title}</span>

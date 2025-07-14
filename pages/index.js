@@ -25,7 +25,7 @@ export default function Home() {
             <img src="/vectors/create_event.svg" alt="Create event" />
             <h2>Create an event</h2>
             <p>Set up Quadratic Voting for your event.</p>
-            <Link href="/create">
+            <Link href="/create" legacyBehavior>
               <a>Set Up Event</a>
             </Link>
           </div>
@@ -33,7 +33,7 @@ export default function Home() {
             <img src="/vectors/place_vote.svg" alt="Place vote" />
             <h2>Place your vote</h2>
             <p>Use your secret code to place votes.</p>
-            <Link href="/place">
+            <Link href="/place" legacyBehavior>
               <a>Place Votes</a>
             </Link>
           </div>

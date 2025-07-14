@@ -116,16 +116,11 @@ export default function Layout(props) {
           property="twitter:image"
           content="/open-graph-logo.png"
         />
-
-        <link
-          href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
-          rel="stylesheet"
-        />
       </Head>
 
       {/* Page global header */}
       <div className="layout__header">
-        <Link href="/">
+        <Link href="/" legacyBehavior>
           <a>
             <img
               src="/logo-yellow.svg"
