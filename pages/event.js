@@ -4,13 +4,31 @@ import moment from "moment"; // Moment date parsing
 import Head from "next/head"; // Custom meta images
 import Layout from "components/layout"; // Layout wrapper
 import Navigation from "components/navigation"; // Navigation
-import { HorizontalBar } from "react-chartjs-2"; // Horizontal bar graph
+import { Bar } from "react-chartjs-2"; // Horizontal bar graph
 import HashLoader from "react-spinners/HashLoader"; // Loader
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
 import Datetime from "react-datetime"; // Datetime component
 import { useState, useEffect } from "react"; // State handling
 import axios from "axios"; // Axios for requests
+import {
+  Chart as ChartJS,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+ChartJS.register(
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend
+);
 
 // Setup fetcher for SWR
 const fetcher = (url) => fetch(url).then((r) => r.json());
@@ -296,7 +314,7 @@ function Event({ query }) {
               {!loading && data ? (
                 <>
                 <div className="chart">
-                  <HorizontalBar data={data.chart} width={90} height={60} />
+                  <Bar data={data.chart} options={{indexAxis: 'y', responsive: true}} width={90} height={60} />
                 </div>
                 <button onClick={downloadXLSX} className="download__button">
                   Download spreadsheet
