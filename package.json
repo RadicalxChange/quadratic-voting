@@ -27,7 +27,7 @@
     "react-dom": "^19.1.0",
     "react-spinners": "^0.17.0",
     "swr": "^2.3.4",
-    "unfetch": "^5.0.0",
+    "unfetch": "4.2.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
