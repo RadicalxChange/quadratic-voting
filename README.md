@@ -30,7 +30,13 @@ psql -f prisma/schema.sql
 
 2. Setup environment variables. Copy [prisma/.env.sample](https://github.com/RadicalxChange/quadratic-voting/blob/master/prisma/.env.sample) to `prisma/.env` and replace `DATABASE_URL` with your PostgreSQL DB url.
 
-3. Run application
+3. Generate Prisma Client
+
+```
+npx prisma generate
+```
+
+4. Run application
 
 ```
 # Install dependencies
