@@ -1,22 +1,26 @@
-import axios from "axios"; // Axios for requests
-import { useState, useEffect } from "react"; // State management
-import Layout from "components/layout"; // Layout wrapper
-import Loader from "components/loader"; // Loader
-import { useRouter } from "next/router"; // Router for page change
-import Countdown from "react-countdown"; // Countdown timer
-import Navigation from "components/navigation"; // Navigation component
+import axios from "axios";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import Countdown from "react-countdown";
 
-function Place({ query }) {
-  const router = useRouter(); // Setup router instance
-  const [code, setCode] = useState(""); // Code input handler
-  const [error, setError] = useState(false); // Error state handler
-  const [loading, setLoading] = useState(false); // Loading state handler
+import Layout from "../components/layout";
+import Loader from "../components/loader";
+import Navigation from "../components/navigation";
 
-  // Run on page load
+export type PlaceProps = {
+  query: {
+    error?: string;
+  };
+};
+
+function Place({ query }: PlaceProps) {
+  const router = useRouter();
+  const [code, setCode] = useState("");
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    // If error URL param
     if (query.error) {
-      // Throw error
       throwError();
     }
   }, []);
@@ -25,23 +29,16 @@ function Place({ query }) {
    * Gets /api/events/exists to check if voter exists
    */
   const checkVoterExists = () => {
-    setLoading(true); // Toggle loading to true
+    setLoading(true);
 
-    // Get endpoint passing code as voter ID param
     axios
       .get(`/api/events/exists?id=${code}`)
-      // If status === 200
       .then(() => {
-        // Redirect to voting page
         router.push(`/vote?user=${code}`);
-        // Toggle loading to false
         setLoading(false);
       })
-      // If status !== 200
       .catch(() => {
-        // Run throw error
         throwError();
-        // Toggle loading to false
         setLoading(false);
       });
   };
@@ -50,23 +47,18 @@ function Place({ query }) {
    * Manages error state if enterred voting code does not exist
    */
   const throwError = () => {
-    // Toggle error to true
     setError(true);
 
-    // Setup a timed untoggling
     setTimeout(() => {
-      // Running tryAgain
       tryAgain();
-    }, 5000); // After 5 seconds
+    }, 5000);
   };
 
   /**
    * Restores from error state
    */
   const tryAgain = () => {
-    // Clear enterred code
     setCode("");
-    // Toggle error to false
     setError(false);
   };
 
@@ -74,13 +66,12 @@ function Place({ query }) {
    * Renderer for react-countdown
    * @param {integer} seconds remaining in countdown
    */
-  const renderer = ({ seconds }) => {
+  const renderer = ({ seconds }: { seconds: number }) => {
     return <span>{seconds}</span>;
   };
 
   return (
     <Layout>
-      {/* Navigation header */}
       <Navigation
         history={{
           title: "Home",
@@ -89,15 +80,11 @@ function Place({ query }) {
         title="Place Votes"
       />
 
-      {/* Place vote block */}
       <div className="place">
         {!error ? (
-          // If no error, show enter code block
           <div className="place__votes">
             <h2>Enter your voting code</h2>
-            <p>
-              This should be a long code with multiple characters and dashes.
-            </p>
+            <p>This should be a long code with multiple characters and dashes.</p>
             <input
               value={code}
               onChange={(e) => setCode(e.target.value)}
@@ -120,14 +107,12 @@ function Place({ query }) {
               Try Again
             </button>
             <span>
-              Automatic redirect in{" "}
-              <Countdown date={Date.now() + 5000} renderer={renderer} /> seconds
+              Automatic redirect in <Countdown date={Date.now() + 5000} renderer={renderer} /> seconds
             </span>
           </div>
         )}
       </div>
 
-      {/* Scoped CSS styling */}
       <style jsx>{`
         .place__votes {
           display: inline-block;
@@ -198,8 +183,7 @@ function Place({ query }) {
   );
 }
 
-// Collect URL params
-Place.getInitialProps = ({ query }) => {
+Place.getInitialProps = ({ query }: PlaceProps) => {
   return { query };
 };
 

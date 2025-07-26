@@ -1,19 +1,26 @@
-import prisma from "db"; // Import prisma
+import prisma from "../../../db/index";
+
+export type EventExistsRequest = {
+  query: { id: number };
+  body?: Parameters<typeof prisma.event.create>[0]["data"];
+};
+
+export type EventExistsResponse = {
+  send: (body: string) => Response;
+  status: (code: number) => EventExistsResponse;
+};
 
 // --> /api/events/exists
-export default async (req, res) => {
+export default async (req: EventExistsRequest, res: EventExistsResponse) => {
   // Collect voter ID from request object
   const {
     query: { id },
   } = req;
 
   // Search voters table
-  await prisma.voters
+  await prisma.voter
     .findMany({
-      where: {
-        // For entry with matching ID
-        id: id,
-      },
+      where: { id },
     })
     // If result is found
     .then((array) => {

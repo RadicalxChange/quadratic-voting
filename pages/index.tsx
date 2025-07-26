@@ -1,12 +1,10 @@
-import Link from "next/link"; // Dynamic links
-import Layout from "components/layout"; // Layout wrapper
+import Link from "next/link";
+import Layout from "../components/layout";
 
 export default function Home() {
   return (
-    // Home page
     <Layout>
       <div className="home">
-        {/* Home heading */}
         <div className="home__content">
           <h1>RxC QV</h1>
           <h2>An easy tool to host a quadratic vote.</h2>
@@ -19,27 +17,21 @@ export default function Home() {
           <h2>Host a Quadratic Voting Event Below!</h2>
         </div>
 
-        {/* Home buttons */}
         <div className="home__cta">
           <div className="home__cta_button">
             <img src="/vectors/create_event.svg" alt="Create event" />
             <h2>Create an event</h2>
             <p>Set up Quadratic Voting for your event.</p>
-            <Link href="/create">
-              <a>Set Up Event</a>
-            </Link>
+            <Link href="/create">Set Up Event</Link>
           </div>
           <div className="home__cta_button">
             <img src="/vectors/place_vote.svg" alt="Place vote" />
             <h2>Place your vote</h2>
             <p>Use your secret code to place votes.</p>
-            <Link href="/place">
-              <a>Place Votes</a>
-            </Link>
+            <Link href="/place">Place Votes</Link>
           </div>
         </div>
 
-        {/* Scoped styling */}
         <style jsx>{`
           .home__content {
             max-width: 700px;

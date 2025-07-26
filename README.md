@@ -7,7 +7,7 @@ This application is built atop
 
 1. Front-end: [NextJS](https://nextjs.org/) (React)
 2. Back-end: [NodeJS](https://nodejs.org/en/) + [Express](https://expressjs.com/) serverless functions
-3. Database: [PostgreSQL](https://www.postgresql.org/) + the [Prisma](https://www.prisma.io/) DB toolkit
+3. Database: [SQLite](https://www.sqlite.org/) + the [Prisma](https://www.prisma.io/) DB toolkit
 
 At a fundamental level, the way in which voting links are generated and sessions are handled is kept simple:
 
@@ -21,14 +21,13 @@ Important files:
 
 ## Run locally
 
-1. Setup your PostgreSQL database
+1. Copy environment variables
 
-```
-# Import schema
-psql -f prisma/schema.sql
+```bash
+cp prisma/.env.sample prisma/.env
 ```
 
-2. Setup environment variables. Copy [prisma/.env.sample](https://github.com/RadicalxChange/quadratic-voting/blob/master/prisma/.env.sample) to `prisma/.env` and replace `DATABASE_URL` with your PostgreSQL DB url.
+2. (Optional) Update `prisma/.env` if you wish to change the default SQLite file path.
 
 3. Run application
 

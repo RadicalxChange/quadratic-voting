@@ -1,16 +1,19 @@
-import Link from "next/link"; // Dynamic links
+import Link from "next/link";
 
-export default function Navigation(props) {
+export type NavigationProps = {
+  history: {
+    link: string;
+    title: string;
+  };
+  title: string;
+};
+
+export default function Navigation(props: NavigationProps) {
   return (
-    // Navigation bar
     <div className="navigation">
-      {/* Navigation title and history */}
-      <Link href={props.history.link}>
-        <a>⟵ Return to {props.history.title}</a>
-      </Link>
+      <Link href={props.history.link}>⟵ Return to {props.history.title}</Link>
       <span>{props.title}</span>
 
-      {/* Scoped styling */}
       <style jsx>{`
         .navigation {
           background-color: #edff38;

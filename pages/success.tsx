@@ -1,11 +1,18 @@
-import Link from "next/link"; // Dynamic links
-import Layout from "components/layout"; // Layout wrapper
-import Navigation from "components/navigation"; // Navigation component
+import Link from "next/link";
 
-function Success({ query }) {
+import Layout from "../components/layout";
+import Navigation from "../components/navigation";
+
+export type SuccessProps = {
+  query: {
+    user: string;
+    event: string;
+  };
+};
+
+function Success({ query }: SuccessProps) {
   return (
     <Layout>
-      {/* Navigation header */}
       <Navigation
         history={{
           title: "Voting",
@@ -14,23 +21,15 @@ function Success({ query }) {
         title="Vote Success"
       />
 
-      {/* Success dialog */}
       <div className="success">
         <h1>Your vote is in!</h1>
         <p>You have successfully placed your votes.</p>
 
-        {/* Go back to voting */}
-        <Link href={`/vote?user=${query.user}`}>
-          <a>Change your votes</a>
-        </Link>
+        <Link href={`/vote?user=${query.user}`}>Change your votes</Link>
 
-        {/* Redirect to event dashboard */}
-        <Link href={`/event?id=${query.event}`}>
-          <a>See event dashboard</a>
-        </Link>
+        <Link href={`/event?id=${query.event}`}>See event dashboard</Link>
       </div>
 
-      {/* Scoped styling */}
       <style jsx>{`
         .success {
           max-width: 700px;
@@ -83,9 +82,7 @@ function Success({ query }) {
   );
 }
 
-// On initial page load:
 Success.getInitialProps = ({ query }) => {
-  // Collect url params
   return { query };
 };
 

@@ -1,23 +1,26 @@
 import React, { useEffect, useRef } from "react";
 
-function ProposalBlocks(props) {
-  const canvasRef = useRef(null);
-  const totalHeightBlocks = Math.sqrt(props.cost)
+export type ProposalBlocksProps = {
+  cost: number;
+};
+
+function ProposalBlocks(props: ProposalBlocksProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const totalHeightBlocks = Math.sqrt(props.cost);
 
   useEffect(() => {
-    draw()
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[props.cost]);
+    draw();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.cost]);
 
-  // make canvas responsive
-  window.addEventListener('resize', () => {
-    draw()
+  window.addEventListener("resize", () => {
+    draw();
   });
 
   const draw = () => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         setUpCanvas(canvas, ctx);
@@ -26,32 +29,40 @@ function ProposalBlocks(props) {
     }
   };
 
-  // set up canvas dimensions
-  const setUpCanvas = (canvas, ctx) => {
+  const setUpCanvas = (
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+  ) => {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
-    var w = canvas.width, h = canvas.height;
+    var w = canvas.width,
+      h = canvas.height;
 
     // set the scale of the context
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
     // scale the canvas by window.devicePixelRatio
-    canvas.width = w*window.devicePixelRatio;
-    canvas.height = h*window.devicePixelRatio;
+    canvas.width = w * window.devicePixelRatio;
+    canvas.height = h * window.devicePixelRatio;
   };
 
-  // draw
-  const drawGraph = (canvas, ctx) => {
+  const drawGraph = (
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+  ) => {
     const maxCellHeight = window.innerWidth < 768 ? 16 : 10;
-    const cellHeight = Math.min(canvas.height / totalHeightBlocks, maxCellHeight);
-    const blockHeight = cellHeight * .7;
+    const cellHeight = Math.min(
+      canvas.height / totalHeightBlocks,
+      maxCellHeight,
+    );
+    const blockHeight = cellHeight * 0.7;
     const gutter = cellHeight - blockHeight;
-    const px = (canvas.width - cellHeight*totalHeightBlocks) / 2
-    const py = (canvas.height - cellHeight*totalHeightBlocks) / 2
+    const px = (canvas.width - cellHeight * totalHeightBlocks) / 2;
+    const py = (canvas.height - cellHeight * totalHeightBlocks) / 2;
     for (let j = 0; j < totalHeightBlocks; j++) {
       for (let i = 0; i < totalHeightBlocks; i++) {
         const x = px + (blockHeight + gutter) * i;
-        const y = py + (blockHeight + gutter) * j + (gutter / 2);
+        const y = py + (blockHeight + gutter) * j + gutter / 2;
         ctx.fillStyle = "black";
         ctx.fillRect(x, y, blockHeight, blockHeight);
       }
@@ -62,7 +73,6 @@ function ProposalBlocks(props) {
     <div className="canvas-wrapper">
       <canvas id="proposal-blocks" ref={canvasRef} />
 
-      {/* Scoped styling */}
       <style jsx>{`
         .canvas-wrapper {
           height: 6rem;

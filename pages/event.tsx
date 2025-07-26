@@ -1,37 +1,40 @@
-import useSWR from "swr"; // State-while-revalidate
-import fetch from "unfetch"; // Fetch for requests
-import moment from "moment"; // Moment date parsing
-import Head from "next/head"; // Custom meta images
-import Layout from "components/layout"; // Layout wrapper
-import Navigation from "components/navigation"; // Navigation
-import { HorizontalBar } from "react-chartjs-2"; // Horizontal bar graph
-import HashLoader from "react-spinners/HashLoader"; // Loader
-import * as FileSaver from 'file-saver';
-import * as XLSX from 'xlsx';
-import Datetime from "react-datetime"; // Datetime component
-import { useState, useEffect } from "react"; // State handling
-import axios from "axios"; // Axios for requests
+import useSWR from "swr";
+import moment from "moment";
+import Head from "next/head";
+import { Bar } from "react-chartjs-2";
+import HashLoader from "react-spinners/HashLoader";
+import FileSaver from "file-saver";
+import * as XLSX from "xlsx";
+import Datetime from "react-datetime";
+import { useState } from "react";
+import axios, { AxiosResponse } from "axios";
 
-// Setup fetcher for SWR
-const fetcher = (url) => fetch(url).then((r) => r.json());
+import Layout from "../components/layout";
+import Navigation from "../components/navigation";
 
-function Event({ query }) {
+import type { EventDetailsResponseData } from "./api/events/details";
+import type { EventUpdateRequest } from "./api/events/update";
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
+
+export type EventProps = {
+  query: {
+    event_id: string;
+    secret?: string;
+  };
+};
+
+function Event({ query }: EventProps) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [editMode, setEditMode] = useState(false);
 
-  // Collect data from endpoint
-  const { data, loading } = useSWR(
-    // Use query ID in URL
-    `/api/events/details?id=${query.id}${
-      // If secret is present, use administrator view
-      query.secret !== "" ? `&secret_key=${query.secret}` : ""
-    }`,
+  const { data, isLoading, mutate } = useSWR<EventDetailsResponseData>(
+    `/api/events/details?id=${query.event_id}${query.secret !== "" ? `&secret_key=${query.secret}` : ""}`,
     {
       fetcher,
-      // Force refresh SWR every 500ms
-      refreshInterval: 500,
-    }
+      refreshInterval: 5000, // TODO: configurable
+    },
   );
 
   /**
@@ -43,9 +46,7 @@ function Event({ query }) {
       .map((voter, _) => `https://quadraticvote.radicalxchange.org/vote?user=${voter.id}`)
       .join("\n");
 
-    // Create link component
     const element = document.createElement("a");
-    // Create blob from text
     const file = new Blob([text], { type: "text/plain" });
 
     // Setup link component to be downloadable and hidden
@@ -53,114 +54,127 @@ function Event({ query }) {
     element.download = "voter_links.txt";
     element.style.display = "none";
 
-    // Append link component to body
     document.body.appendChild(element);
 
-    // Click link component to download file
     element.click();
 
-    // Remove link component from body
     document.body.removeChild(element);
   };
 
   const downloadXLSX = () => {
-    const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-    const fileExtension = '.xlsx';
-    const options = data.chart.labels
-    const descriptions = data.chart.descriptions
-    const effectiveVotes = data.chart.datasets[0].data
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const options = data.chart.labels;
+    const descriptions = data.chart.descriptions;
+    const effectiveVotes = data.chart.datasets[0].data;
     var rows = [];
-    var i;
+    var i: number;
     for (i = 0; i < options.length; i++) {
       var option = {
         title: options[i],
         description: descriptions[i],
         votes: effectiveVotes[i],
-      }
+      };
       rows.push(option);
     }
     const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = { Sheets: { 'data': ws }, SheetNames: ['data'] };
-    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const fileData = new Blob([excelBuffer], {type: fileType});
-    FileSaver.saveAs(fileData, 'qv-results' + fileExtension);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const fileData = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(fileData, "qv-results" + fileExtension);
   };
 
-  const toggleEditMode = async (start) => {
+  const toggleEditMode = async (start: boolean) => {
     if (start) {
       if (data) {
-        setStartDate(moment(data.event.start_event_date));
-        setEndDate(moment(data.event.end_event_date));
+        setStartDate(`${moment(data.event.start_event_date)}`);
+        setEndDate(`${moment(data.event.end_event_date)}`);
         setEditMode(true);
       }
     } else {
-      // POST data and collect status
-      const { status } = await axios.post("/api/events/update", {
+      const { status } = await axios.post<string, AxiosResponse, EventUpdateRequest["body"]>("/api/events/update", {
         id: data.event.id,
         start_event_date: startDate,
         end_event_date: endDate,
       });
-      // If POST is a success
       if (status === 200) {
-        // Close edit mode
         setEditMode(false);
       }
     }
   };
 
+  const horizBarOptions = {
+    // scales: {
+    //   xAxes: [
+    //     {
+    //       ticks: { beginAtZero: true },
+    //     },
+    //   ],
+    // },
+    indexAxis: "y" as const,
+    // elements: {
+    //   bar: {
+    //     borderWidth: 2,
+    //   },
+    // },
+    // responsive: true,
+    // plugins: {
+    //   legend: {
+    //     position: 'right' as const,
+    //   },
+    //   title: {
+    //     display: true,
+    //     text: 'Chart.js Horizontal Bar Chart',
+    //   },
+    // },
+  };
+
   return (
-    <Layout event>
-      {/* Custom meta images */}
-      <Head>
+    <Layout>
+      {/* <Head>
         <meta
           property="og:image"
-          content={`https://qv-image.vercel.app/api/?id=${query.id}`}
+          content={`https://qv-image.vercel.app/api/?id=${query.event_id}`}
         />
         <meta
           property="twitter:image"
-          content={`https://qv-image.vercel.app/api/?id=${query.id}`}
+          content={`https://qv-image.vercel.app/api/?id=${query.event_id}`}
         />
-      </Head>
+      </Head> */}
 
-      {/* Navigation header */}
       <Navigation
         history={{
           // If secret is not present, return to home
-          title:
-            query.secret && query.secret !== "" ? "event creation" : "home",
+          title: query.secret && query.secret !== "" ? "event creation" : "home",
           // If secret is present, return to create page
           link: query.secret && query.secret !== "" ? `/create` : "/",
         }}
         title="Event Details"
       />
 
-      {/* Event page summary */}
       <div className="event">
         <h1>Event Details</h1>
         <div className="event__information">
-          <h2>{!loading && data ? data.event.event_title : "Loading..."}</h2>
-          <p>
-            {!loading && data ? data.event.event_description : "Loading..."}
-          </p>
+          <h2>{!isLoading && data ? data.event.event_title : "Loading..."}</h2>
+          <p>{!isLoading && data ? data.event.event_description : "Loading..."}</p>
           {data ? (
             <>
-            {(moment() > moment(data.event.end_event_date)) ? (
-              <h3>This event has concluded. See results below!</h3>
-            ) : (
-              <>
-              {(moment() < moment(data.event.start_event_date)) ? (
-                <h3>This event begins {moment(data.event.start_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+              {moment() > moment(data.event.end_event_date) ? (
+                <h3>This event has concluded. See results below!</h3>
               ) : (
-                <h3>This event closes {moment(data.event.end_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                <>
+                  {moment() < moment(data.event.start_event_date) ? (
+                    <h3>This event begins {moment(data.event.start_event_date).format("MMMM Do YYYY, h:mm:ss a")}</h3>
+                  ) : (
+                    <h3>This event closes {moment(data.event.end_event_date).format("MMMM Do YYYY, h:mm:ss a")}</h3>
+                  )}
+                </>
               )}
-              </>
-            )}
             </>
           ) : null}
         </div>
 
-        {/* Event start date selection */}
-        {!loading && data ? (
+        {!isLoading && data ? (
           editMode ? (
             <div className="event__section">
               <label>Event start date</label>
@@ -168,12 +182,10 @@ function Event({ query }) {
                 <Datetime
                   className="create__settings_datetime"
                   value={startDate}
-                  onChange={(value) => setStartDate(value)}
+                  onChange={(value) => setStartDate(value as string)}
                 />
-                <button
-                  type="button"
-                  onClick={() => toggleEditMode(false)}
-                >save
+                <button type="button" onClick={() => toggleEditMode(false)}>
+                  save
                 </button>
               </div>
             </div>
@@ -181,14 +193,10 @@ function Event({ query }) {
             <div className="event__section">
               <label>Event start date</label>
               <div className="event__dates">
-                <p>
-                  {moment(data.event.start_event_date).format('MMMM Do YYYY, h:mm a')}
-                </p>
+                <p>{moment(data.event.start_event_date).format("MMMM Do YYYY, h:mm a")}</p>
                 {query.secret && query.secret !== "" ? (
-                  <button
-                    type="button"
-                    onClick={() => toggleEditMode(true)}
-                  >edit
+                  <button type="button" onClick={() => toggleEditMode(true)}>
+                    edit
                   </button>
                 ) : null}
               </div>
@@ -196,8 +204,7 @@ function Event({ query }) {
           )
         ) : null}
 
-        {/* Event end date selection */}
-        {!loading && data ? (
+        {!isLoading && data ? (
           editMode ? (
             <div className="event__section">
               <label>Event end date</label>
@@ -205,12 +212,10 @@ function Event({ query }) {
                 <Datetime
                   className="create__settings_datetime"
                   value={endDate}
-                  onChange={(value) => setEndDate(value)}
+                  onChange={(value) => setEndDate(value as string)}
                 />
-                <button
-                  type="button"
-                  onClick={() => toggleEditMode(false)}
-                >save
+                <button type="button" onClick={() => toggleEditMode(false)}>
+                  save
                 </button>
               </div>
             </div>
@@ -218,14 +223,10 @@ function Event({ query }) {
             <div className="event__section">
               <label>Event end date</label>
               <div className="event__dates">
-                <p>
-                  {moment(data.event.end_event_date).format('MMMM Do YYYY, h:mm a')}
-                </p>
+                <p>{moment(data.event.end_event_date).format("MMMM Do YYYY, h:mm a")}</p>
                 {query.secret && query.secret !== "" ? (
-                  <button
-                    type="button"
-                    onClick={() => toggleEditMode(true)}
-                  >edit
+                  <button type="button" onClick={() => toggleEditMode(true)}>
+                    edit
                   </button>
                 ) : null}
               </div>
@@ -237,34 +238,23 @@ function Event({ query }) {
         <div className="event__section">
           <label>Event URL</label>
           <p>Statistics dashboard URL</p>
-          <input
-            value={`https://quadraticvote.radicalxchange.org/event?id=${query.id}`}
-            readOnly
-          />
+          <input value={`https://quadraticvote.radicalxchange.org/event?id=${query.event_id}`} readOnly />
         </div>
 
         {/* Event private URL */}
-        {query.id !== "" &&
-        query.secret !== "" &&
-        query.secret !== undefined &&
-        !loading &&
-        data ? (
+        {query.event_id !== "" && query.secret !== "" && query.secret !== undefined && !isLoading && data ? (
           <div className="event__section">
             <label className="private__label">Private Admin URL</label>
             <p>Save this URL to manage event and make changes</p>
             <input
-              value={`https://quadraticvote.radicalxchange.org/event?id=${query.id}&secret=${query.secret}`}
+              value={`https://quadraticvote.radicalxchange.org/event?id=${query.event_id}&secret=${query.secret}`}
               readOnly
             />
           </div>
         ) : null}
 
         {/* Event copyable links */}
-        {query.id !== "" &&
-        query.secret !== "" &&
-        query.secret !== undefined &&
-        !loading &&
-        data ? (
+        {query.event_id !== "" && query.secret !== "" && query.secret !== undefined && !isLoading && data ? (
           <div className="event__section">
             <label className="private__label">Individual voting links</label>
             <p>For private sharing with voters</p>
@@ -272,9 +262,7 @@ function Event({ query }) {
               className="event__section_textarea"
               // Collect voter urls as one text element
               value={data.event.voters
-                .map(
-                  (voter, _) => `https://quadraticvote.radicalxchange.org/vote?user=${voter.id}`
-                )
+                .map((voter, _) => `https://quadraticvote.radicalxchange.org/vote?user=${voter.id}`)
                 .join("\n")}
               readOnly
             />
@@ -285,54 +273,45 @@ function Event({ query }) {
         ) : null}
 
         {/* Event public chart */}
-        {query.id !== "" &&
-        !loading &&
-        data ? (
+        {query.event_id !== "" && !isLoading && data ? (
           <div className="event__section">
             <label>Event Votes</label>
             {data.chart ? (
-            <>
-              <p>Quadratic Voting-weighted voting results</p>
-              {!loading && data ? (
-                <>
-                <div className="chart">
-                  <HorizontalBar data={data.chart} width={90} height={60} />
-                </div>
-                <button onClick={downloadXLSX} className="download__button">
-                  Download spreadsheet
-                </button>
-                </>
-              ) : (
-                <div className="loading__chart">
-                  <HashLoader
-                    size={50}
-                    color="#000"
-                    css={{ display: "inline-block" }}
-                  />
-                  <h3>Loading Chart...</h3>
-                  <span>Please give us a moment</span>
-                </div>
-              )}
-            </>
+              <>
+                <p>Quadratic Voting-weighted voting results</p>
+                {!isLoading && data ? (
+                  <>
+                    <div className="chart">
+                      <Bar data={data.chart} width={90} height={60} options={horizBarOptions} />
+                    </div>
+                    <button onClick={downloadXLSX} className="download__button">
+                      Download spreadsheet
+                    </button>
+                  </>
+                ) : (
+                  <div className="loading__chart">
+                    <HashLoader size={50} color="#000" cssOverride={{ display: "inline-block" }} />
+                    <h3>Loading Chart...</h3>
+                    <span>Please give us a moment</span>
+                  </div>
+                )}
+              </>
             ) : (
               <p>Voting results will appear here when the event has concluded</p>
             )}
           </div>
         ) : null}
 
-
         {/* Event public statistics */}
-        {query.id !== "" &&
-        !loading &&
-        data ? (
+        {query.event_id !== "" && !isLoading && data ? (
           <div className="event__section">
-              <label>Event Statistics</label>
-              {data.statistics ? (
+            <label>Event Statistics</label>
+            {data.statistics ? (
               <>
                 <div className="event__sub_section">
                   <label>Voting Participants</label>
                   <h3>
-                    {!loading && data
+                    {!isLoading && data
                       ? `${data.statistics.numberVoters.toLocaleString()} / ${data.statistics.numberVotersTotal.toLocaleString()}`
                       : "Loading..."}
                   </h3>
@@ -340,20 +319,19 @@ function Event({ query }) {
                 <div className="event__sub_section">
                   <label>Credits Used</label>
                   <h3>
-                    {!loading && data
+                    {!isLoading && data
                       ? `${data.statistics.numberVotes.toLocaleString()} / ${data.statistics.numberVotesTotal.toLocaleString()}`
                       : "Loading..."}
                   </h3>
                 </div>
               </>
-              ) : (
-                <p>Event Statistics will appear here when the event has concluded</p>
-              )}
+            ) : (
+              <p>Event Statistics will appear here when the event has concluded</p>
+            )}
           </div>
         ) : null}
       </div>
 
-      {/* Global styling */}
       <style jsx global>{`
         .create__settings_section > input,
         .create__settings_datetime > input {
@@ -366,7 +344,6 @@ function Event({ query }) {
         }]
       `}</style>
 
-      {/* Scoped styles */}
       <style jsx>{`
         .event {
           max-width: 700px;
@@ -528,9 +505,7 @@ function Event({ query }) {
   );
 }
 
-// On initial page load:
-Event.getInitialProps = ({ query }) => {
-  // Return URL params
+Event.getInitialProps = ({ query }: EventProps) => {
   return { query };
 };
 

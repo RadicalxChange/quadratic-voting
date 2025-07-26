@@ -1,12 +1,12 @@
-import Head from "next/head"; // Header settings
-import Link from "next/link"; // Dynamic links
+import Head from "next/head";
+import Link from "next/link";
 
-export default function Layout(props) {
+export default function Layout(props: { children: React.ReactNode }) {
   return (
-    // Global layout setup
     <div className="layout">
-      {/* Header */}
-      <Head>        <link
+      <Head>
+        {" "}
+        <link
           rel="apple-touch-icon"
           sizes="57x57"
           href="/favicon/favicon-rxc.png"
@@ -82,63 +82,48 @@ export default function Layout(props) {
           content="/favicon/favicon-rxc.png"
         />
         <meta name="theme-color" content="#ffffff" />
-
         <title>RxC QV</title>
         <meta name="title" content="RxC QV" />
         <meta
           name="description"
           content="An easy tool to host a quadratic vote"
         />
-
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://quadraticvote.radicalxchange.org/" />
+        <meta
+          property="og:url"
+          content="https://quadraticvote.radicalxchange.org/"
+        />
         <meta property="og:title" content="RxC QV" />
         <meta
           property="og:description"
           content="An easy tool to host a quadratic vote"
         />
-
         <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content="https://quadraticvote.radicalxchange.org/" />
         <meta
-          property="twitter:title"
-          content="RxC QV"
+          property="twitter:url"
+          content="https://quadraticvote.radicalxchange.org/"
         />
+        <meta property="twitter:title" content="RxC QV" />
         <meta
           property="twitter:description"
           content="An easy tool to host a quadratic vote"
         />
-        <meta
-          property="og:image"
-          content="/open-graph-logo.png"
-        />
-        <meta
-          property="twitter:image"
-          content="/open-graph-logo.png"
-        />
-
+        <meta property="og:image" content="/open-graph-logo.png" />
+        <meta property="twitter:image" content="/open-graph-logo.png" />
         <link
           href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
           rel="stylesheet"
         />
       </Head>
 
-      {/* Page global header */}
       <div className="layout__header">
         <Link href="/">
-          <a>
-            <img
-              src="/logo-yellow.svg"
-              alt="RadicalxChange logo"
-            />
-          </a>
+          <img src="/logo-yellow.svg" alt="RadicalxChange logo" />
         </Link>
       </div>
 
-      {/* Page content */}
       <div className="layout__content">{props.children}</div>
 
-      {/* Page footer */}
       <div className="layout__footer">
         <div>
           <a
@@ -146,10 +131,7 @@ export default function Layout(props) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <img
-              src="/logo-yellow.svg"
-              alt="RadicalxChange logo"
-            />
+            <img src="/logo-yellow.svg" alt="RadicalxChange logo" />
           </a>
           <div>
             <a
@@ -170,7 +152,6 @@ export default function Layout(props) {
         </div>
       </div>
 
-      {/* Global styling */}
       <style jsx global>{`
         body {
           padding: 0px;
@@ -180,7 +161,6 @@ export default function Layout(props) {
         }
       `}</style>
 
-      {/* Scoped layout styling */}
       <style jsx>{`
         .layout__header {
           height: 65px;
@@ -253,30 +233,30 @@ export default function Layout(props) {
         }
 
         @font-face {
-            font-family: 'suisse_intlbook_italic';
-            src: url('./fonts/suisseintl-bookitalic-webfont.woff2') format('woff2'),
-                 url('./fonts/suisseintl-bookitalic-webfont.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-
+          font-family: "suisse_intlbook_italic";
+          src:
+            url("./fonts/suisseintl-bookitalic-webfont.woff2") format("woff2"),
+            url("./fonts/suisseintl-bookitalic-webfont.woff") format("woff");
+          font-weight: normal;
+          font-style: normal;
         }
 
         @font-face {
-            font-family: 'suisse_intlbook';
-            src: url('./fonts/suisseintl-book-webfont.woff2') format('woff2'),
-                 url('./fonts/suisseintl-book-webfont.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-
+          font-family: "suisse_intlbook";
+          src:
+            url("./fonts/suisseintl-book-webfont.woff2") format("woff2"),
+            url("./fonts/suisseintl-book-webfont.woff") format("woff");
+          font-weight: normal;
+          font-style: normal;
         }
 
         @font-face {
-            font-family: 'messerv2.1condensed';
-            src: url('./fonts/messerv2.1-condensed-webfont.woff2') format('woff2'),
-                 url('./fonts/messerv2.1-condensed-webfont.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-
+          font-family: "messerv2.1condensed";
+          src:
+            url("./fonts/messerv2.1-condensed-webfont.woff2") format("woff2"),
+            url("./fonts/messerv2.1-condensed-webfont.woff") format("woff");
+          font-weight: normal;
+          font-style: normal;
         }
       `}</style>
     </div>

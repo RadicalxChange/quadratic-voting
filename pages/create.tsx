@@ -4,17 +4,19 @@ import {
   AccordionItemHeading,
   AccordionItemButton,
   AccordionItemPanel,
-} from "react-accessible-accordion"; // React accordion
-import axios from "axios"; // Request handling
-import moment from "moment"; // Date handling
-import { useState } from "react"; // State handling
-import Datetime from "react-datetime"; // Datetime component
-import Layout from "components/layout"; // Layout wrapper
-import Loader from "components/loader"; // Loader component
-import { useRouter } from "next/router"; // Router hooks
-import Navigation from "components/navigation"; // Navigation bar
+} from "react-accessible-accordion";
+import axios, { AxiosResponse } from "axios";
+import moment from "moment";
+import { useState } from "react";
+import Datetime from "react-datetime";
+import { useRouter } from "next/router";
 
-// Initial global settings
+import Layout from "../components/layout";
+import Loader from "../components/loader";
+import Navigation from "../components/navigation";
+
+import { EventCreateRequest, EventCreateResponseData } from "./api/events/create";
+
 const defaultGlobalSettings = {
   event_title: "",
   event_description: "",
@@ -24,30 +26,27 @@ const defaultGlobalSettings = {
   end_event_date: moment().add(1, "days"),
 };
 
-// Initial empty subject
 const defaultCurrentSubject = {
   title: "",
   description: "",
   url: "",
 };
 
+export type EventSettings = typeof defaultGlobalSettings;
+export type EventItem = typeof defaultCurrentSubject;
+
 export default function Create() {
-  // Router object
   const router = useRouter();
-  // Global settings object
   const [globalSettings, setGlobalSettings] = useState(defaultGlobalSettings);
-  // Current subject object
   const [currentSubject, setCurrentSubject] = useState(defaultCurrentSubject);
-  // Array of all subjects
   const [subjects, setSubjects] = useState([]);
-  // Loading state
   const [loading, setLoading] = useState(false);
 
   /**
    * Sets the number of voters (between 1 - 250)
    * @param {number} value number of voters
    */
-  const setNumVoters = (value) => {
+  const setNumVoters = (value: number) => {
     setGlobalSettings({
       ...globalSettings, // Current settings
       num_voters: Math.max(1, Math.min(1000, Number(Math.round(value)))), // Number between 1 - 250 and not decimal
@@ -58,7 +57,7 @@ export default function Create() {
    * Sets the number of voting credits per voter (min. 1)
    * @param {number} value number of voting credits
    */
-  const setCreditsPerVoter = (value) => {
+  const setCreditsPerVoter = (value: number) => {
     setGlobalSettings({
       ...globalSettings, // Current settings
       credits_per_voter: Math.max(1, Number(Math.round(value))), // Number above 1 and not decimal
@@ -70,7 +69,7 @@ export default function Create() {
    * @param {string} type name of object date key
    * @param {object} value moment date object
    */
-  const setEventData = (type, value) => {
+  const setEventData = <K extends keyof EventSettings>(type: K, value: EventSettings[K]) => {
     setGlobalSettings({
       ...globalSettings,
       [type]: value,
@@ -82,7 +81,7 @@ export default function Create() {
    * @param {string} field object key
    * @param {string} value input field value
    */
-  const setSubjectData = (field, value) => {
+  const setSubjectData = (field: keyof EventItem, value: string) => {
     setCurrentSubject({
       ...currentSubject,
       [field]: value,
@@ -103,7 +102,7 @@ export default function Create() {
    * Edits item with x index by setting it to current and deleting from subjects[]
    * @param {number} index array index of item to edit
    */
-  const editSubject = (index) => {
+  const editSubject = (index: number) => {
     // Set current subject to to-be-edited item
     setCurrentSubject(subjects[index]);
     // Delete to-be-edited item from subjects array
@@ -114,7 +113,7 @@ export default function Create() {
    * Deletes item with x index by filtering it out of subjects[]
    * @param {number} index array index of item to delete
    */
-  const deleteSubject = (index) => {
+  const deleteSubject = (index: number) => {
     // Filter array for all items that are not subjects[index]
     setSubjects(subjects.filter((item, i) => i !== index));
   };
@@ -123,29 +122,30 @@ export default function Create() {
    * POST event creation endpoint
    */
   const submitEvent = async () => {
-    // Toggle loading
     setLoading(true);
 
     // Post create endpoint and retrieve event details
-    const eventDetails = await axios.post("/api/events/create", {
+    const eventDetails = await axios.post<
+      EventCreateResponseData,
+      AxiosResponse<EventCreateResponseData, EventCreateRequest["body"]>,
+      EventCreateRequest["body"]
+    >("/api/events/create", {
       ...globalSettings,
-      subjects,
+      start_event_date: globalSettings.start_event_date.toString(),
+      end_event_date: globalSettings.end_event_date.toString(),
+      items: subjects,
     });
 
-    // Toggle loading
     setLoading(false);
 
     // Redirect to events page on submission
     router
-      .push(
-        `/event?id=${eventDetails.data.id}&secret=${eventDetails.data.secret_key}`
-      )
+      .push(`/event?id=${eventDetails.data.id}&secret=${eventDetails.data.secret_key}`)
       .then(() => window.scrollTo(0, 0));
   };
 
   return (
     <Layout>
-      {/* Navigation header */}
       <Navigation
         history={{
           title: "Home",
@@ -154,29 +154,22 @@ export default function Create() {
         title="Create Event"
       />
 
-      {/* Create page */}
       <div className="create">
-        {/* Create page heading */}
         <div className="create__content">
           <h1>Create a new event</h1>
           <p>
-            To create an event, simply fill out the event settings, add your
-            options, and we will generate you quicklinks that you can share with
-            your audience.
+            To create an event, simply fill out the event settings, add your options, and we will generate you
+            quicklinks that you can share with your audience.
           </p>
         </div>
 
-        {/* Global settings */}
         <div className="create__settings">
-          {/* Global settings header */}
           <h2>Global Settings</h2>
           <p>
-            These settings are used to setup your event. You can add an event
-            title and description, select the number of voters, how many vote
-            credits they'll each receive, and a start and end date for voting.
+            These settings are used to setup your event. You can add an event title and description, select the number
+            of voters, how many vote credits they'll each receive, and a start and end date for voting.
           </p>
 
-          {/* Event title selection */}
           <div className="create__settings_section">
             <label htmlFor="event_title">Event title</label>
             <p>What is your event called?</p>
@@ -189,7 +182,6 @@ export default function Create() {
             />
           </div>
 
-          {/* Event description selection */}
           <div className="create__settings_section">
             <label htmlFor="event_description">Event description</label>
             <p>Describe your event in under 240 characters:</p>
@@ -198,10 +190,8 @@ export default function Create() {
               id="event_description"
               placeholder="My Event Description"
               value={globalSettings.event_description}
-              maxLength="240"
-              onChange={(e) =>
-                setEventData("event_description", e.target.value)
-              }
+              maxLength={240}
+              onChange={(e) => setEventData("event_description", e.target.value)}
             />
           </div>
 
@@ -213,7 +203,7 @@ export default function Create() {
               type="number"
               id="num_voters"
               value={globalSettings.num_voters}
-              onChange={(e) => setNumVoters(e.target.value)}
+              onChange={(e) => setNumVoters(parseInt(`${e.target.value}`))}
             />
           </div>
 
@@ -228,7 +218,7 @@ export default function Create() {
               step="1"
               id="credits_per_voter"
               value={globalSettings.credits_per_voter}
-              onChange={(e) => setCreditsPerVoter(e.target.value)}
+              onChange={(e) => setCreditsPerVoter(parseInt(`${e.target.value}`))}
             />
           </div>
 
@@ -239,7 +229,7 @@ export default function Create() {
             <Datetime
               className="create__settings_datetime"
               value={globalSettings.start_event_date}
-              onChange={(value) => setEventData("start_event_date", value)}
+              onChange={(value) => setEventData("start_event_date", value as moment.Moment)}
             />
           </div>
 
@@ -250,69 +240,31 @@ export default function Create() {
             <Datetime
               className="create__settings_datetime"
               value={globalSettings.end_event_date}
-              onChange={(value) => setEventData("end_event_date", value)}
+              onChange={(value) => setEventData("end_event_date", value as moment.Moment)}
             />
           </div>
         </div>
 
-        {/* Subject settings */}
         <div className="create__settings">
-          {/* Subject settings heading */}
           <h2>Options</h2>
           <p>
-            These settings enable you to add options that voters can delegate
-            their voting credits to. You can choose to add an option title,
-            description, and link.
+            These settings enable you to add options that voters can delegate their voting credits to. You can choose to
+            add an option title, description, and link.
           </p>
 
-          {/* Listing of all subjects via accordion*/}
           <h3>Options</h3>
           <div className="create__settings_section">
             {subjects.length > 0 ? (
               // If subjects array contains at least one subject
               <Accordion>
-                {subjects.map((subject, i) => {
-                  // Render subjects in accordion
-                  return (
-                    <AccordionItem key={i}>
-                      <AccordionItemHeading>
-                        <AccordionItemButton>
-                          {subject.title}
-                        </AccordionItemButton>
-                      </AccordionItemHeading>
-                      <AccordionItemPanel>
-                        {subject.description !== "" ? (
-                          // If subject has a description
-                          <div className="accordion__value">
-                            <label>Description</label>
-                            <textarea value={subject.description} disabled />
-                          </div>
-                        ) : null}
-                        {subject.url !== "" ? (
-                          // If subject has a URL
-                          <div className="accordion__value">
-                            <label>Link</label>
-                            <a
-                              href={subject.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {subject.url}
-                            </a>
-                          </div>
-                        ) : null}
-                        <div className="accordion__buttons">
-                          <button onClick={() => editSubject(i)}>
-                            Edit Option
-                          </button>
-                          <button onClick={() => deleteSubject(i)}>
-                            Delete Option
-                          </button>
-                        </div>
-                      </AccordionItemPanel>
-                    </AccordionItem>
-                  );
-                })}
+                {subjects.map((item, n) =>
+                  renderAccordionItem(
+                    item,
+                    n,
+                    () => editSubject(n),
+                    () => deleteSubject(n),
+                  ),
+                )}
               </Accordion>
             ) : (
               // Else, if no subjects in subjects array
@@ -320,7 +272,6 @@ export default function Create() {
             )}
           </div>
 
-          {/* Form to add subjects */}
           <h3>Add Options</h3>
           <div className="create__settings_section">
             {/* Subject addition form */}
@@ -336,19 +287,15 @@ export default function Create() {
                 />
               </div>
 
-              {/* Add subject description */}
               <div>
                 <label>Option Description</label>
                 <textarea
                   placeholder="Description of the option."
                   value={currentSubject.description}
-                  onChange={(e) =>
-                    setSubjectData("description", e.target.value)
-                  }
+                  onChange={(e) => setSubjectData("description", e.target.value)}
                 />
               </div>
 
-              {/* Add subject link */}
               <div>
                 <label>Option Link</label>
                 <input
@@ -372,7 +319,6 @@ export default function Create() {
           </div>
         </div>
 
-        {/* Submit event creation */}
         <div className="create__submission">
           {subjects.length > 1 ? (
             // If subjects have been provided, enable event creation
@@ -388,7 +334,6 @@ export default function Create() {
         </div>
       </div>
 
-      {/* Global styling */}
       <style jsx global>{`
         .create__settings_section > input,
         .create__settings_datetime > input {
@@ -462,7 +407,7 @@ export default function Create() {
         .accordion__buttons > button:nth-child(2) {
           background-color: #fff;
           color: #000;
-          border: 1px solid black
+          border: 1px solid black;
         }
         .accordion__buttons > button:hover {
           opacity: 0.8;
@@ -473,7 +418,6 @@ export default function Create() {
         }
       `}</style>
 
-      {/* Scoped styling */}
       <style jsx>{`
         .create {
           padding-bottom: 80px;
@@ -591,32 +535,64 @@ export default function Create() {
         }
 
         @font-face {
-            font-family: 'suisse_intlbook_italic';
-            src: url('./fonts/suisseintl-bookitalic-webfont.woff2') format('woff2'),
-                 url('./fonts/suisseintl-bookitalic-webfont.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-
+          font-family: "suisse_intlbook_italic";
+          src:
+            url("./fonts/suisseintl-bookitalic-webfont.woff2") format("woff2"),
+            url("./fonts/suisseintl-bookitalic-webfont.woff") format("woff");
+          font-weight: normal;
+          font-style: normal;
         }
 
         @font-face {
-            font-family: 'suisse_intlbook';
-            src: url('./fonts/suisseintl-book-webfont.woff2') format('woff2'),
-                 url('./fonts/suisseintl-book-webfont.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-
+          font-family: "suisse_intlbook";
+          src:
+            url("./fonts/suisseintl-book-webfont.woff2") format("woff2"),
+            url("./fonts/suisseintl-book-webfont.woff") format("woff");
+          font-weight: normal;
+          font-style: normal;
         }
 
         @font-face {
-            font-family: 'messerv2.1condensed';
-            src: url('./fonts/messerv2.1-condensed-webfont.woff2') format('woff2'),
-                 url('./fonts/messerv2.1-condensed-webfont.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-
+          font-family: "messerv2.1condensed";
+          src:
+            url("./fonts/messerv2.1-condensed-webfont.woff2") format("woff2"),
+            url("./fonts/messerv2.1-condensed-webfont.woff") format("woff");
+          font-weight: normal;
+          font-style: normal;
         }
       `}</style>
     </Layout>
+  );
+}
+
+function renderAccordionItem(item: EventItem, n: number, editSubject: () => void, deleteSubject: () => void) {
+  return (
+    <AccordionItem key={n}>
+      <AccordionItemHeading>
+        <AccordionItemButton>{item.title}</AccordionItemButton>
+      </AccordionItemHeading>
+      <AccordionItemPanel>
+        {item.description !== "" ? (
+          // If subject has a description
+          <div className="accordion__value">
+            <label>Description</label>
+            <textarea value={item.description} disabled />
+          </div>
+        ) : null}
+        {item.url !== "" ? (
+          // If subject has a URL
+          <div className="accordion__value">
+            <label>Link</label>
+            <a href={item.url} target="_blank" rel="noopener noreferrer">
+              {item.url}
+            </a>
+          </div>
+        ) : null}
+        <div className="accordion__buttons">
+          <button onClick={editSubject}>Edit Option</button>
+          <button onClick={deleteSubject}>Delete Option</button>
+        </div>
+      </AccordionItemPanel>
+    </AccordionItem>
   );
 }

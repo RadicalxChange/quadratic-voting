@@ -1,11 +1,18 @@
-import Link from "next/link"; // Dynamic links
-import Layout from "components/layout"; // Layout wrapper
-import Navigation from "components/navigation"; // Navigation component
+import Link from "next/link";
 
-function Failure({ query }) {
+import Layout from "../components/layout";
+import Navigation from "../components/navigation";
+
+export type FailureProps = {
+  query: {
+    user: string;
+    event: string;
+  };
+};
+
+function Failure({ query }: FailureProps) {
   return (
     <Layout>
-      {/* Navigation header */}
       <Navigation
         history={{
           title: "Voting",
@@ -14,23 +21,15 @@ function Failure({ query }) {
         title="Vote Failure"
       />
 
-      {/* Failure dialog */}
       <div className="failure">
         <h1>Oops! Your vote failed.</h1>
         <p>This shouldn't happen—please try again later!</p>
 
-        {/* Return to voting */}
-        <Link href={`/vote?user=${query.user}`}>
-          <a>Try voting again</a>
-        </Link>
+        <Link href={`/vote?user=${query.user}`}>Try voting again</Link>
 
-        {/* Redirect to event dashboard */}
-        <Link href={`/event?id=${query.event}`}>
-          <a>See event dashboard</a>
-        </Link>
+        <Link href={`/event?id=${query.event}`}>See event dashboard</Link>
       </div>
 
-      {/* Scoped styling */}
       <style jsx>{`
         .failure {
           max-width: 700px;
@@ -83,9 +82,7 @@ function Failure({ query }) {
   );
 }
 
-// On initial page load:
 Failure.getInitialProps = ({ query }) => {
-  // Collect URL params
   return { query };
 };
 
