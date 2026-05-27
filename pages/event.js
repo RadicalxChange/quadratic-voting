@@ -16,6 +16,71 @@ import { buildVotersSheet, shouldIncludeVotersSheet } from "lib/export";
 // Setup fetcher for SWR
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
+// Displays the public voting URL for an event in public link mode, with a
+// copy-to-clipboard button. URL is built client-side from
+// window.location.origin so we don't hard-code the deployment domain.
+function PublicVotingUrl({ eventId }) {
+  const [url, setUrl] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    // window is only defined client-side; safe inside useEffect.
+    setUrl(`${window.location.origin}/vote?event=${eventId}`);
+  }, [eventId]);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (_) {
+      // Clipboard may be unavailable (e.g. insecure context). Fall back
+      // by selecting the input so the user can copy manually.
+      const el = document.getElementById("public_voting_url");
+      if (el) {
+        el.focus();
+        el.select();
+      }
+    }
+  };
+
+  return (
+    <div className="public__url">
+      <input id="public_voting_url" value={url} readOnly />
+      <button type="button" onClick={copy}>
+        {copied ? "Copied!" : "Copy"}
+      </button>
+      <style jsx>{`
+        .public__url {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 8px;
+          margin-top: 12px;
+        }
+        .public__url > input {
+          font-size: 16px;
+          border-radius: 5px;
+          border: 1px solid #f1f2e5;
+          padding: 8px 10px;
+          background-color: #fff;
+        }
+        .public__url > button {
+          padding: 8px 14px;
+          border-radius: 5px;
+          background-color: #000;
+          color: #edff38;
+          border: none;
+          cursor: pointer;
+          font-size: 14px;
+        }
+        .public__url > button:hover {
+          opacity: 0.85;
+        }
+      `}</style>
+    </div>
+  );
+}
+
 function Event({ query }) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -292,6 +357,21 @@ function Event({ query }) {
                 ? "Identified — voter names will appear in the downloaded report (per-voter export ships in a follow-up release)."
                 : "Anonymous — voter names are not included in the downloaded report."}
             </p>
+          </div>
+        ) : null}
+
+        {/* Link mode (read-only) + public URL display when applicable */}
+        {!loading && data ? (
+          <div className="event__section">
+            <label>Voter access</label>
+            <p>
+              {data.event.link_mode === "public"
+                ? "Public link — anyone with the URL below can vote. The same person can submit multiple times."
+                : "Per-voter link — each voter has a personal link that can submit one ballot."}
+            </p>
+            {data.event.link_mode === "public" ? (
+              <PublicVotingUrl eventId={query.id} />
+            ) : null}
           </div>
         ) : null}
 

@@ -3,13 +3,19 @@ import Layout from "components/layout"; // Layout wrapper
 import Navigation from "components/navigation"; // Navigation component
 
 function Success({ query }) {
+  // Public-link submitters have no voter id to round-trip — each visit is
+  // independent — so "Change your votes" only makes sense for unique-link
+  // voters whose row we can resume.
+  const hasVoter = !!query.user;
+  const backToVote = hasVoter ? `/vote?user=${query.user}` : "/";
+  const backToVoteLabel = hasVoter ? "Voting" : "Home";
   return (
     <Layout>
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Voting",
-          link: `/vote?user=${query.user}`,
+          title: backToVoteLabel,
+          link: backToVote,
         }}
         title="Vote Success"
       />
@@ -19,10 +25,12 @@ function Success({ query }) {
         <h1>Your vote is in!</h1>
         <p>You have successfully placed your votes.</p>
 
-        {/* Go back to voting */}
-        <Link href={`/vote?user=${query.user}`}>
-          <a>Change your votes</a>
-        </Link>
+        {/* Go back to voting (only for unique-link voters) */}
+        {hasVoter ? (
+          <Link href={`/vote?user=${query.user}`}>
+            <a>Change your votes</a>
+          </Link>
+        ) : null}
 
         {/* Redirect to event dashboard */}
         <Link href={`/event?id=${query.event}`}>

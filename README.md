@@ -53,6 +53,31 @@ them mid-event.
 Existing events created before this feature shipped display as
 **Anonymous** on their settings page and cannot be switched.
 
+## Voter access
+
+Independently of `privacy_mode`, each event chooses a `link_mode` that
+determines how voters reach the ballot:
+
+- **Per-voter link** (`unique`, default) — the organizer pre-allocates
+  `num_voters` ballot rows at event creation, each with its own personal
+  URL. Each link can submit one ballot. Suitable for known voter rosters
+  where one-person-one-vote matters. This matches the behavior of every
+  event created before `link_mode` was introduced; existing events are
+  migrated to `unique` explicitly.
+- **Public link** (`public`) — a single URL anyone can visit at
+  `/vote?event=<event_uuid>`. No voter rows are pre-allocated; each
+  submission creates its own row at vote time.
+
+> Public mode is intentionally low-trust. The same person can submit
+> multiple times by reloading the page or sharing the link further.
+> Suitable for demos, workshops, and classroom polls — not for
+> consequential votes.
+
+All four (`privacy_mode` × `link_mode`) combinations are supported and
+behave independently. The two axes are locked separately once the first
+vote is cast — the API returns 409 if either is changed after voting
+begins.
+
 ## Run locally
 
 1. Setup your PostgreSQL database

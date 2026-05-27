@@ -13,6 +13,7 @@ CREATE TABLE "public"."Events"
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   event_data JSON,
   privacy_mode VARCHAR NOT NULL DEFAULT 'anonymous',
+  link_mode VARCHAR NOT NULL DEFAULT 'unique',
   PRIMARY KEY (id)
 );
 

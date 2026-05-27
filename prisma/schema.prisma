@@ -19,6 +19,7 @@ model Events {
   created_at        DateTime @default(now())
   event_data        Json?
   privacy_mode      String   @default("anonymous")
+  link_mode         String   @default("unique")
   Voters            Voters[]
 }
 
