@@ -1,12 +1,20 @@
 // FIXME: Fix end date parsing
 import prisma from "db"; // Import prisma
 import moment from "moment"; // Time formatting
+import { normalizePrivacyMode } from "lib/privacy";
 
 // --> /api/events/create
 export default async (req, res) => {
   // Collect event details from request body
   const event = req.body;
   const vote_data = [];
+
+  let privacy_mode;
+  try {
+    privacy_mode = normalizePrivacyMode(event.privacy_mode);
+  } catch (err) {
+    return res.status(400).send(err.message);
+  }
 
   // Loop through all subjects
   for (const subject of event.subjects) {
@@ -33,6 +41,7 @@ export default async (req, res) => {
       end_event_date: formatAsPGTimestamp(event.end_event_date),
       // Stringify voteable subject data
       event_data: JSON.stringify(event.subjects),
+      privacy_mode: privacy_mode,
       // Create voters from filled array
       Voters: { create: voters },
     },

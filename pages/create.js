@@ -22,6 +22,7 @@ const defaultGlobalSettings = {
   credits_per_voter: 99,
   start_event_date: moment(),
   end_event_date: moment().add(1, "days"),
+  privacy_mode: "anonymous",
 };
 
 // Initial empty subject
@@ -252,6 +253,45 @@ export default function Create() {
               value={globalSettings.end_event_date}
               onChange={(value) => setEventData("end_event_date", value)}
             />
+          </div>
+
+          {/* Privacy mode selection */}
+          <div className="create__settings_section">
+            <label>Voter privacy</label>
+            <p>How should voter identity be handled in this event?</p>
+            <div className="privacy__option">
+              <label className="privacy__option_label">
+                <input
+                  type="radio"
+                  name="privacy_mode"
+                  value="anonymous"
+                  checked={globalSettings.privacy_mode === "anonymous"}
+                  onChange={(e) => setEventData("privacy_mode", e.target.value)}
+                />
+                <span>
+                  <strong>Anonymous</strong> — voter names are not included in
+                  the downloaded report. Only aggregate totals.
+                </span>
+              </label>
+            </div>
+            <div className="privacy__option">
+              <label className="privacy__option_label">
+                <input
+                  type="radio"
+                  name="privacy_mode"
+                  value="identified"
+                  checked={globalSettings.privacy_mode === "identified"}
+                  onChange={(e) => setEventData("privacy_mode", e.target.value)}
+                />
+                <span>
+                  <strong>Identified</strong> — voter names are included in the
+                  downloaded report, with each voter's allocations visible.
+                  Per-voter export ships in a follow-up release; until then,
+                  identified events behave the same as anonymous ones at
+                  download time.
+                </span>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -583,6 +623,23 @@ export default function Create() {
           color: #000;
           display: block;
           text-align: center;
+        }
+        .privacy__option {
+          margin-top: 12px;
+        }
+        .privacy__option_label {
+          display: grid;
+          grid-template-columns: auto 1fr;
+          gap: 10px;
+          align-items: start;
+          cursor: pointer;
+          font-size: 16px;
+          color: #000;
+          text-transform: none;
+          font-weight: normal;
+        }
+        .privacy__option_label > input {
+          margin-top: 4px;
         }
         .create__submission {
           margin: 0px auto;

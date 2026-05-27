@@ -1,5 +1,6 @@
 import prisma from "db"; // Import prisma
 import moment from "moment"; // Time formatting
+import { validateVoteSubmission } from "lib/privacy";
 
 // --> /api/events/vote
 export default async (req, res) => {
@@ -33,8 +34,18 @@ export default async (req, res) => {
       select: {
         start_event_date: true,
         end_event_date: true,
+        privacy_mode: true,
       },
     });
+
+    const validation = validateVoteSubmission({
+      privacyMode: event_data.privacy_mode,
+      name: vote.name,
+    });
+    if (validation.error) {
+      return res.status(400).send(validation.error);
+    }
+
     if ((moment() > moment(event_data.start_event_date)) &&
       (moment() < moment(event_data.end_event_date))) {
       // Loop through vote_data in DB
@@ -42,13 +53,12 @@ export default async (req, res) => {
         // Update with new votes from request body
         vote_data[i].votes = vote.votes[i];
       }
-      // Update voter object
+      // Update voter object — persist the normalized name, not raw input.
       await prisma.voters.update({
         // Using individual, secret vote ID passed from request body
         where: { id: vote.id },
-        // With updated votes from request body + preexisting vote_data from DB
         data: {
-          voter_name: vote.name !== "" ? vote.name : "",
+          voter_name: validation.name,
           vote_data: vote_data,
         },
       });

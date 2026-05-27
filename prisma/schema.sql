@@ -12,6 +12,7 @@ CREATE TABLE "public"."Events"
   end_event_date TIMESTAMP NOT NULL DEFAULT NOW(),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   event_data JSON,
+  privacy_mode VARCHAR NOT NULL DEFAULT 'anonymous',
   PRIMARY KEY (id)
 );
 

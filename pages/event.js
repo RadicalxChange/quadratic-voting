@@ -11,6 +11,7 @@ import * as XLSX from 'xlsx';
 import Datetime from "react-datetime"; // Datetime component
 import { useState, useEffect } from "react"; // State handling
 import axios from "axios"; // Axios for requests
+import { buildVotersSheet, shouldIncludeVotersSheet } from "lib/export";
 
 // Setup fetcher for SWR
 const fetcher = (url) => fetch(url).then((r) => r.json());
@@ -64,6 +65,45 @@ function Event({ query }) {
   };
 
   const downloadXLSX = () => {
+    // Identified events with at least one named voter get a second sheet.
+    // For every other case (anonymous, identified-with-no-voters, non-admin
+    // view of identified) we fall through to the PR 1 anonymous code path
+    // below — keeping that block byte-for-byte identical is the privacy
+    // contract for existing anonymous events. Do not "refactor while
+    // you're in here."
+    if (shouldIncludeVotersSheet(data)) {
+      const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+      const fileExtension = '.xlsx';
+
+      // Sheet 1: totals, same construction as anonymous mode.
+      const options = data.chart.labels;
+      const descriptions = data.chart.descriptions;
+      const effectiveVotes = data.chart.datasets[0].data;
+      const totalsRows = [];
+      for (let i = 0; i < options.length; i++) {
+        totalsRows.push({
+          title: options[i],
+          description: descriptions[i],
+          votes: effectiveVotes[i],
+        });
+      }
+      const totalsSheet = XLSX.utils.json_to_sheet(totalsRows);
+
+      // Sheet 2: per-voter rows.
+      const voters = buildVotersSheet(data);
+      const votersSheet = XLSX.utils.json_to_sheet(voters.rows);
+
+      const wb = {
+        Sheets: { 'data': totalsSheet, 'Voters': votersSheet },
+        SheetNames: ['data', 'Voters'],
+      };
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const fileData = new Blob([excelBuffer], { type: fileType });
+      FileSaver.saveAs(fileData, 'qv-results' + fileExtension);
+      return;
+    }
+
+    // === ANONYMOUS PATH — PR 1 verbatim. Do not modify. ===
     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
     const fileExtension = '.xlsx';
     const options = data.chart.labels
@@ -242,6 +282,18 @@ function Event({ query }) {
             readOnly
           />
         </div>
+
+        {/* Privacy mode (read-only) */}
+        {!loading && data ? (
+          <div className="event__section">
+            <label>Voter privacy</label>
+            <p>
+              {data.event.privacy_mode === "identified"
+                ? "Identified — voter names will appear in the downloaded report (per-voter export ships in a follow-up release)."
+                : "Anonymous — voter names are not included in the downloaded report."}
+            </p>
+          </div>
+        ) : null}
 
         {/* Event private URL */}
         {query.id !== "" &&

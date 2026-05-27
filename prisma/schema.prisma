@@ -18,6 +18,7 @@ model Events {
   end_event_date    DateTime @default(now())
   created_at        DateTime @default(now())
   event_data        Json?
+  privacy_mode      String   @default("anonymous")
   Voters            Voters[]
 }
 

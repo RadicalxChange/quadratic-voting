@@ -1,5 +1,6 @@
 import prisma from "db"; // Import prisma
 import moment from "moment"; // Time formatting
+import { scrubVotersForAdmin } from "lib/privacy";
 
 // --> /api/events/details
 export default async (req, res) => {
@@ -63,13 +64,9 @@ export default async (req, res) => {
 
   // If private_key enables administrator access
   if (isAdmin && event.voters) {
-    // remove voter name and vote data to keep anonymous from election admins
-    const voterIds = event.voters;
-    voterIds.forEach((voter, _) => {
-      delete voter.voter_name;
-      delete voter.vote_data;
-    });
-    event.voters = voterIds;
+    // Mode-conditional scrub: identified events expose voter_name + vote_data
+    // to admins; every other mode (including unrecognized values) scrubs.
+    scrubVotersForAdmin(event.voters, event.privacy_mode);
   }
 
   // Return event data, computed statistics, and chart

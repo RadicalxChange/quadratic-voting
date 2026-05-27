@@ -48,6 +48,7 @@ export default async (req, res) => {
           start_event_date: true,
           end_event_date: true,
           credits_per_voter: true,
+          privacy_mode: true,
         },
       });
 
