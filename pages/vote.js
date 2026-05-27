@@ -118,25 +118,48 @@ function Vote({ query }) {
   };
 
   /**
+   * True when this event requires the voter to provide a name.
+   */
+  const isIdentified = () =>
+    data &&
+    data.event_data &&
+    data.event_data.privacy_mode === "identified";
+
+  /**
+   * True when the vote can be submitted right now.
+   */
+  const canSubmit = () => !isIdentified() || name.trim() !== "";
+
+  /**
    * Vote submission POST
    */
   const submitVotes = async () => {
+    // Identified-mode events require a non-empty name. Mirror the server-side
+    // check so the user gets immediate feedback instead of a 400.
+    if (isIdentified() && name.trim() === "") {
+      return;
+    }
+
     // Toggle button loading state to true
     setSubmitLoading(true);
 
-    // POST data and collect status
-    const { status } = await axios.post("/api/events/vote", {
-      id: query.user, // Voter ID
-      votes: votes, // Vote data
-      name: name, // Voter name
-    });
+    try {
+      // POST data and collect status
+      const { status } = await axios.post("/api/events/vote", {
+        id: query.user, // Voter ID
+        votes: votes, // Vote data
+        name: name, // Voter name
+      });
 
-    // If POST is a success
-    if (status === 200) {
-      // Redirect to success page
-      router.push(`success?event=${data.event_id}&user=${query.user}`);
-    } else {
-      // Else, redirec to failure page
+      // If POST is a success
+      if (status === 200) {
+        // Redirect to success page
+        router.push(`success?event=${data.event_id}&user=${query.user}`);
+      } else {
+        // Else, redirec to failure page
+        router.push(`failure?event=${data.event_id}&user=${query.user}`);
+      }
+    } catch (_) {
       router.push(`failure?event=${data.event_id}&user=${query.user}`);
     }
 
@@ -222,10 +245,15 @@ function Vote({ query }) {
                       <button className="submit__button" disabled>
                         <Loader />
                       </button>
-                    ) : (
+                    ) : canSubmit() ? (
                       // Else, enable submission
                       <button name="input-element" onClick={submitVotes} className="submit__button">
                         Submit Votes
+                      </button>
+                    ) : (
+                      // Identified event with empty name — block submission
+                      <button className="submit__button button__disabled" disabled title="Enter your name to submit">
+                        Enter your name to submit
                       </button>
                     )}
                 </>
@@ -273,6 +301,27 @@ function Vote({ query }) {
                   ) : null}
                 </div>
               </div>
+
+              {/* Voter name input — required for identified events */}
+              {data && isIdentified() &&
+               moment() >= moment(data.event_data.start_event_date) &&
+               moment() <= moment(data.event_data.end_event_date) ? (
+                <div className="voter__name_section">
+                  <label htmlFor="voter_name">Your name</label>
+                  <p>
+                    The organizer has set this event to <strong>identified</strong>.
+                    Your name will appear next to your vote allocations in the
+                    organizer's downloaded report.
+                  </p>
+                  <input
+                    type="text"
+                    id="voter_name"
+                    placeholder="Required"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+              ) : null}
 
               {/* Ballot */}
               {data ? (
@@ -756,6 +805,36 @@ function Vote({ query }) {
           border-radius: 5px;
           text-align: center;
           border: 1px solid #fada5e;
+        }
+        .voter__name_section {
+          background-color: #fff;
+          border-radius: 8px;
+          border: 1px solid #f1f2e5;
+          box-shadow: 0 0 35px rgba(127, 150, 174, 0.125);
+          padding: 15px;
+          margin: 25px 0px;
+          text-align: left;
+        }
+        .voter__name_section > label {
+          display: block;
+          color: #000;
+          font-weight: bold;
+          font-size: 18px;
+          text-transform: uppercase;
+        }
+        .voter__name_section > p {
+          font-size: 16px;
+          line-height: 150%;
+          color: #80806b;
+          margin: 5px 0px 10px 0px;
+        }
+        .voter__name_section > input {
+          width: calc(100% - 22px);
+          font-size: 18px;
+          border-radius: 5px;
+          border: 1px solid #f1f2e5;
+          padding: 10px;
+          background-color: #fff;
         }
       `}</style>
     </Layout>

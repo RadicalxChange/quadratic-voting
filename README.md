@@ -19,6 +19,40 @@ Important files:
 1. [prisma/schema.sql](https://github.com/RadicalxChange/quadratic-voting/blob/master/prisma/schema.sql) contains the SQL schema for the application.
 2. [pages/api/events/details.js](https://github.com/RadicalxChange/quadratic-voting/blob/master/pages/api/events/details.js) contains the QV calculation logic.
 
+## Voter privacy
+
+Each event has a `privacy_mode` chosen at creation time:
+
+- **Anonymous** (default) — voter names and per-voter vote data are never
+  returned to the event organizer. The organizer sees only aggregate
+  totals in the downloaded report. This matches the behavior of every
+  event created before `privacy_mode` was introduced; existing events
+  are migrated to `anonymous` explicitly.
+- **Identified** — voters are required to enter a name on the ballot
+  page, and the name is stored alongside their allocation. Names are
+  trimmed and internal whitespace is collapsed before storage; case is
+  preserved exactly as the voter typed it.
+
+The downloaded XLSX report differs by mode:
+
+- **Anonymous** — one sheet (`data`) with one row per option containing
+  the aggregate QV-weighted total. Byte-identical to what the report
+  contained before `privacy_mode` existed.
+- **Identified** — the same `data` sheet, plus a second sheet named
+  `Voters` with one row per voter. Columns: voter name, one column per
+  option in the order they were created (matching the ballot), and a
+  final `Credits used` column with the total credits (Σ votes²) the
+  voter spent. Rows are sorted alphabetically by name (case-insensitive
+  sort, display case preserved).
+
+Once any voter casts a vote, the event's `privacy_mode` is locked. The
+API rejects mode-change requests after the first non-zero allocation is
+submitted, so voters can't have the privacy contract changed underneath
+them mid-event.
+
+Existing events created before this feature shipped display as
+**Anonymous** on their settings page and cannot be switched.
+
 ## Run locally
 
 1. Setup your PostgreSQL database
