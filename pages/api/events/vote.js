@@ -1,10 +1,18 @@
 import prisma from "db"; // Import prisma
 import moment from "moment"; // Time formatting
 import { validateVoteSubmission } from "lib/privacy";
+import { LINK_MODES, buildNewPublicVoterRow } from "lib/access";
 
 // --> /api/events/vote
 export default async (req, res) => {
   const vote = req.body; // Collect vote data from POST
+
+  // Public-mode submission path: no voter id, look up event by event_id and
+  // create a fresh Voters row. Branches at the top so the existing
+  // unique-mode flow below is unchanged.
+  if (!vote.id) {
+    return handlePublicSubmission(vote, res);
+  }
 
   // Look for current JSON data
   const { vote_data } = await prisma.voters.findUnique({
@@ -73,3 +81,66 @@ export default async (req, res) => {
     res.status(400).send("Invalid voter link")
   }
 };
+
+// Handles a public-mode submission (no voter id in the request body). The
+// caller has already determined there's no voter id; we resolve the event,
+// confirm it's actually in public mode, run privacy/name validation, and
+// create a fresh Voters row. Repeat submissions from the same client
+// each go through this path independently — that's by design for public
+// mode (each visit is its own row).
+async function handlePublicSubmission(vote, res) {
+  if (!vote.event_id) {
+    return res.status(400).send("Missing event_id");
+  }
+
+  const event = await prisma.events.findUnique({
+    where: { id: vote.event_id },
+    select: {
+      id: true,
+      start_event_date: true,
+      end_event_date: true,
+      privacy_mode: true,
+      link_mode: true,
+      event_data: true,
+    },
+  });
+
+  if (!event) {
+    return res.status(404).send("Event not found");
+  }
+  if (event.link_mode !== LINK_MODES.PUBLIC) {
+    // Defense-in-depth: a unique-mode event must never accept a
+    // no-voter-id submission, even if a client constructed one manually.
+    return res.status(400).send("This event requires a personal voting link.");
+  }
+
+  const validation = validateVoteSubmission({
+    privacyMode: event.privacy_mode,
+    name: vote.name,
+  });
+  if (validation.error) {
+    return res.status(400).send(validation.error);
+  }
+
+  if (
+    !(moment() > moment(event.start_event_date) &&
+      moment() < moment(event.end_event_date))
+  ) {
+    return res.status(400).send("Voting is closed for this event");
+  }
+
+  const subjects =
+    typeof event.event_data === "string"
+      ? JSON.parse(event.event_data)
+      : event.event_data;
+
+  const rowData = buildNewPublicVoterRow({
+    eventUuid: event.id,
+    eventSubjects: subjects,
+    voterName: validation.name,
+    submittedVotes: vote.votes,
+  });
+
+  await prisma.voters.create({ data: rowData });
+  res.status(200).send("Successful submission");
+}

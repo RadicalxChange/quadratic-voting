@@ -23,6 +23,7 @@ const defaultGlobalSettings = {
   start_event_date: moment(),
   end_event_date: moment().add(1, "days"),
   privacy_mode: "anonymous",
+  link_mode: "unique",
 };
 
 // Initial empty subject
@@ -206,17 +207,19 @@ export default function Create() {
             />
           </div>
 
-          {/* Number of voters selection */}
-          <div className="create__settings_section">
-            <label htmlFor="num_voters">Number of voters</label>
-            <p>How many voting links would you like to generate?</p>
-            <input
-              type="number"
-              id="num_voters"
-              value={globalSettings.num_voters}
-              onChange={(e) => setNumVoters(e.target.value)}
-            />
-          </div>
+          {/* Number of voters selection — only meaningful for unique-link events */}
+          {globalSettings.link_mode === "unique" ? (
+            <div className="create__settings_section">
+              <label htmlFor="num_voters">Number of voters</label>
+              <p>How many voting links would you like to generate?</p>
+              <input
+                type="number"
+                id="num_voters"
+                value={globalSettings.num_voters}
+                onChange={(e) => setNumVoters(e.target.value)}
+              />
+            </div>
+          ) : null}
 
           {/* Number of credits per voter selection */}
           <div className="create__settings_section">
@@ -292,6 +295,52 @@ export default function Create() {
                 </span>
               </label>
             </div>
+          </div>
+
+          {/* Voter access (link mode) selection */}
+          <div className="create__settings_section">
+            <label>Voter access</label>
+            <p>How will voters reach the ballot?</p>
+            <div className="privacy__option">
+              <label className="privacy__option_label">
+                <input
+                  type="radio"
+                  name="link_mode"
+                  value="unique"
+                  checked={globalSettings.link_mode === "unique"}
+                  onChange={(e) => setEventData("link_mode", e.target.value)}
+                />
+                <span>
+                  <strong>Per-voter link</strong> — generate a personal voting
+                  link for each voter. Each link can submit one ballot. Suitable
+                  for known voter rosters.
+                </span>
+              </label>
+            </div>
+            <div className="privacy__option">
+              <label className="privacy__option_label">
+                <input
+                  type="radio"
+                  name="link_mode"
+                  value="public"
+                  checked={globalSettings.link_mode === "public"}
+                  onChange={(e) => setEventData("link_mode", e.target.value)}
+                />
+                <span>
+                  <strong>Public link</strong> — a single URL anyone can use to
+                  vote. The same person can submit multiple times by reloading
+                  the page. Suitable for demos, workshops, and classroom polls
+                  — not for consequential votes.
+                </span>
+              </label>
+            </div>
+            {globalSettings.link_mode === "public" &&
+            globalSettings.privacy_mode === "identified" ? (
+              <p className="privacy__warning">
+                Names are self-reported and not verified. Use for low-stakes
+                contexts only.
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -640,6 +689,16 @@ export default function Create() {
         }
         .privacy__option_label > input {
           margin-top: 4px;
+        }
+        .privacy__warning {
+          margin-top: 14px !important;
+          padding: 8px 10px;
+          background-color: #fff5d0;
+          border: 1px solid #fada5e;
+          border-radius: 5px;
+          color: #000;
+          font-size: 14px;
+          line-height: 140%;
         }
         .create__submission {
           margin: 0px auto;

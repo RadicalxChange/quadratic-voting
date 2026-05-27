@@ -4,6 +4,7 @@ import {
   isValidPrivacyMode,
   hasAnyVoteBeenCast,
 } from "lib/privacy";
+import { isValidLinkMode } from "lib/access";
 
 // --> /api/events/update
 export default async (req, res) => {
@@ -14,23 +15,36 @@ export default async (req, res) => {
     end_event_date: formatAsPGTimestamp(new_data.end_event_date),
   };
 
-  // privacy_mode is optional on update. When present, it must be a known
-  // value AND no voter may have already cast a vote — the privacy contract
-  // can't change underneath voters who've already submitted under one mode.
-  if (new_data.privacy_mode !== undefined) {
-    if (!isValidPrivacyMode(new_data.privacy_mode)) {
-      return res.status(400).send(`Invalid privacy_mode: ${new_data.privacy_mode}`);
-    }
+  // Both privacy_mode and link_mode are optional and independently
+  // locked after the first vote — voters can't have either contract
+  // changed underneath them mid-event. We query voters at most once.
+  const wantsPrivacyChange = new_data.privacy_mode !== undefined;
+  const wantsLinkChange = new_data.link_mode !== undefined;
+
+  if (wantsPrivacyChange && !isValidPrivacyMode(new_data.privacy_mode)) {
+    return res.status(400).send(`Invalid privacy_mode: ${new_data.privacy_mode}`);
+  }
+  if (wantsLinkChange && !isValidLinkMode(new_data.link_mode)) {
+    return res.status(400).send(`Invalid link_mode: ${new_data.link_mode}`);
+  }
+
+  if (wantsPrivacyChange || wantsLinkChange) {
     const voters = await prisma.voters.findMany({
       where: { event_uuid: new_data.id },
       select: { vote_data: true },
     });
     if (hasAnyVoteBeenCast(voters)) {
+      if (wantsPrivacyChange) {
+        return res
+          .status(409)
+          .send("Privacy mode is locked: at least one voter has already submitted a vote.");
+      }
       return res
         .status(409)
-        .send("Privacy mode is locked: at least one voter has already submitted a vote.");
+        .send("Link mode is locked: at least one voter has already submitted a vote.");
     }
-    updateData.privacy_mode = new_data.privacy_mode;
+    if (wantsPrivacyChange) updateData.privacy_mode = new_data.privacy_mode;
+    if (wantsLinkChange) updateData.link_mode = new_data.link_mode;
   }
 
   await prisma.events.update({

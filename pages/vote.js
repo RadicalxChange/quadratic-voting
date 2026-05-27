@@ -17,6 +17,11 @@ function Vote({ query }) {
   const [votes, setVotes] = useState(null); // Option votes array
   const [credits, setCredits] = useState(0); // Total available credits
   const [submitLoading, setSubmitLoading] = useState(false); // Component (button) submission loading state
+  const [accessError, setAccessError] = useState(""); // Inline error for public-visit failures
+
+  // Public-mode visits use ?event=<id> with no voter id. Per-voter visits
+  // use ?user=<voter_id>. Computed once per render.
+  const isPublicVisit = !query.user && !!query.event;
 
   /**
    * Calculates culmulative number of votes and available credits on load
@@ -60,9 +65,42 @@ function Vote({ query }) {
   };
 
   /**
-   * componentDidMount
+   * componentDidMount — branches on URL pattern.
+   *
+   *   ?user=<voter_id>   per-voter unique-link flow (existing behavior)
+   *   ?event=<event_id>  public-link flow (new). The find endpoint rejects
+   *                      this query with 403 if the event is unique-mode,
+   *                      which we surface inline rather than redirecting.
+   *   neither            redirect to /place (matches existing fallback)
    */
   useEffect(() => {
+    if (isPublicVisit) {
+      axios
+        .get(`/api/events/find?event=${query.event}`)
+        .then((response) => {
+          setData(response.data);
+          setName("");
+          calculateVotes(response.data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          // 403 → unique-mode mismatch; surface server's message inline.
+          // 404 → event not found; same treatment.
+          const msg =
+            err && err.response && typeof err.response.data === "string"
+              ? err.response.data
+              : "This event requires a personal voting link. Contact the organizer.";
+          setAccessError(msg);
+          setLoading(false);
+        });
+      return;
+    }
+
+    if (!query.user) {
+      router.push("/place?error=true");
+      return;
+    }
+
     // Collect voter information on load
     axios
       .get(`/api/events/find?id=${query.user}`)
@@ -131,7 +169,10 @@ function Vote({ query }) {
   const canSubmit = () => !isIdentified() || name.trim() !== "";
 
   /**
-   * Vote submission POST
+   * Vote submission POST. Two body shapes depending on the visit type:
+   *   per-voter: { id: <voter_id>, votes, name }
+   *   public:    { event_id: <event_id>, votes, name }
+   * The server distinguishes by presence/absence of `id`.
    */
   const submitVotes = async () => {
     // Identified-mode events require a non-empty name. Mirror the server-side
@@ -143,24 +184,29 @@ function Vote({ query }) {
     // Toggle button loading state to true
     setSubmitLoading(true);
 
-    try {
-      // POST data and collect status
-      const { status } = await axios.post("/api/events/vote", {
-        id: query.user, // Voter ID
-        votes: votes, // Vote data
-        name: name, // Voter name
-      });
+    const body = isPublicVisit
+      ? { event_id: data.event_id, votes: votes, name: name }
+      : { id: query.user, votes: votes, name: name };
 
-      // If POST is a success
+    // Success/failure URLs vary too — public visits have no voter id to
+    // round-trip, so the thank-you page renders without a "Change your
+    // votes" link.
+    const successUrl = isPublicVisit
+      ? `success?event=${data.event_id}`
+      : `success?event=${data.event_id}&user=${query.user}`;
+    const failureUrl = isPublicVisit
+      ? `failure?event=${data.event_id}`
+      : `failure?event=${data.event_id}&user=${query.user}`;
+
+    try {
+      const { status } = await axios.post("/api/events/vote", body);
       if (status === 200) {
-        // Redirect to success page
-        router.push(`success?event=${data.event_id}&user=${query.user}`);
+        router.push(successUrl);
       } else {
-        // Else, redirec to failure page
-        router.push(`failure?event=${data.event_id}&user=${query.user}`);
+        router.push(failureUrl);
       }
     } catch (_) {
-      router.push(`failure?event=${data.event_id}&user=${query.user}`);
+      router.push(failureUrl);
     }
 
     // Toggle button loading state to false
@@ -210,8 +256,20 @@ function Vote({ query }) {
       />
 
       <div className="vote">
+        {/* Inline error for public visits where the event isn't public,
+            doesn't exist, or otherwise can't be browsed. */}
+        {accessError ? (
+          <div className="vote__loading">
+            <h1>Can't open this ballot</h1>
+            <p>{accessError}</p>
+            <p>
+              <a href="/">Back to home</a>
+            </p>
+          </div>
+        ) : null}
+
         {/* Loading state check */}
-        {!loading ? (
+        {!loading && !accessError ? (
           <>
           <aside id="table-of-contents_container">
             <div className="toc-header">
@@ -427,13 +485,14 @@ function Vote({ query }) {
             </div>
           </div>
           </>
-        ) : (
-          // If loading, show global loading state
+        ) : !accessError ? (
+          // If loading, show global loading state. Suppressed when an
+          // access error is already on screen.
           <div className="vote__loading">
             <h1>Loading...</h1>
             <p>Please give us a moment to retrieve your voting profile.</p>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Component scoped CSS */}
