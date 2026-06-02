@@ -207,6 +207,54 @@ export default function Create() {
             />
           </div>
 
+          {/* Voter access (link mode) selection — chosen BEFORE num_voters so
+              the conditional hide-of-num_voters happens based on a choice the
+              user has already made, not retroactively after they typed a count. */}
+          <div className="create__settings_section">
+            <label>Voter access</label>
+            <p>How will voters reach the ballot?</p>
+            <div className="privacy__option">
+              <label className="privacy__option_label">
+                <input
+                  type="radio"
+                  name="link_mode"
+                  value="unique"
+                  checked={globalSettings.link_mode === "unique"}
+                  onChange={(e) => setEventData("link_mode", e.target.value)}
+                />
+                <span>
+                  <strong>Per-voter link</strong> — generate a personal voting
+                  link for each voter. Each link can submit one ballot. Suitable
+                  for known voter rosters.
+                </span>
+              </label>
+            </div>
+            <div className="privacy__option">
+              <label className="privacy__option_label">
+                <input
+                  type="radio"
+                  name="link_mode"
+                  value="public"
+                  checked={globalSettings.link_mode === "public"}
+                  onChange={(e) => setEventData("link_mode", e.target.value)}
+                />
+                <span>
+                  <strong>Public link</strong> — a single URL anyone can use to
+                  vote. The same person can submit multiple times by reloading
+                  the page. Suitable for demos, workshops, and classroom polls
+                  — not for consequential votes.
+                </span>
+              </label>
+            </div>
+            {globalSettings.link_mode === "public" &&
+            globalSettings.privacy_mode === "identified" ? (
+              <p className="privacy__warning">
+                Names are self-reported and not verified. Use for low-stakes
+                contexts only.
+              </p>
+            ) : null}
+          </div>
+
           {/* Number of voters selection — only meaningful for unique-link events */}
           {globalSettings.link_mode === "unique" ? (
             <div className="create__settings_section">
@@ -297,51 +345,6 @@ export default function Create() {
             </div>
           </div>
 
-          {/* Voter access (link mode) selection */}
-          <div className="create__settings_section">
-            <label>Voter access</label>
-            <p>How will voters reach the ballot?</p>
-            <div className="privacy__option">
-              <label className="privacy__option_label">
-                <input
-                  type="radio"
-                  name="link_mode"
-                  value="unique"
-                  checked={globalSettings.link_mode === "unique"}
-                  onChange={(e) => setEventData("link_mode", e.target.value)}
-                />
-                <span>
-                  <strong>Per-voter link</strong> — generate a personal voting
-                  link for each voter. Each link can submit one ballot. Suitable
-                  for known voter rosters.
-                </span>
-              </label>
-            </div>
-            <div className="privacy__option">
-              <label className="privacy__option_label">
-                <input
-                  type="radio"
-                  name="link_mode"
-                  value="public"
-                  checked={globalSettings.link_mode === "public"}
-                  onChange={(e) => setEventData("link_mode", e.target.value)}
-                />
-                <span>
-                  <strong>Public link</strong> — a single URL anyone can use to
-                  vote. The same person can submit multiple times by reloading
-                  the page. Suitable for demos, workshops, and classroom polls
-                  — not for consequential votes.
-                </span>
-              </label>
-            </div>
-            {globalSettings.link_mode === "public" &&
-            globalSettings.privacy_mode === "identified" ? (
-              <p className="privacy__warning">
-                Names are self-reported and not verified. Use for low-stakes
-                contexts only.
-              </p>
-            ) : null}
-          </div>
         </div>
 
         {/* Subject settings */}

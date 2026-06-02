@@ -86,19 +86,41 @@ function Event({ query }) {
   const [endDate, setEndDate] = useState("");
   const [editMode, setEditMode] = useState(false);
 
-  // Collect data from endpoint
-  const { data, loading } = useSWR(
+  // Collect data from endpoint.
+  //
+  // NOTE: useSWR returns { data, error, isValidating } — there is no
+  // `loading` field. The pre-existing code destructures `loading` here,
+  // which is always undefined; we keep that to avoid touching unrelated
+  // render paths, but we ALSO grab `error` so we can surface backend
+  // failures instead of silently retrying every 500ms behind a
+  // "Loading..." string. Before this change any 4xx/5xx from
+  // /api/events/details just looked like an infinite load to the user.
+  const swr = useSWR(
     // Use query ID in URL
     `/api/events/details?id=${query.id}${
       // If secret is present, use administrator view
       query.secret !== "" ? `&secret_key=${query.secret}` : ""
     }`,
     {
-      fetcher,
+      fetcher: async (url) => {
+        const r = await fetch(url);
+        if (!r.ok) {
+          // Throw with the server's response body so SWR surfaces it as
+          // `error` and the page can show it.
+          const body = await r.text();
+          const err = new Error(body || `HTTP ${r.status}`);
+          err.status = r.status;
+          throw err;
+        }
+        return r.json();
+      },
       // Force refresh SWR every 500ms
       refreshInterval: 500,
+      // Don't retry forever on a 4xx — the response isn't going to change.
+      shouldRetryOnError: (err) => !err || !err.status || err.status >= 500,
     }
   );
+  const { data, error, loading } = swr;
 
   /**
    * Admin view: download voter URLs as text file
@@ -242,6 +264,22 @@ function Event({ query }) {
       {/* Event page summary */}
       <div className="event">
         <h1>Event Details</h1>
+
+        {/* Backend error surfacing. Previously the page would just hang
+            on "Loading..." forever when /api/events/details returned a
+            non-2xx; SWR retried every 500ms and the user got no signal. */}
+        {error ? (
+          <div className="event__error">
+            <h2>This event couldn't be loaded.</h2>
+            <p>{String(error.message || error)}</p>
+            <p className="event__error_hint">
+              Server status: {error.status || "(none)"}.
+              Open the browser developer tools, Network tab, and inspect the
+              call to <code>/api/events/details</code> for more detail.
+            </p>
+          </div>
+        ) : null}
+
         <div className="event__information">
           <h2>{!loading && data ? data.event.event_title : "Loading..."}</h2>
           <p>
@@ -517,6 +555,25 @@ function Event({ query }) {
           padding: 10px;
           border-radius: 10px;
           margin: 20px 0px;
+        }
+
+        .event__error {
+          background-color: #fff5d0;
+          border: 1px solid #fada5e;
+          border-radius: 10px;
+          padding: 16px 20px;
+          margin: 20px 0px;
+          color: #000;
+          text-align: left;
+        }
+        .event__error > h2 {
+          margin-block-start: 0px;
+          font-size: 22px;
+        }
+        .event__error_hint {
+          color: #80806b;
+          font-size: 14px;
+          margin-block-end: 0px;
         }
 
         .event__information > h2 {
