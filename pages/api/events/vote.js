@@ -56,16 +56,22 @@ export default async (req, res) => {
 
     if ((moment() > moment(event_data.start_event_date)) &&
       (moment() < moment(event_data.end_event_date))) {
-      // Loop through vote_data in DB. vote_data is Json? (nullable); a
-      // null/legacy row has no subject scaffolding to merge votes into, so
-      // guard the loop to treat null as an empty prior state (no votes
-      // recorded) instead of 500ing on `.length`. Mirrors the Array.isArray
-      // guard in lib/privacy.js and the zero-fill guard in details.js.
-      if (Array.isArray(vote_data)) {
-        for (let i = 0; i < vote_data.length; i++) {
-          // Update with new votes from request body
-          vote_data[i].votes = vote.votes[i];
-        }
+      // vote_data is Json? (nullable). A pre-allocated unique-link voter
+      // always has a zeroed array here, so a null is an invariant violation
+      // (legacy/manual/corrupt row), not a normal state. Surface it: log the
+      // anomaly and return 409 rather than 500ing on `.length` OR silently
+      // dropping the ballot and reporting a false 200. Mirrors the
+      // Array.isArray guard in lib/privacy.js and details.js.
+      if (!Array.isArray(vote_data)) {
+        console.error(`vote.js: null vote_data for voter ${vote.id} (event ${user.event_uuid}) — data anomaly`);
+        return res
+          .status(409)
+          .send("This voting link is in an invalid state. Please contact the organizer.");
+      }
+      // Loop through vote_data in DB
+      for (let i = 0; i < vote_data.length; i++) {
+        // Update with new votes from request body
+        vote_data[i].votes = vote.votes[i];
       }
       // Update voter object — persist the normalized name, not raw input.
       await prisma.voters.update({

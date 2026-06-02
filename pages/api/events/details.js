@@ -100,8 +100,13 @@ function generateStatistics(subjects, num_voters, credits_per_voter, voters) {
     // participation denominator (zero-fill) — identical to a normal zeroed
     // non-voter. Skip its tallying so the .map (below), .length, and
     // element access never dereference null. Mirrors the Array.isArray
-    // guard in lib/privacy.js (hasVoterVoted).
-    if (!Array.isArray(voter_data)) continue;
+    // guard in lib/privacy.js (hasVoterVoted). Warn so the same anomaly that
+    // vote.js rejects with a 409 is also detectable from the read-only stats
+    // path.
+    if (!Array.isArray(voter_data)) {
+      console.warn(`generateStatistics: skipping voter ${voter.id} with null vote_data (event ${voter.event_uuid})`);
+      continue;
+    }
 
     // Sum voter preferences to check if user has placed at least 1 vote
     const sumVotes = voter_data
