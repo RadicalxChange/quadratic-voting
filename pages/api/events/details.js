@@ -38,8 +38,10 @@ export default async (req, res) => {
   if (isAdmin || (moment() > moment(event.end_event_date))) {
     // Pass voting statistics to endpoint
     statistics = generateStatistics(
-      // Number of voteable subjects
-      JSON.parse(event.event_data).length,
+      // Number of voteable subjects. event_data is Json? (nullable); guard
+      // the parse so a null event_data yields 0 subjects instead of throwing
+      // "Cannot read property 'length' of null".
+      event.event_data ? JSON.parse(event.event_data).length : 0,
       // Number of max voters
       event.num_voters,
       // Number of credits per voter
@@ -49,8 +51,9 @@ export default async (req, res) => {
     );
   }
 
-  // Parse event_data
-  event.event_data = JSON.parse(event.event_data);
+  // Parse event_data. Same null guard as above — a null event_data becomes
+  // an empty array rather than throwing.
+  event.event_data = event.event_data ? JSON.parse(event.event_data) : [];
 
   // If event is concluded or private_key enables administrator access
   if (isAdmin || (moment() > moment(event.end_event_date))) {
@@ -139,7 +142,11 @@ function generateStatistics(subjects, num_voters, credits_per_voter, voters) {
     numberVoters,
     numberVotesTotal: credits_per_voter * num_voters,
     numberVotes,
-    voterParticiptation: (voters.length / numberVoters) * 100,
+    // Guard divide-by-zero: when nobody has voted numberVoters is 0, which
+    // would yield Infinity/NaN. Report 0% participation instead. (Field name
+    // typo kept as-is to avoid breaking consumers that read this key.)
+    voterParticiptation:
+      numberVoters > 0 ? (voters.length / numberVoters) * 100 : 0,
     qvRaw,
     linear,
     qv,
