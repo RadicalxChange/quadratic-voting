@@ -95,7 +95,7 @@ function publicEventFixture() {
   };
 }
 
-test("buildNewPublicVoterRow produces a row with event_uuid + voter_name + vote_data", () => {
+test("buildNewPublicVoterRow produces a row with Events relation + voter_name + vote_data", () => {
   const fx = publicEventFixture();
   const row = access.buildNewPublicVoterRow({
     eventUuid: fx.eventUuid,
@@ -103,7 +103,10 @@ test("buildNewPublicVoterRow produces a row with event_uuid + voter_name + vote_
     voterName: "Alice",
     submittedVotes: [2, 0, -1],
   });
-  assert.strictEqual(row.event_uuid, "evt-1");
+  // Event association is emitted as the `Events` relation connect, not a
+  // scalar event_uuid (which the Prisma client rejects on create).
+  assert.strictEqual(row.event_uuid, undefined);
+  assert.deepStrictEqual(row.Events, { connect: { id: "evt-1" } });
   assert.strictEqual(row.voter_name, "Alice");
   assert.strictEqual(row.vote_data.length, 3);
 });
@@ -251,7 +254,7 @@ for (const combo of matrix) {
       } else {
         assert.strictEqual(row.voter_name, "");
       }
-      assert.strictEqual(row.event_uuid, fx.eventUuid);
+      assert.deepStrictEqual(row.Events, { connect: { id: fx.eventUuid } });
     });
   }
 }
