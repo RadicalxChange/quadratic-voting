@@ -198,6 +198,13 @@ function Vote({ query }) {
       ? `failure?event=${data.event_id}`
       : `failure?event=${data.event_id}&user=${query.user}`;
 
+    // Build a failure URL that surfaces the server's message when we have
+    // one. Falls back to the generic copy on /failure when ?reason= is absent.
+    const failureWithReason = (reason) => {
+      if (!reason) return failureUrl;
+      return `${failureUrl}&reason=${encodeURIComponent(reason)}`;
+    };
+
     try {
       const { status } = await axios.post("/api/events/vote", body);
       if (status === 200) {
@@ -205,8 +212,20 @@ function Vote({ query }) {
       } else {
         router.push(failureUrl);
       }
-    } catch (_) {
-      router.push(failureUrl);
+    } catch (err) {
+      // axios throws on 4xx/5xx. Capture the server's response body when it
+      // looks like a usable message (string, under ~300 chars). Otherwise
+      // fall back to the generic failure page.
+      const body =
+        err && err.response && typeof err.response.data === "string"
+          ? err.response.data
+          : "";
+      const reason = body && body.length > 0 && body.length < 300 ? body : "";
+      // Log to the console too, so anyone investigating can see the full
+      // error shape (status, body, etc.) without needing logs.
+      // eslint-disable-next-line no-console
+      console.error("Vote submission failed:", err && err.response, err);
+      router.push(failureWithReason(reason));
     }
 
     // Toggle button loading state to false

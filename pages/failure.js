@@ -17,12 +17,23 @@ function Failure({ query }) {
       {/* Failure dialog */}
       <div className="failure">
         <h1>Oops! Your vote failed.</h1>
-        <p>This shouldn't happen—please try again later!</p>
+        {query.reason ? (
+          <p className="failure__reason">{query.reason}</p>
+        ) : (
+          <p>This shouldn't happen—please try again later!</p>
+        )}
 
-        {/* Return to voting */}
-        <Link href={`/vote?user=${query.user}`}>
-          <a>Try voting again</a>
-        </Link>
+        {/* Return to voting — per-voter links only. Public visits have no
+            voter id to round-trip; they go back to the public ballot URL. */}
+        {query.user ? (
+          <Link href={`/vote?user=${query.user}`}>
+            <a>Try voting again</a>
+          </Link>
+        ) : query.event ? (
+          <Link href={`/vote?event=${query.event}`}>
+            <a>Try voting again</a>
+          </Link>
+        ) : null}
 
         {/* Redirect to event dashboard */}
         <Link href={`/event?id=${query.event}`}>
@@ -50,6 +61,15 @@ function Failure({ query }) {
           line-height: 150%;
           color: #80806b;
           margin-block-start: 0px;
+        }
+
+        .failure__reason {
+          background-color: #fff5d0;
+          border: 1px solid #fada5e;
+          border-radius: 6px;
+          padding: 10px 14px;
+          color: #000 !important;
+          font-size: 16px !important;
         }
 
         .failure > a {

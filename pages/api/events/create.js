@@ -38,27 +38,53 @@ export default async (req, res) => {
       })
     : [];
 
-  // Create new event
-  const createdEvent = await prisma.events.create({
-    data: {
-      event_title: event.event_title,
-      event_description: event.event_description,
-      num_voters: event.num_voters,
-      credits_per_voter: event.credits_per_voter,
-      start_event_date: formatAsPGTimestamp(event.start_event_date),
-      end_event_date: formatAsPGTimestamp(event.end_event_date),
-      // Stringify voteable subject data
-      event_data: JSON.stringify(event.subjects),
-      privacy_mode: privacy_mode,
-      link_mode: link_mode,
-      // Create voters from filled array (empty for public-link events)
-      Voters: { create: voters },
-    },
-    select: {
-      id: true,
-      secret_key: true,
-    },
-  });
+  // Create new event. Build the data payload conditionally — omitting
+  // the `Voters` nested-write entirely for public-link events instead of
+  // sending `{ create: [] }`. Older Prisma versions handle empty nested
+  // arrays inconsistently and we saw the event row come back with
+  // empty/undefined fields when the nested write was an empty array,
+  // which would then break the /event redirect (id=undefined).
+  const data = {
+    event_title: event.event_title,
+    event_description: event.event_description,
+    num_voters: event.num_voters,
+    credits_per_voter: event.credits_per_voter,
+    start_event_date: formatAsPGTimestamp(event.start_event_date),
+    end_event_date: formatAsPGTimestamp(event.end_event_date),
+    // Stringify voteable subject data
+    event_data: JSON.stringify(event.subjects),
+    privacy_mode: privacy_mode,
+    link_mode: link_mode,
+  };
+  if (voters.length > 0) {
+    data.Voters = { create: voters };
+  }
+
+  let createdEvent;
+  try {
+    createdEvent = await prisma.events.create({
+      data,
+      select: {
+        id: true,
+        secret_key: true,
+      },
+    });
+  } catch (err) {
+    // Surface the prisma/db error to the client instead of letting Next
+    // return a generic 500 with no body. Otherwise the client just sees
+    // a non-2xx, redirects nowhere, and the user is stuck.
+    // eslint-disable-next-line no-console
+    console.error("events/create failed:", err);
+    return res
+      .status(500)
+      .send((err && err.message) || "Failed to create event");
+  }
+
+  if (!createdEvent || !createdEvent.id) {
+    // Defense-in-depth: if prisma somehow returns without an id, fail
+    // loudly rather than redirecting the client to /event?id=undefined.
+    return res.status(500).send("Event was created but no id was returned");
+  }
 
   // Send back created event
   res.send(createdEvent);
