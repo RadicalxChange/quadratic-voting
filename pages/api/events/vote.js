@@ -15,12 +15,22 @@ export default async (req, res) => {
   }
 
   // Look for current JSON data
-  const { vote_data } = await prisma.voters.findUnique({
+  const voterRow = await prisma.voters.findUnique({
     // Using individual, secret vote ID passed from request body
     where: { id: vote.id },
     // And select only existing JSON data
     select: { vote_data: true },
   });
+
+  // findUnique returns null for a missing/invalid voter id. Guard before
+  // destructuring so an unknown link returns the handler's existing
+  // "Invalid voter link" response (see the `if (user)` else branch below)
+  // instead of throwing "Cannot destructure property 'vote_data' of null"
+  // and 500ing.
+  if (!voterRow) {
+    return res.status(400).send("Invalid voter link");
+  }
+  const { vote_data } = voterRow;
 
   // Collect voter information
   const user = await prisma.voters.findUnique({
