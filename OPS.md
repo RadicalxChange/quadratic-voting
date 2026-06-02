@@ -6,7 +6,7 @@ in sync with `deploy.sh`.
 ## Architecture
 
 Everything runs on a single DigitalOcean droplet, **rxc-voice-apps**
-(`64.225.61.72`), as **five** Docker containers — one per app, each
+(`64.225.61.72`), as **six** Docker containers (five apps — rxc-voice runs as two) — each
 publishing its own host port. Access is `ssh root@64.225.61.72` (root SSH
 key). DigitalOcean load balancers sit in front and route public traffic to
 these ports.
@@ -20,7 +20,7 @@ these ports.
 | rxc-voice_voice    | 4000      | (rxc-voice frontend)                                      |
 | rxc-voice_api      | 8000      | (rxc-voice backend)                                       |
 
-> **Only ever touch the container on port 2000.** The other four apps are
+> **Only ever touch the container on port 2000.** The other five apps are
 > independent and must be left running. `deploy.sh` keys entirely off port
 > 2000 and refuses to act if the match isn't exactly one container.
 
