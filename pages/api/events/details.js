@@ -95,6 +95,14 @@ function generateStatistics(subjects, num_voters, credits_per_voter, voters) {
     // Collect voter preferences
     const voter_data = voter.vote_data;
 
+    // vote_data is Json? (nullable). A null/legacy row carries no votes, so
+    // it contributes nothing but remains counted in totalVoters / the
+    // participation denominator (zero-fill) — identical to a normal zeroed
+    // non-voter. Skip its tallying so the .map (below), .length, and
+    // element access never dereference null. Mirrors the Array.isArray
+    // guard in lib/privacy.js (hasVoterVoted).
+    if (!Array.isArray(voter_data)) continue;
+
     // Sum voter preferences to check if user has placed at least 1 vote
     const sumVotes = voter_data
       .map((subject) => Math.pow(subject.votes, 2))

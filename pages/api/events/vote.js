@@ -56,10 +56,16 @@ export default async (req, res) => {
 
     if ((moment() > moment(event_data.start_event_date)) &&
       (moment() < moment(event_data.end_event_date))) {
-      // Loop through vote_data in DB
-      for (let i = 0; i < vote_data.length; i++) {
-        // Update with new votes from request body
-        vote_data[i].votes = vote.votes[i];
+      // Loop through vote_data in DB. vote_data is Json? (nullable); a
+      // null/legacy row has no subject scaffolding to merge votes into, so
+      // guard the loop to treat null as an empty prior state (no votes
+      // recorded) instead of 500ing on `.length`. Mirrors the Array.isArray
+      // guard in lib/privacy.js and the zero-fill guard in details.js.
+      if (Array.isArray(vote_data)) {
+        for (let i = 0; i < vote_data.length; i++) {
+          // Update with new votes from request body
+          vote_data[i].votes = vote.votes[i];
+        }
       }
       // Update voter object — persist the normalized name, not raw input.
       await prisma.voters.update({
