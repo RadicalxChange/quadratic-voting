@@ -386,9 +386,8 @@ function Vote({ query }) {
                 <div className="voter__name_section">
                   <label htmlFor="voter_name">Your name</label>
                   <p>
-                    The organizer has set this event to <strong>identified</strong>.
-                    Your name will appear next to your vote allocations in the
-                    organizer's downloaded report.
+                    Your name is used only to connect your responses and is never
+                    included in publicly shared results.
                   </p>
                   <input
                     type="text"
