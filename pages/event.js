@@ -12,6 +12,7 @@ import Datetime from "react-datetime"; // Datetime component
 import { useState, useEffect } from "react"; // State handling
 import axios from "axios"; // Axios for requests
 import { buildVotersSheet, shouldIncludeVotersSheet } from "lib/export";
+import { LINK_MODES } from "lib/access"; // Link-mode constants
 
 // Setup fetcher for SWR
 const fetcher = (url) => fetch(url).then((r) => r.json());
@@ -502,8 +503,15 @@ function Event({ query }) {
                 <div className="event__sub_section">
                   <label>Voting Participants</label>
                   <h3>
+                    {/* For public-link events num_voters is not a real
+                        roster, so the "/ N" denominator is a meaningless
+                        leftover (and reads as nonsense like "23 / 10" once
+                        submissions exceed it). Show just the count for
+                        public; keep "x / N" for unique-link rosters. */}
                     {!loading && data
-                      ? `${data.statistics.numberVoters.toLocaleString()} / ${data.statistics.numberVotersTotal.toLocaleString()}`
+                      ? data.event.link_mode === LINK_MODES.PUBLIC
+                        ? `${data.statistics.numberVoters.toLocaleString()}`
+                        : `${data.statistics.numberVoters.toLocaleString()} / ${data.statistics.numberVotersTotal.toLocaleString()}`
                       : "Loading..."}
                   </h3>
                 </div>
@@ -511,7 +519,9 @@ function Event({ query }) {
                   <label>Credits Used</label>
                   <h3>
                     {!loading && data
-                      ? `${data.statistics.numberVotes.toLocaleString()} / ${data.statistics.numberVotesTotal.toLocaleString()}`
+                      ? data.event.link_mode === LINK_MODES.PUBLIC
+                        ? `${data.statistics.numberVotes.toLocaleString()}`
+                        : `${data.statistics.numberVotes.toLocaleString()} / ${data.statistics.numberVotesTotal.toLocaleString()}`
                       : "Loading..."}
                   </h3>
                 </div>
