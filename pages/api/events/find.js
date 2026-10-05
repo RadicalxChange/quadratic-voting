@@ -1,5 +1,6 @@
 import prisma from "db"; // Import prisma
 import { LINK_MODES } from "lib/access";
+import { parseEventData } from "lib/ballot";
 
 // --> /api/events/find
 //
@@ -39,7 +40,7 @@ async function findByVoterId(id, res) {
     response.voter_name = user.voter_name;
     response.vote_data = user.vote_data;
 
-    const event_data = await prisma.events.findUnique({
+    const event = await prisma.events.findUnique({
       where: { id: user.event_uuid },
       select: {
         event_title: true,
@@ -49,10 +50,40 @@ async function findByVoterId(id, res) {
         credits_per_voter: true,
         privacy_mode: true,
         link_mode: true,
+        event_data: true,
       },
     });
 
-    response.event_data = event_data;
+    // Pre-allocated voter rows were zipped from the subjects at creation
+    // time, so they predate any Spanish text (and any live-added option
+    // text edits). Overlay the event's current *_es fields positionally so
+    // the ballot can render translations, and surface the event-level
+    // translations from the ballot meta. English fields in vote_data are
+    // left untouched.
+    const { subjects, meta } = parseEventData(event.event_data);
+    if (Array.isArray(response.vote_data)) {
+      response.vote_data = response.vote_data.map((entry, i) => {
+        const subject = subjects[i];
+        if (!subject) return entry;
+        const merged = { ...entry };
+        if (subject.title_es !== undefined) merged.title_es = subject.title_es;
+        if (subject.description_es !== undefined)
+          merged.description_es = subject.description_es;
+        return merged;
+      });
+    }
+
+    response.event_data = {
+      event_title: event.event_title,
+      event_description: event.event_description,
+      start_event_date: event.start_event_date,
+      end_event_date: event.end_event_date,
+      credits_per_voter: event.credits_per_voter,
+      privacy_mode: event.privacy_mode,
+      link_mode: event.link_mode,
+      event_title_es: meta.event_title_es,
+      event_description_es: meta.event_description_es,
+    };
   }
 
   res.send(response);
@@ -85,14 +116,12 @@ async function findByEventId(eventId, res) {
       .send("This event requires a personal voting link. Contact the organizer.");
   }
 
-  const subjects =
-    typeof event.event_data === "string"
-      ? JSON.parse(event.event_data)
-      : event.event_data;
+  const { subjects, meta } = parseEventData(event.event_data);
 
   // Build a fresh, zeroed vote_data shape — same shape as a pre-allocated
-  // voter row would have, so the ballot page renders identically.
-  const fresh_vote_data = (Array.isArray(subjects) ? subjects : []).map((s) => ({
+  // voter row would have, so the ballot page renders identically. Subjects
+  // carry their optional *_es fields straight through.
+  const fresh_vote_data = subjects.map((s) => ({
     ...s,
     votes: 0,
   }));
@@ -110,6 +139,8 @@ async function findByEventId(eventId, res) {
       credits_per_voter: event.credits_per_voter,
       privacy_mode: event.privacy_mode,
       link_mode: event.link_mode,
+      event_title_es: meta.event_title_es,
+      event_description_es: meta.event_description_es,
     },
   });
 }

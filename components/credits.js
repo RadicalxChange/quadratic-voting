@@ -126,10 +126,14 @@ function CanvasBlocks(props) {
 
   return (
     <div className="canvas-wrapper">
-      <h3>Available Voice Credits</h3>
+      {/* heading/remainingLabel are optional overrides so the ballot can
+          render this panel in the voter's language; defaults preserve the
+          exact current English copy. */}
+      <h3>{props.heading || "Available Voice Credits"}</h3>
       <canvas id="remaining-credits-blocks" ref={canvasRef} />
       <p>
-        {props.creditsRemaining}/{props.creditBalance} voice credits remaining
+        {props.creditsRemaining}/{props.creditBalance}{" "}
+        {props.remainingLabel || "voice credits remaining"}
       </p>
 
       {/* Scoped styling */}

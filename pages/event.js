@@ -22,22 +22,24 @@ const fetcher = (url) => fetch(url).then((r) => r.json());
 // window.location.origin so we don't hard-code the deployment domain.
 function PublicVotingUrl({ eventId }) {
   const [url, setUrl] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [urlEs, setUrlEs] = useState("");
+  const [copied, setCopied] = useState("");
 
   useEffect(() => {
     // window is only defined client-side; safe inside useEffect.
     setUrl(`${window.location.origin}/vote?event=${eventId}`);
+    setUrlEs(`${window.location.origin}/vote?event=${eventId}&lang=es`);
   }, [eventId]);
 
-  const copy = async () => {
+  const copy = async (value, key, inputId) => {
     try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      await navigator.clipboard.writeText(value);
+      setCopied(key);
+      setTimeout(() => setCopied(""), 1500);
     } catch (_) {
       // Clipboard may be unavailable (e.g. insecure context). Fall back
       // by selecting the input so the user can copy manually.
-      const el = document.getElementById("public_voting_url");
+      const el = document.getElementById(inputId);
       if (el) {
         el.focus();
         el.select();
@@ -46,17 +48,40 @@ function PublicVotingUrl({ eventId }) {
   };
 
   return (
-    <div className="public__url">
-      <input id="public_voting_url" value={url} readOnly />
-      <button type="button" onClick={copy}>
-        {copied ? "Copied!" : "Copy"}
-      </button>
+    <div>
+      <div className="public__url">
+        <span className="public__url_lang">EN</span>
+        <input id="public_voting_url" value={url} readOnly />
+        <button
+          type="button"
+          onClick={() => copy(url, "en", "public_voting_url")}
+        >
+          {copied === "en" ? "Copied!" : "Copy"}
+        </button>
+      </div>
+      {/* Same event, same ballot, same tally — only the interface language
+          differs. Share this one with Spanish-speaking voters. */}
+      <div className="public__url">
+        <span className="public__url_lang">ES</span>
+        <input id="public_voting_url_es" value={urlEs} readOnly />
+        <button
+          type="button"
+          onClick={() => copy(urlEs, "es", "public_voting_url_es")}
+        >
+          {copied === "es" ? "Copied!" : "Copy"}
+        </button>
+      </div>
       <style jsx>{`
         .public__url {
           display: grid;
-          grid-template-columns: 1fr auto;
+          grid-template-columns: auto 1fr auto;
           gap: 8px;
           margin-top: 12px;
+          align-items: center;
+        }
+        .public__url_lang {
+          font-weight: bold;
+          font-size: 14px;
         }
         .public__url > input {
           font-size: 16px;
@@ -76,6 +101,178 @@ function PublicVotingUrl({ eventId }) {
         }
         .public__url > button:hover {
           opacity: 0.85;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Admin-only form to append one (optionally bilingual) option to a live
+// public-link event. Appending is index-safe: votes already cast keep their
+// positions, and voters who loaded the ballot earlier simply contribute 0
+// to the new option. The dashboard's SWR poll picks up the new option in
+// the chart within a second of a successful add.
+function AddOptionForm({ eventId, secret }) {
+  const emptyOption = {
+    title: "",
+    title_es: "",
+    description: "",
+    description_es: "",
+  };
+  const [option, setOption] = useState(emptyOption);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState(null); // {ok: bool, message: string}
+
+  const setField = (field, value) =>
+    setOption((prev) => ({ ...prev, [field]: value }));
+
+  const submit = async () => {
+    setBusy(true);
+    setStatus(null);
+    try {
+      const { data } = await axios.post("/api/events/addOption", {
+        id: eventId,
+        secret_key: secret,
+        title: option.title,
+        title_es: option.title_es,
+        description: option.description,
+        description_es: option.description_es,
+      });
+      setStatus({
+        ok: true,
+        message: `Option added — the ballot now has ${data.num_options} options. Voters see it on their next page load.`,
+      });
+      setOption(emptyOption);
+    } catch (err) {
+      const message =
+        err && err.response && typeof err.response.data === "string"
+          ? err.response.data
+          : "Adding the option failed. Please try again.";
+      setStatus({ ok: false, message });
+    }
+    setBusy(false);
+  };
+
+  return (
+    <div className="add__option">
+      <div className="add__option_grid">
+        <div>
+          <label htmlFor="add_option_title">Title (English)</label>
+          <input
+            id="add_option_title"
+            type="text"
+            value={option.title}
+            onChange={(e) => setField("title", e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="add_option_title_es">Title (Spanish)</label>
+          <input
+            id="add_option_title_es"
+            type="text"
+            value={option.title_es}
+            onChange={(e) => setField("title_es", e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="add_option_desc">Description (English)</label>
+          <textarea
+            id="add_option_desc"
+            value={option.description}
+            onChange={(e) => setField("description", e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="add_option_desc_es">Description (Spanish)</label>
+          <textarea
+            id="add_option_desc_es"
+            value={option.description_es}
+            onChange={(e) => setField("description_es", e.target.value)}
+          />
+        </div>
+      </div>
+      {option.title.trim() !== "" && !busy ? (
+        <button type="button" className="add__option_button" onClick={submit}>
+          Add option to live ballot
+        </button>
+      ) : (
+        <button type="button" className="add__option_button add__option_disabled" disabled>
+          {busy ? "Adding..." : "Enter an English title to add"}
+        </button>
+      )}
+      {status ? (
+        <p className={status.ok ? "add__option_ok" : "add__option_error"}>
+          {status.message}
+        </p>
+      ) : null}
+      <style jsx>{`
+        .add__option {
+          margin-top: 12px;
+        }
+        .add__option_grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        .add__option_grid label {
+          display: block;
+          font-size: 14px;
+          font-weight: bold;
+          color: #000;
+          text-transform: uppercase;
+        }
+        .add__option_grid input,
+        .add__option_grid textarea {
+          width: calc(100% - 12px);
+          max-width: calc(100% - 12px);
+          font-size: 16px;
+          border-radius: 5px;
+          border: 1px solid #f1f2e5;
+          margin-top: 5px;
+          padding: 8px 5px;
+          font-family: suisse_intlbook;
+        }
+        .add__option_grid textarea {
+          min-height: 70px;
+        }
+        .add__option_button {
+          margin-top: 12px;
+          padding: 12px 0px;
+          width: 100%;
+          border-radius: 5px;
+          background-color: #000;
+          color: #edff38;
+          font-size: 16px;
+          border: none;
+          cursor: pointer;
+          transition: 100ms ease-in-out;
+        }
+        .add__option_button:hover {
+          opacity: 0.8;
+        }
+        .add__option_disabled {
+          background-color: #f1f2e5 !important;
+          color: #000 !important;
+          cursor: not-allowed !important;
+        }
+        .add__option_ok {
+          background-color: #eaffea;
+          border: 1px solid #9fd89f;
+          border-radius: 5px;
+          padding: 8px 10px;
+          font-size: 14px;
+        }
+        .add__option_error {
+          background-color: #fff5d0;
+          border: 1px solid #fada5e;
+          border-radius: 5px;
+          padding: 8px 10px;
+          font-size: 14px;
+        }
+        @media screen and (max-width: 700px) {
+          .add__option_grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </div>
@@ -411,6 +608,25 @@ function Event({ query }) {
             {data.event.link_mode === "public" ? (
               <PublicVotingUrl eventId={query.id} />
             ) : null}
+          </div>
+        ) : null}
+
+        {/* Admin: add an option to a live public-link ballot */}
+        {query.id !== "" &&
+        query.secret !== "" &&
+        query.secret !== undefined &&
+        !loading &&
+        data &&
+        data.event.link_mode === LINK_MODES.PUBLIC ? (
+          <div className="event__section">
+            <label className="private__label">Add a live option</label>
+            <p>
+              Appends a new option to the ballot immediately — no redeploy.
+              Votes already cast are unaffected; voters see the new option
+              when they next load or reload the ballot. Spanish fields are
+              optional (English shows as fallback).
+            </p>
+            <AddOptionForm eventId={query.id} secret={query.secret} />
           </div>
         ) : null}
 

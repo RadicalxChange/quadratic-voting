@@ -1,5 +1,6 @@
 import axios from "axios"; // Axios for requests
 import moment from "moment"; // Moment date parsing
+import "moment/locale/es"; // Spanish date strings (registers the locale)
 import Link from "next/link"; // Dynamic links
 import Loader from "components/loader"; // Placeholder loader
 import Layout from "components/layout"; // Layout wrapper
@@ -8,6 +9,18 @@ import { useState, useEffect } from "react"; // State management
 import Navigation from "components/navigation"; // Navigation component
 import RemainingCredits from "components/credits";
 import ProposalBlocks from "components/proposalBlocks";
+import {
+  getLang,
+  t,
+  translateServerMessage,
+  localizeSubject,
+  localizeEventText,
+  langToggleHref,
+} from "lib/i18n";
+
+// Importing a moment locale makes it the global default; pin the default
+// back to English so every page that doesn't opt into Spanish is untouched.
+moment.locale("en");
 
 function Vote({ query }) {
   const router = useRouter(); // Hook into router
@@ -18,6 +31,37 @@ function Vote({ query }) {
   const [credits, setCredits] = useState(0); // Total available credits
   const [submitLoading, setSubmitLoading] = useState(false); // Component (button) submission loading state
   const [accessError, setAccessError] = useState(""); // Inline error for public-visit failures
+  const [lang, setLang] = useState(getLang(query)); // Ballot language (?lang=es)
+
+  // Reflect the ballot language on <html lang> so screen readers switch
+  // pronunciation. The toggle below keeps this in sync via state.
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  /**
+   * Switches ballot language in place. Votes in progress are React state,
+   * so they survive the switch; shallow routing keeps the URL shareable
+   * without re-running data fetching.
+   */
+  const switchLang = (target) => {
+    if (target === lang) return;
+    setLang(target);
+    const href = langToggleHref("/vote", query, target);
+    router.replace(href, href, { shallow: true });
+  };
+
+  /**
+   * Formats an event date in the ballot language. English output is
+   * byte-identical to the previous hardcoded format.
+   */
+  const fmtDate = (date, withSeconds) => {
+    const m = moment(date);
+    if (lang === "es") {
+      return m.locale("es").format("D [de] MMMM [de] YYYY, h:mm a");
+    }
+    return m.format(withSeconds ? "MMMM Do YYYY, h:mm:ss a" : "MMMM Do YYYY, h:mm a");
+  };
 
   // Public-mode visits use ?event=<id> with no voter id. Per-voter visits
   // use ?user=<voter_id>. Computed once per render.
@@ -191,12 +235,15 @@ function Vote({ query }) {
     // Success/failure URLs vary too — public visits have no voter id to
     // round-trip, so the thank-you page renders without a "Change your
     // votes" link.
+    // Carry the ballot language through so the thank-you/failure pages
+    // render in the language the voter was using.
+    const langParam = lang === "es" ? "&lang=es" : "";
     const successUrl = isPublicVisit
-      ? `success?event=${data.event_id}`
-      : `success?event=${data.event_id}&user=${query.user}`;
+      ? `success?event=${data.event_id}${langParam}`
+      : `success?event=${data.event_id}&user=${query.user}${langParam}`;
     const failureUrl = isPublicVisit
-      ? `failure?event=${data.event_id}`
-      : `failure?event=${data.event_id}&user=${query.user}`;
+      ? `failure?event=${data.event_id}${langParam}`
+      : `failure?event=${data.event_id}&user=${query.user}${langParam}`;
 
     // Build a failure URL that surfaces the server's message when we have
     // one. Falls back to the generic copy on /failure when ?reason= is absent.
@@ -268,10 +315,11 @@ function Vote({ query }) {
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Home",
+          title: t(lang, "nav_home"),
           link: "/",
         }}
-        title="Place Votes"
+        returnPrefix={t(lang, "nav_return_prefix")}
+        title={t(lang, "nav_place_votes")}
       />
 
       <div className="vote">
@@ -279,10 +327,10 @@ function Vote({ query }) {
             doesn't exist, or otherwise can't be browsed. */}
         {accessError ? (
           <div className="vote__loading">
-            <h1>Can't open this ballot</h1>
-            <p>{accessError}</p>
+            <h1>{t(lang, "cant_open_ballot")}</h1>
+            <p>{translateServerMessage(lang, accessError)}</p>
             <p>
-              <a href="/">Back to home</a>
+              <a href="/">{t(lang, "back_to_home")}</a>
             </p>
           </div>
         ) : null}
@@ -292,14 +340,14 @@ function Vote({ query }) {
           <>
           <aside id="table-of-contents_container">
             <div className="toc-header">
-              <h3>Jump to an Option</h3>
+              <h3>{t(lang, "jump_to_option")}</h3>
             </div>
             <div id="table-of-contents">
               {data.vote_data.map((option, i) => {
                 // Loop through each voteable option
                 return (
                   <div key={i} className="toc-item">
-                    <a href={'#' + i}>{option.title}</a>
+                    <a href={'#' + i}>{localizeSubject(option, lang).title}</a>
                   </div>
                 );
               })}
@@ -309,6 +357,8 @@ function Vote({ query }) {
             <RemainingCredits
               creditBalance={data.event_data.credits_per_voter}
               creditsRemaining={credits}
+              heading={t(lang, "available_credits")}
+              remainingLabel={t(lang, "credits_remaining")}
             />
             {data ? (
               <>
@@ -325,12 +375,12 @@ function Vote({ query }) {
                     ) : canSubmit() ? (
                       // Else, enable submission
                       <button name="input-element" onClick={submitVotes} className="submit__button">
-                        Submit Votes
+                        {t(lang, "submit_votes")}
                       </button>
                     ) : (
                       // Identified event with empty name — block submission
-                      <button className="submit__button button__disabled" disabled title="Enter your name to submit">
-                        Enter your name to submit
+                      <button className="submit__button button__disabled" disabled title={t(lang, "enter_name_to_submit")}>
+                        {t(lang, "enter_name_to_submit")}
                       </button>
                     )}
                 </>
@@ -340,37 +390,61 @@ function Vote({ query }) {
           </aside>
           <div className="ballot_container">
             <div className="vote__info">
+              {/* Language toggle — EN/ES. Rendered above the heading so
+                  Spanish speakers spot it before reading English copy. */}
+              <div className="lang__toggle" role="group" aria-label="Language / Idioma">
+                <button
+                  type="button"
+                  className={lang === "en" ? "lang__active" : ""}
+                  aria-pressed={lang === "en"}
+                  onClick={() => switchLang("en")}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  className={lang === "es" ? "lang__active" : ""}
+                  aria-pressed={lang === "es"}
+                  onClick={() => switchLang("es")}
+                >
+                  Español
+                </button>
+              </div>
+
               {/* General voting header */}
               <div className="vote__info_heading">
-                <h1>Place your votes</h1>
+                <h1>{t(lang, "place_your_votes")}</h1>
                 <p>
-                  You can use up to{" "}
-                  <strong>{data.event_data.credits_per_voter} credits</strong> to
-                  vote during this event.
+                  {t(lang, "credits_intro_before")}
+                  <strong>
+                    {data.event_data.credits_per_voter}{" "}
+                    {t(lang, "credits_intro_credits")}
+                  </strong>
+                  {t(lang, "credits_intro_after")}
                 </p>
               </div>
 
               {/* Project name and description */}
               <div className="event__details">
                 <div className="vote__loading event__summary">
-                  <h2>{data.event_data.event_title}</h2>
-                  <p>{data.event_data.event_description}</p>
+                  <h2>{localizeEventText(data.event_data, lang).title}</h2>
+                  <p>{localizeEventText(data.event_data, lang).description}</p>
                   {data ? (
                     <>
                     {(moment() > moment(data.event_data.end_event_date)) ? (
                       <>
-                      <h3>This event has concluded. Click below to to see the results!</h3>
+                      <h3>{t(lang, "event_concluded")}</h3>
                       {/* Redirect to event dashboard */}
                       <Link href={`/event?id=${data.event_id}`}>
-                        <a>See event dashboard</a>
+                        <a>{t(lang, "see_dashboard")}</a>
                       </Link>
                       </>
                     ) : (
                       <>
                       {(moment() < moment(data.event_data.start_event_date)) ? (
-                        <h3>This event begins {moment(data.event_data.start_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                        <h3>{t(lang, "event_begins")} {fmtDate(data.event_data.start_event_date, true)}</h3>
                       ) : (
-                        <h3>This event closes {moment(data.event_data.end_event_date).format('MMMM Do YYYY, h:mm:ss a')}</h3>
+                        <h3>{t(lang, "event_closes")} {fmtDate(data.event_data.end_event_date, true)}</h3>
                       )}
                       </>
                     )}
@@ -384,15 +458,12 @@ function Vote({ query }) {
                moment() >= moment(data.event_data.start_event_date) &&
                moment() <= moment(data.event_data.end_event_date) ? (
                 <div className="voter__name_section">
-                  <label htmlFor="voter_name">Your name</label>
-                  <p>
-                    Your name is used only to connect your responses and is never
-                    included in publicly shared results.
-                  </p>
+                  <label htmlFor="voter_name">{t(lang, "your_name")}</label>
+                  <p>{t(lang, "name_privacy_note")}</p>
                   <input
                     type="text"
                     id="voter_name"
-                    placeholder="Required"
+                    placeholder={t(lang, "name_required_placeholder")}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -409,36 +480,38 @@ function Vote({ query }) {
                   <>
                   {/* Voteable options */}
                   <div className="event__options">
-                    <h2>Voteable Options</h2>
+                    <h2>{t(lang, "voteable_options")}</h2>
                     <div className="divider" />
                     <div className="event__options_list">
                       {data.vote_data.map((option, i) => {
-                        // Loop through each voteable option
+                        // Loop through each voteable option, in the ballot
+                        // language (field-by-field English fallback)
+                        const localized = localizeSubject(option, lang);
                         return (
                           <div key={i} id={i} className="event__option_item">
                             <div>
                               <button className="title-container" onClick={() => toggleDescription(i)}>
-                                <label>Title</label>
-                                <h3>{option.title}</h3>
+                                <label>{t(lang, "label_title")}</label>
+                                <h3>{localized.title}</h3>
                                   <img id={`toggle-button-${i}`} src="/vectors/down_arrow.svg" alt="down arrow" />
                               </button>
-                              {option.description !== "" ? (
+                              {localized.description !== "" ? (
                                 // If description exists, show description
                                 <div id={`description-container-${i}`}>
-                                  <label>Description</label>
-                                  <p className="event__option_item_desc">{option.description}</p>
+                                  <label>{t(lang, "label_description")}</label>
+                                  <p className="event__option_item_desc">{localized.description}</p>
                                 </div>
                               ) : null}
-                              {option.url !== "" ? (
+                              {localized.url !== "" ? (
                                 // If URL exists, show URL
                                 <div id={`link-container-${i}`}>
-                                  <label>Link</label>
+                                  <label>{t(lang, "label_link")}</label>
                                   <a
-                                    href={option.url}
+                                    href={localized.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                   >
-                                    {option.url}
+                                    {localized.url}
                                   </a>
                                 </div>
                               ) : null}
@@ -449,7 +522,7 @@ function Vote({ query }) {
                               />
                             ) : null}
                             <div className="event__option_item_vote">
-                              <label>Votes</label>
+                              <label>{t(lang, "label_votes")}</label>
                               <input type="number" value={votes[i]} disabled />
                               <div className="item__vote_buttons">
                                 {data ? (
@@ -484,9 +557,12 @@ function Vote({ query }) {
                                 // If user has voted before, show historic votes
                                 <div className="existing__votes">
                                   <span>
-                                    You last allocated{" "}
-                                    <strong>{data.vote_data[i].votes} votes </strong>
-                                    to this option.
+                                    {t(lang, "last_allocated_before")}{" "}
+                                    <strong>
+                                      {data.vote_data[i].votes}{" "}
+                                      {t(lang, "last_allocated_votes")}{" "}
+                                    </strong>
+                                    {t(lang, "last_allocated_after")}
                                   </span>
                                 </div>
                               ) : null}
@@ -507,8 +583,8 @@ function Vote({ query }) {
           // If loading, show global loading state. Suppressed when an
           // access error is already on screen.
           <div className="vote__loading">
-            <h1>Loading...</h1>
-            <p>Please give us a moment to retrieve your voting profile.</p>
+            <h1>{t(lang, "loading")}</h1>
+            <p>{t(lang, "loading_profile")}</p>
           </div>
         ) : null}
       </div>
@@ -520,6 +596,36 @@ function Vote({ query }) {
         }
         .vote {
           text-align: center;
+        }
+
+        .lang__toggle {
+          display: inline-flex;
+          gap: 0px;
+          border: 1px solid #000;
+          border-radius: 5px;
+          overflow: hidden;
+          margin-bottom: 10px;
+        }
+
+        .lang__toggle > button {
+          border: none;
+          background-color: #fff;
+          color: #000;
+          font-size: 16px;
+          font-family: suisse_intlbook;
+          padding: 8px 18px;
+          cursor: pointer;
+          transition: 100ms ease-in-out;
+        }
+
+        .lang__toggle > button.lang__active {
+          background-color: #000;
+          color: #edff38;
+          cursor: default;
+        }
+
+        .lang__toggle > button:not(.lang__active):hover {
+          opacity: 0.8;
         }
 
         .vote__info {

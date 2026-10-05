@@ -5,6 +5,7 @@ import {
   hasAnyVoteBeenCast,
 } from "lib/privacy";
 import { isValidLinkMode } from "lib/access";
+import { parseEventData, serializeEventData } from "lib/ballot";
 
 // --> /api/events/update
 export default async (req, res) => {
@@ -45,6 +46,31 @@ export default async (req, res) => {
     }
     if (wantsPrivacyChange) updateData.privacy_mode = new_data.privacy_mode;
     if (wantsLinkChange) updateData.link_mode = new_data.link_mode;
+  }
+
+  // Optional Spanish event-level text. Stored inside event_data's ballot
+  // meta (no schema change), so an existing event can be made bilingual
+  // after creation. Translations are presentation-only — safe to change at
+  // any time, including mid-event.
+  const wantsMetaChange =
+    new_data.event_title_es !== undefined ||
+    new_data.event_description_es !== undefined;
+  if (wantsMetaChange) {
+    const existing = await prisma.events.findUnique({
+      where: { id: new_data.id },
+      select: { event_data: true },
+    });
+    if (!existing) {
+      return res.status(404).send("Event not found");
+    }
+    const { subjects, meta } = parseEventData(existing.event_data);
+    if (new_data.event_title_es !== undefined) {
+      meta.event_title_es = new_data.event_title_es;
+    }
+    if (new_data.event_description_es !== undefined) {
+      meta.event_description_es = new_data.event_description_es;
+    }
+    updateData.event_data = serializeEventData(subjects, meta);
   }
 
   await prisma.events.update({

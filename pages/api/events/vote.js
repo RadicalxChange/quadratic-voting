@@ -2,6 +2,7 @@ import prisma from "db"; // Import prisma
 import moment from "moment"; // Time formatting
 import { validateVoteSubmission } from "lib/privacy";
 import { LINK_MODES, buildNewPublicVoterRow } from "lib/access";
+import { parseEventData } from "lib/ballot";
 
 // --> /api/events/vote
 export default async (req, res) => {
@@ -151,10 +152,7 @@ async function handlePublicSubmission(vote, res) {
     return res.status(400).send("Voting is closed for this event");
   }
 
-  const subjects =
-    typeof event.event_data === "string"
-      ? JSON.parse(event.event_data)
-      : event.event_data;
+  const { subjects } = parseEventData(event.event_data);
 
   const rowData = buildNewPublicVoterRow({
     eventUuid: event.id,

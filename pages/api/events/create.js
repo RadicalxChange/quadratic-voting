@@ -3,6 +3,7 @@ import prisma from "db"; // Import prisma
 import moment from "moment"; // Time formatting
 import { normalizePrivacyMode } from "lib/privacy";
 import { normalizeLinkMode, LINK_MODES } from "lib/access";
+import { serializeEventData } from "lib/ballot";
 
 // --> /api/events/create
 export default async (req, res) => {
@@ -51,8 +52,13 @@ export default async (req, res) => {
     credits_per_voter: event.credits_per_voter,
     start_event_date: formatAsPGTimestamp(event.start_event_date),
     end_event_date: formatAsPGTimestamp(event.end_event_date),
-    // Stringify voteable subject data
-    event_data: JSON.stringify(event.subjects),
+    // Stringify voteable subject data. Spanish event-level text (optional)
+    // rides along as ballot meta; events without it keep the legacy
+    // plain-array storage shape.
+    event_data: serializeEventData(event.subjects, {
+      event_title_es: event.event_title_es,
+      event_description_es: event.event_description_es,
+    }),
     privacy_mode: privacy_mode,
     link_mode: link_mode,
   };
