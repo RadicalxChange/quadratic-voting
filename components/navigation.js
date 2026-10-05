@@ -6,7 +6,9 @@ export default function Navigation(props) {
     <div className="navigation">
       {/* Navigation title and history */}
       <Link href={props.history.link}>
-        <a>⟵ Return to {props.history.title}</a>
+        {/* returnPrefix lets translated pages localize the "Return to" text;
+            pages that don't pass it keep the exact current copy. */}
+        <a>⟵ {props.returnPrefix || "Return to"} {props.history.title}</a>
       </Link>
       <span>{props.title}</span>
 

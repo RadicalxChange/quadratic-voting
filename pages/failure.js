@@ -1,43 +1,58 @@
 import Link from "next/link"; // Dynamic links
+import { useEffect } from "react"; // Side effects
 import Layout from "components/layout"; // Layout wrapper
 import Navigation from "components/navigation"; // Navigation component
+import { getLang, t, translateServerMessage } from "lib/i18n";
 
 function Failure({ query }) {
+  const lang = getLang(query);
+  const langParam = lang === "es" ? "&lang=es" : "";
+
+  // Match <html lang> to the page language for screen readers.
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   return (
     <Layout>
       {/* Navigation header */}
       <Navigation
         history={{
-          title: "Voting",
-          link: `/vote?user=${query.user}`,
+          title: t(lang, "nav_voting"),
+          link: `/vote?user=${query.user}${langParam}`,
         }}
-        title="Vote Failure"
+        returnPrefix={t(lang, "nav_return_prefix")}
+        title={t(lang, "nav_vote_failure")}
       />
 
       {/* Failure dialog */}
       <div className="failure">
-        <h1>Oops! Your vote failed.</h1>
+        <h1>{t(lang, "vote_failed")}</h1>
         {query.reason ? (
-          <p className="failure__reason">{query.reason}</p>
+          // ?reason= carries the server's English message; translate the
+          // known ones client-side, fall through for anything unknown.
+          <p className="failure__reason">
+            {translateServerMessage(lang, query.reason)}
+          </p>
         ) : (
-          <p>This shouldn't happen—please try again later!</p>
+          <p>{t(lang, "vote_failed_generic")}</p>
         )}
 
         {/* Return to voting — per-voter links only. Public visits have no
             voter id to round-trip; they go back to the public ballot URL. */}
         {query.user ? (
-          <Link href={`/vote?user=${query.user}`}>
-            <a>Try voting again</a>
+          <Link href={`/vote?user=${query.user}${langParam}`}>
+            <a>{t(lang, "try_again")}</a>
           </Link>
         ) : query.event ? (
-          <Link href={`/vote?event=${query.event}`}>
-            <a>Try voting again</a>
+          <Link href={`/vote?event=${query.event}${langParam}`}>
+            <a>{t(lang, "try_again")}</a>
           </Link>
         ) : null}
 
         {/* Redirect to event dashboard */}
         <Link href={`/event?id=${query.event}`}>
-          <a>See event dashboard</a>
+          <a>{t(lang, "see_dashboard")}</a>
         </Link>
       </div>
 

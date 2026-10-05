@@ -17,7 +17,9 @@ import Navigation from "components/navigation"; // Navigation bar
 // Initial global settings
 const defaultGlobalSettings = {
   event_title: "",
+  event_title_es: "",
   event_description: "",
+  event_description_es: "",
   num_voters: 10,
   credits_per_voter: 99,
   start_event_date: moment(),
@@ -26,10 +28,13 @@ const defaultGlobalSettings = {
   link_mode: "unique",
 };
 
-// Initial empty subject
+// Initial empty subject. Spanish fields are optional — options without them
+// render their English text in the Spanish ballot view.
 const defaultCurrentSubject = {
   title: "",
+  title_es: "",
   description: "",
+  description_es: "",
   url: "",
 };
 
@@ -191,6 +196,19 @@ export default function Create() {
             />
           </div>
 
+          {/* Event Spanish title selection (optional) */}
+          <div className="create__settings_section">
+            <label htmlFor="event_title_es">Event title (Spanish, optional)</label>
+            <p>Shown to voters using the Spanish ballot (?lang=es):</p>
+            <input
+              type="text"
+              id="event_title_es"
+              placeholder="Título del evento"
+              value={globalSettings.event_title_es}
+              onChange={(e) => setEventData("event_title_es", e.target.value)}
+            />
+          </div>
+
           {/* Event description selection */}
           <div className="create__settings_section">
             <label htmlFor="event_description">Event description</label>
@@ -203,6 +221,24 @@ export default function Create() {
               maxLength="240"
               onChange={(e) =>
                 setEventData("event_description", e.target.value)
+              }
+            />
+          </div>
+
+          {/* Event Spanish description selection (optional) */}
+          <div className="create__settings_section">
+            <label htmlFor="event_description_es">
+              Event description (Spanish, optional)
+            </label>
+            <p>Shown to voters using the Spanish ballot (?lang=es):</p>
+            <input
+              type="text"
+              id="event_description_es"
+              placeholder="Descripción del evento"
+              value={globalSettings.event_description_es}
+              maxLength="480"
+              onChange={(e) =>
+                setEventData("event_description_es", e.target.value)
               }
             />
           </div>
@@ -428,6 +464,17 @@ export default function Create() {
                 />
               </div>
 
+              {/* Add subject Spanish title (optional) */}
+              <div>
+                <label>Option Title (Spanish, optional)</label>
+                <input
+                  type="text"
+                  placeholder="Título de la opción"
+                  value={currentSubject.title_es || ""}
+                  onChange={(e) => setSubjectData("title_es", e.target.value)}
+                />
+              </div>
+
               {/* Add subject description */}
               <div>
                 <label>Option Description</label>
@@ -436,6 +483,18 @@ export default function Create() {
                   value={currentSubject.description}
                   onChange={(e) =>
                     setSubjectData("description", e.target.value)
+                  }
+                />
+              </div>
+
+              {/* Add subject Spanish description (optional) */}
+              <div>
+                <label>Option Description (Spanish, optional)</label>
+                <textarea
+                  placeholder="Descripción de la opción."
+                  value={currentSubject.description_es || ""}
+                  onChange={(e) =>
+                    setSubjectData("description_es", e.target.value)
                   }
                 />
               </div>

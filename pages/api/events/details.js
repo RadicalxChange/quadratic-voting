@@ -1,6 +1,7 @@
 import prisma from "db"; // Import prisma
 import moment from "moment"; // Time formatting
 import { scrubVotersForAdmin } from "lib/privacy";
+import { parseEventData } from "lib/ballot";
 
 // --> /api/events/details
 export default async (req, res) => {
@@ -34,14 +35,20 @@ export default async (req, res) => {
   var statistics = null;
   var chart = null;
 
+  // Parse event_data through the shared helper: handles null, the legacy
+  // plain-array shape, and the {meta, subjects} shape added for Spanish
+  // ballots. Consumers of this endpoint keep seeing event_data as the
+  // subjects array; event-level translations ride along as event_meta.
+  const { subjects: ballotSubjects, meta: ballotMeta } = parseEventData(
+    event.event_data
+  );
+
   // If event is concluded or private_key enables administrator access
   if (isAdmin || (moment() > moment(event.end_event_date))) {
     // Pass voting statistics to endpoint
     statistics = generateStatistics(
-      // Number of voteable subjects. event_data is Json? (nullable); guard
-      // the parse so a null event_data yields 0 subjects instead of throwing
-      // "Cannot read property 'length' of null".
-      event.event_data ? JSON.parse(event.event_data).length : 0,
+      // Number of voteable subjects
+      ballotSubjects.length,
       // Number of max voters
       event.num_voters,
       // Number of credits per voter
@@ -51,9 +58,8 @@ export default async (req, res) => {
     );
   }
 
-  // Parse event_data. Same null guard as above — a null event_data becomes
-  // an empty array rather than throwing.
-  event.event_data = event.event_data ? JSON.parse(event.event_data) : [];
+  event.event_data = ballotSubjects;
+  event.event_meta = ballotMeta;
 
   // If event is concluded or private_key enables administrator access
   if (isAdmin || (moment() > moment(event.end_event_date))) {
