@@ -8,8 +8,28 @@ import { isValidLinkMode } from "lib/access";
 import { parseEventData, serializeEventData } from "lib/ballot";
 
 // --> /api/events/update
+//
+// Admin-only: every change (dates, modes, Spanish meta) requires the
+// event's secret_key — the same credential as the admin dashboard URL.
+// Historically this endpoint accepted unauthenticated updates; that let
+// anyone with a public event id move its dates.
 export default async (req, res) => {
   const new_data = req.body;
+
+  if (!new_data || !new_data.id || !new_data.secret_key) {
+    return res.status(400).send("Missing id or secret_key");
+  }
+
+  const event = await prisma.events.findUnique({
+    where: { id: new_data.id },
+    select: { secret_key: true, event_data: true },
+  });
+  if (!event) {
+    return res.status(404).send("Event not found");
+  }
+  if (event.secret_key !== new_data.secret_key) {
+    return res.status(403).send("Invalid secret key");
+  }
 
   const updateData = {
     start_event_date: formatAsPGTimestamp(new_data.start_event_date),
@@ -56,14 +76,8 @@ export default async (req, res) => {
     new_data.event_title_es !== undefined ||
     new_data.event_description_es !== undefined;
   if (wantsMetaChange) {
-    const existing = await prisma.events.findUnique({
-      where: { id: new_data.id },
-      select: { event_data: true },
-    });
-    if (!existing) {
-      return res.status(404).send("Event not found");
-    }
-    const { subjects, meta } = parseEventData(existing.event_data);
+    // event_data was already fetched by the auth lookup above.
+    const { subjects, meta } = parseEventData(event.event_data);
     if (new_data.event_title_es !== undefined) {
       meta.event_title_es = new_data.event_title_es;
     }

@@ -419,9 +419,12 @@ function Event({ query }) {
         setEditMode(true);
       }
     } else {
-      // POST data and collect status
+      // POST data and collect status. The endpoint is secret-key
+      // protected; the edit buttons only render when query.secret is
+      // present, so it's always available here.
       const { status } = await axios.post("/api/events/update", {
         id: data.event.id,
+        secret_key: query.secret,
         start_event_date: startDate,
         end_event_date: endDate,
       });
